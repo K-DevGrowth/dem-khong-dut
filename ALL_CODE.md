@@ -2,7 +2,7 @@
 
 > Dự án: **02/14 — Đêm Không Dứt (Amnesia-Style Psychological Horror Game)**  
 > Công nghệ: **Three.js + Vite (ESM Modules)**  
-> Thời gian xuất: 19:20:50 23/11/2026
+> Thời gian xuất: 20:07:22 23/11/2026
 
 ## Danh mục tập tin (32 files)
 
