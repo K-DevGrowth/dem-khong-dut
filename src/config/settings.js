@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
-export const SETTINGS_KEY = 'vong_lap_settings_v3';
+export const SETTINGS_KEY = 'vong_lap_settings_v4';
 
 export const DEFAULT_SETTINGS = {
-  graphics: 'low',    // 'low' | 'medium' | 'high'
+  graphics: 'medium', // 'low' | 'medium' | 'high'
   fpsLimit: 60,       // 30 | 60 | 120 | 0 (unlimited)
   showFps: false,
   camSmooth: true,
@@ -13,42 +13,42 @@ export const DEFAULT_SETTINGS = {
 export const GFX_PRESETS = {
   low: {
     label: 'Thấp',
-    desc: 'Tắt đổ bóng, tắt hạt bụi & nhiễu phim, tối ưu độ phân giải (0.85x) và giảm cập nhật texture phụ — mượt tối đa trên máy yếu/iGPU.',
-    maxDpr: 0.85,
+    desc: 'Tắt đổ bóng & hạt bụi, giữ vân tường nhẹ và tối ưu độ phân giải (0.9x) — mượt tối đa trên máy yếu/iGPU.',
+    maxDpr: 0.9,
     shadows: false,
     shadowType: THREE.BasicShadowMap,
     shadowSize: 256,
     dust: false,
-    wallBump: 0,
-    floorBump: 0,
+    wallBump: 0.014,
+    floorBump: 0.010,
     tvSkip: 10,
-    exposure: 1.36
+    exposure: 1.06
   },
   medium: {
     label: 'Trung bình',
-    desc: 'Bật đổ bóng tĩnh nhẹ (256px), hiệu ứng bụi, vân tường/sàn và độ phân giải 1:1 (1.0x) cân bằng mượt mà.',
+    desc: 'Đổ bóng tĩnh (512px), hạt bụi, vân tường/sàn ẩm mốc và tương phản bóng tối kinh dị cân bằng (1.0x).',
     maxDpr: 1.0,
     shadows: true,
     shadowType: THREE.PCFShadowMap,
-    shadowSize: 256,
+    shadowSize: 512,
     dust: true,
-    wallBump: 0.022,
-    floorBump: 0.015,
+    wallBump: 0.026,
+    floorBump: 0.018,
     tvSkip: 6,
-    exposure: 1.30
+    exposure: 1.00
   },
   high: {
     label: 'Cao',
-    desc: 'Đổ bóng mềm (512px PCFSoft), độ phân giải sắc nét (tối đa 1.5x), nổi khối sâu và ánh sáng giàu chi tiết.',
+    desc: 'Đổ bóng mềm (1024px PCFSoft), độ phân giải sắc nét (tối đa 1.5x), nổi khối sâu và ánh sáng tương phản đậm.',
     maxDpr: 1.5,
     shadows: true,
     shadowType: THREE.PCFSoftShadowMap,
-    shadowSize: 512,
+    shadowSize: 1024,
     dust: true,
-    wallBump: 0.030,
-    floorBump: 0.020,
+    wallBump: 0.034,
+    floorBump: 0.024,
     tvSkip: 3,
-    exposure: 1.24
+    exposure: 0.96
   }
 };
 

@@ -31,25 +31,43 @@ export function setupLoopEnvironment(loopNum, ctx) {
     keypadScreen,
     objectiveText,
     clearInteractUI,
-    updateHUD,
-    releaseHplGrab
+    updateHUD
   } = ctx;
 
   if (ctx.timers) ctx.timers.clearAll();
   clearInteractUI();
   state.loop = loopNum;
   state.loopClueFound = false;
-  state.wakingDuration = loopNum === 1 ? 4.6 : 3.1;
+  // Loop 3 wakes standing in the steamy bathroom facing the foggy mirror;
+  // Loop 4 wakes disoriented in the living room facing the blaring static TV!
+  const wakeInBed = (loopNum === 1 || loopNum === 2 || loopNum === 5);
+  state.wakingDuration = wakeInBed ? (loopNum === 1 ? 4.6 : 2.9) : 1.1;
   state.wakingTimer = state.wakingDuration;
-  state.wakeStepPlayed = false;
+  state.wakeStepPlayed = !wakeInBed;
 
   eyelidTop.style.transform = 'translateY(0%)';
   eyelidBottom.style.transform = 'translateY(0%)';
   eyeHaze.style.opacity = '0.92';
 
-  state.pos.set(0.35, 1.65, 2.35);
-  state.yaw = 0.25; state.pitch = 0.05;
-  state.targetYaw = 0.25; state.targetPitch = 0.05;
+  if (loopNum === 3) {
+    // Wake up inside the Bathroom facing the foggy 02:14 mirror & running sink
+    state.pos.set(5.75, 1.65, 1.0);
+    state.yaw = -Math.PI / 2;
+    state.pitch = -0.04;
+    state.targetYaw = -Math.PI / 2;
+    state.targetPitch = -0.04;
+  } else if (loopNum === 4) {
+    // Wake up in the Living Room facing the blaring CRT static TV
+    state.pos.set(-1.35, 1.65, -7.85);
+    state.yaw = Math.PI * 0.42;
+    state.pitch = -0.06;
+    state.targetYaw = Math.PI * 0.42;
+    state.targetPitch = -0.06;
+  } else {
+    state.pos.set(0.35, 1.65, 2.35);
+    state.yaw = 0.25; state.pitch = 0.05;
+    state.targetYaw = 0.25; state.targetPitch = 0.05;
+  }
   state.velX = 0; state.velZ = 0; state.bobBlend = 0;
   state.fear = loopNum >= 4 ? 22 : 0;
   state.matchTimer = 0;
@@ -68,6 +86,7 @@ export function setupLoopEnvironment(loopNum, ctx) {
   state.holdingPaperSource = null;
   state.paperAnim = 0;
   if (ctx.heldPaperGroup) ctx.heldPaperGroup.visible = false;
+  if (ctx.paperOverlay) ctx.paperOverlay.classList.add('hidden');
   ctx.crosshair.style.opacity = '';
 
   ctx.matchGroup.visible = false;
@@ -179,15 +198,13 @@ export function setupLoopEnvironment(loopNum, ctx) {
   objects.phoneObj.answered = false;
   objects.phoneLed.intensity = 0;
 
-  releaseHplGrab(false);
-
   doors.forEach((d) => {
     d.isOpen = false; d.targetOffset = 0; d.currentOffset = 0; d.angVel = 0; d.rattleTime = 0;
     d.pivot.rotation.y = d.baseRotY; d.collider.active = true;
   });
 
   hplDrawers.forEach((dr) => {
-    dr.openDist = 0; dr.vel = 0; dr.inspectedInLoop = 0;
+    dr.isOpen = false; dr.targetDist = 0; dr.openDist = 0; dr.vel = 0; dr.inspectedInLoop = 0;
     dr.group.position.copy(dr.basePos);
     dr.worldPos.copy(dr.basePos).addScaledVector(dr.slideAxis, 0.2);
   });
@@ -207,6 +224,10 @@ export function setupLoopEnvironment(loopNum, ctx) {
 
   state.studyKeyFound = loopNum !== 1;
   state.breakerFixed = loopNum !== 2;
+  state.fridgeChecked = loopNum !== 2;
+  state.bathEscaped = loopNum !== 3;
+  state.phoneCheckedLoop3 = loopNum !== 3;
+  state.tvTurnedOff = loopNum !== 4;
   state.codeUnlocked = loopNum !== TOTAL_LOOPS;
   keypadScreen.classList.add('hidden');
 
@@ -240,7 +261,7 @@ export function setupLoopEnvironment(loopNum, ctx) {
   }
 
   if (loopNum === 1) {
-    lights.bedroomLampLight.intensity = 1.45;
+    lights.bedroomLampLight.intensity = 1.15;
     objects.wardrobeDoorPivot.rotation.y = 0; objects.wardrobeDoorPivot2.rotation.y = 0; objects.wardrobeObj.targetAngle = 0; objects.wardrobeEyes.visible = false;
     materials.portraitMat.map = materials.portraitCleanTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.82, 1.82, -3.4); objects.portraitGroup.rotation.set(0.24, 0, 0);
@@ -342,11 +363,11 @@ export function setupLoopEnvironment(loopNum, ctx) {
   }
   if (loopNum === 3 && c2) {
     if (c2.kind === 'avoid') {
-      scene.fog.density = 0.125;
+      scene.fog.density = 0.142;
       shadowEvent.peekCooldown = 5.5;
       state.fear = 18;
     } else {
-      scene.fog.density = 0.098;
+      scene.fog.density = 0.118;
       const livingCandle = candles.find(c => c.id === 'candle_living');
       if (livingCandle) {
         livingCandle.lit = true;
@@ -365,7 +386,7 @@ export function setupLoopEnvironment(loopNum, ctx) {
     }
   }
   if (loopNum === 5) {
-    scene.fog.density = 0.095 + state.denialScore * 0.008;
+    scene.fog.density = 0.115 + state.denialScore * 0.009;
     state.fear = Math.min(48, 12 + state.denialScore * 9);
   }
 
@@ -419,13 +440,19 @@ export function openChoiceModal(loopNum, ctx) {
   clearInteractUI();
   if (document.pointerLockElement) document.exitPointerLock();
 
+  // Alternate option order on Loops 2 & 4 so players read carefully rather than always clicking button 1
+  const swapped = (loopNum === 2 || loopNum === 4);
+  state.choiceSwapped = swapped;
+  const topOpt = swapped ? cfg.b : cfg.a;
+  const botOpt = swapped ? cfg.a : cfg.b;
+
   choiceKicker.textContent = cfg.kicker;
   choiceTitle.textContent = cfg.title;
   choicePrompt.textContent = cfg.prompt;
-  choiceALabel.textContent = cfg.a.label;
-  choiceASub.textContent = cfg.a.sub;
-  choiceBLabel.textContent = cfg.b.label;
-  choiceBSub.textContent = cfg.b.sub;
+  choiceALabel.textContent = topOpt.label;
+  choiceASub.textContent = topOpt.sub;
+  choiceBLabel.textContent = botOpt.label;
+  choiceBSub.textContent = botOpt.sub;
   choiceScreen.classList.remove('hidden');
 }
 

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createWindowRainSystem, makeTileFloorTex, makeRugTexture } from './textures.js';
+import { createWindowRainSystem, makeTileFloorTex, makeRugTexture, makeContactShadowTex } from './textures.js';
 
 export function createHouse(scene, materials, colliders, interactables, getState) {
   // Shared BoxGeometry cache to avoid duplicate GPU buffer allocations
@@ -73,6 +73,24 @@ export function createHouse(scene, materials, colliders, interactables, getState
     return proxy;
   }
 
+  // Subtle midnight blue-black ambient fill so dark rooms show eerie silhouettes
+  const nightHemi = new THREE.HemisphereLight(0x1a283d, 0x070608, 0.22);
+  scene.add(nightHemi);
+
+  // Soft contact shadow decal helper so furniture feels grounded on the floor
+  const contactShadowMat = new THREE.MeshBasicMaterial({
+    map: makeContactShadowTex(),
+    transparent: true,
+    opacity: 0.78,
+    depthWrite: false
+  });
+  function addContactShadow(w, d, x, z) {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), contactShadowMat);
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(x, 0.008, z);
+    scene.add(m);
+  }
+
   // Ceilings and floors
   addBox(17.6, 0.25, 17, -0.1, -0.125, -3.0, materials.floorMat, false, false, true);
   addBox(17.6, 0.25, 17, -0.1, 3.25, -3.0, materials.ceilingMat, false, false, true);
@@ -124,6 +142,15 @@ export function createHouse(scene, materials, colliders, interactables, getState
     });
     slatInst.instanceMatrix.needsUpdate = true;
     wg.add(slatInst);
+
+    // Subtle dark drapery curtains flanking each rainy window
+    const curtainL = new THREE.Mesh(getBoxGeo(0.24, 1.92, 0.08), materials.blanketMat);
+    curtainL.position.set(-0.78, -0.08, 0.10);
+    const curtainR = new THREE.Mesh(getBoxGeo(0.24, 1.92, 0.08), materials.blanketMat);
+    curtainR.position.set(0.78, -0.08, 0.10);
+    const curtainRod = new THREE.Mesh(getBoxGeo(1.92, 0.035, 0.035), materials.metalMat);
+    curtainRod.position.set(0, 0.88, 0.12);
+    wg.add(curtainL, curtainR, curtainRod);
     scene.add(wg);
 
     // Only keep 1 real SpotLight (living room window) to stay within WebGL light budget
@@ -139,6 +166,11 @@ export function createHouse(scene, materials, colliders, interactables, getState
   }
   addMoonlitWindow(-3.32, 1.85, 1.6, Math.PI / 2, false);
   addMoonlitWindow(-3.82, 1.85, -6.0, Math.PI / 2, true);
+
+  // Exterior storm lightning flash light (synced with distant thunder)
+  const lightningLight = new THREE.PointLight(0xa8ceff, 0, 18, 1.35);
+  lightningLight.position.set(-2.9, 2.2, -5.8);
+  scene.add(lightningLight);
 
   // ==========================================
   // 1. BEDROOM
@@ -210,6 +242,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
   const clockCanvas = document.createElement('canvas'); clockCanvas.width = 256; clockCanvas.height = 128;
   const clockCtx = clockCanvas.getContext('2d');
   const clockTex = new THREE.CanvasTexture(clockCanvas);
+  clockTex.colorSpace = THREE.SRGBColorSpace;
   function drawClockFace(text, color = '#ff4a3d') {
     clockCtx.fillStyle = '#070709'; clockCtx.fillRect(0, 0, 256, 128);
     clockCtx.shadowColor = color; clockCtx.shadowBlur = 14;
@@ -249,7 +282,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
   lampShade.position.set(1.35, 1.24, 4.05);
   scene.add(lampShade);
 
-  const bedroomLampLight = new THREE.PointLight(0xffa952, 1.45, 7.2, 1.75);
+  const bedroomLampLight = new THREE.PointLight(0xff9642, 1.15, 6.6, 1.85);
   bedroomLampLight.position.set(1.35, 1.28, 3.95);
   bedroomLampLight.castShadow = true;
   bedroomLampLight.shadow.mapSize.width = 512;
@@ -418,9 +451,13 @@ export function createHouse(scene, materials, colliders, interactables, getState
     type: 'tv',
     worldPos: new THREE.Vector3(-3.2, 0.94, -8.3),
     checkedInLoop: 0,
-    label: () => (getState().loop >= 2 && tvObj.checkedInLoop !== getState().loop)
-      ? 'Nhấn [E] kiểm tra màn hình TV nhiễu hạt'
-      : ''
+    label: () => {
+      const s = getState();
+      if (s.loop === 4 && !s.tvTurnedOff) return 'Nhấn [E] tắt màn hình TV nhiễu hạt';
+      return (s.loop >= 2 && tvObj.checkedInLoop !== s.loop)
+        ? 'Nhấn [E] kiểm tra màn hình TV nhiễu hạt'
+        : '';
+    }
   };
   interactables.push(tvObj);
 
@@ -776,6 +813,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
   phoneScreenCanvas.width = 256; phoneScreenCanvas.height = 440;
   const phoneScreenCtx = phoneScreenCanvas.getContext('2d');
   const phoneScreenTex = new THREE.CanvasTexture(phoneScreenCanvas);
+  phoneScreenTex.colorSpace = THREE.SRGBColorSpace;
 
   function drawSmartphoneScreen(mode) {
     const ctx = phoneScreenCtx;
@@ -919,6 +957,13 @@ export function createHouse(scene, materials, colliders, interactables, getState
   // Kitchen breaker guide glow proxy instead of PointLight
   const kitchenGuideLight = createGlowProxy(scene, 0xff3b30, [-4.35, 1.65, -2.2], 0.95, 0, 0.65);
 
+  // Grounding contact shadows under major furniture
+  addContactShadow(2.55, 2.85, -1.7, 3.0);   // Bed
+  addContactShadow(1.15, 1.85, 2.95, 2.95);  // Wardrobe
+  addContactShadow(1.25, 2.55, 2.8, -7.8);   // Sofa
+  addContactShadow(1.95, 1.45, -2.3, -5.8);  // Dining table
+  addContactShadow(1.15, 1.25, -7.82, -2.2); // Fridge
+
   // Floating Dust Particles
   const dustCount = 260, dustGeo = new THREE.BufferGeometry(), dustPos = new Float32Array(dustCount * 3);
   for (let i = 0; i < dustCount; i++) {
@@ -1033,6 +1078,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
     lights: {
       bedroomLampLight,
       livingWindowMoon,
+      lightningLight,
       tvLight,
       fridgeLight,
       bathLight,

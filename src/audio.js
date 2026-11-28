@@ -7,19 +7,23 @@
 
 const AUDIO_BASE = `${(typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || './'}audio/`;
 
+// Supports both .wav (direct Mixkit downloads, checked first) and .mp3 automatically
 export const SFX_ASSETS = {
-  doorOpen: `${AUDIO_BASE}door-open.mp3`,
-  doorClose: `${AUDIO_BASE}door-close.mp3`,
-  doorKnock: `${AUDIO_BASE}door-knock.mp3`,
-  glassHit: `${AUDIO_BASE}glass-hit.mp3`,
-  glassDebris: `${AUDIO_BASE}glass-debris.mp3`,
-  horrorAmbience: `${AUDIO_BASE}horror-ambience.mp3`,
-  tombAmbience: `${AUDIO_BASE}tomb-ambience.mp3`,
-  scaryWoods: `${AUDIO_BASE}scary-woods.mp3`,
-  scaryWind: `${AUDIO_BASE}scary-wind.mp3`,
-  terrorSweep: `${AUDIO_BASE}terror-sweep.mp3`,
-  horrorSweep: `${AUDIO_BASE}horror-sweep.mp3`,
-  foxCry: `${AUDIO_BASE}fox-cry.ogg`
+  doorOpen: 'door-open',
+  doorClose: 'door-close',
+  wardrobeOpen: 'wardrobe-open',
+  wardrobeClose: 'wardrobe-close',
+  doorKnock: 'door-knock',
+  glassHit: 'glass-hit',
+  glassDebris: 'glass-debris',
+  horrorAmbience: 'horror-ambience',
+  scaryWind: 'scary-wind',
+  rainIndoor: 'rain-indoor',
+  thunder: 'thunder',
+  terrorSweep: 'terror-sweep',
+  horrorSweep: 'horror-sweep',
+  foxCry: 'fox-cry',
+  tvStaticOff: 'tv-static-off'
 };
 
 export class HouseAudio {
@@ -43,6 +47,8 @@ export class HouseAudio {
     this.bgAmbienceGain = null;
     this.bgWindSrc = null;
     this.bgWindGain = null;
+    this.bgRainSrc = null;
+    this.bgRainGain = null;
     this.ambienceMutedBySequence = false;
     this.assetsLoadedCount = 0;
     this.onAssetStatus = null;
@@ -111,7 +117,7 @@ export class HouseAudio {
     this.droneGain = this.ctx.createGain();
     osc1.type = 'sine'; osc1.frequency.value = 39;
     flt.type = 'lowpass'; flt.frequency.value = 95;
-    this.droneGain.gain.value = 0.08;
+    this.droneGain.gain.value = 0.025;
     osc1.connect(flt); flt.connect(this.droneGain);
     this.droneGain.connect(this.masterGain);
     osc1.start();
@@ -122,22 +128,27 @@ export class HouseAudio {
     const bp = this.ctx.createBiquadFilter();
     bp.type = 'bandpass'; bp.frequency.value = 880; bp.Q.value = 2.4;
     this.staticGain = this.ctx.createGain();
-    this.staticGain.gain.value = 0.003;
+    this.staticGain.gain.value = 0.0004;
     src.connect(bp); bp.connect(this.staticGain);
     this.staticGain.connect(this.masterGain);
     src.start();
 
     // Ambience gain buses (routed cleanly through masterGain)
     this.bgAmbienceGain = this.ctx.createGain();
-    this.bgAmbienceGain.gain.value = 0.24;
+    this.bgAmbienceGain.gain.value = 0.12;
     this.bgAmbienceGain.connect(this.masterGain);
 
     this.bgWindGain = this.ctx.createGain();
-    this.bgWindGain.gain.value = 0.10;
+    this.bgWindGain.gain.value = 0.05;
     this.bgWindGain.connect(this.masterGain);
 
-    // Start procedural wind bed immediately so ambience works even without external files
+    this.bgRainGain = this.ctx.createGain();
+    this.bgRainGain.gain.value = 0.11;
+    this.bgRainGain.connect(this.masterGain);
+
+    // Start procedural beds immediately; seamlessly replaced when MP3 buffers decode
     this._startProceduralWindBed();
+    this._startProceduralRainBed();
     this._preloadAssets();
   }
 
@@ -148,12 +159,30 @@ export class HouseAudio {
     src.loop = true;
     const bp = this.ctx.createBiquadFilter();
     bp.type = 'bandpass';
-    bp.frequency.value = 260;
-    bp.Q.value = 1.8;
+    bp.frequency.value = 240;
+    bp.Q.value = 1.6;
     src.connect(bp);
     bp.connect(this.bgWindGain);
     src.start();
     this.bgWindSrc = src;
+  }
+
+  _startProceduralRainBed() {
+    if (!this.ctx || !this.bgRainGain || this.bgRainSrc) return;
+    const src = this.ctx.createBufferSource();
+    src.buffer = this.whiteBuf;
+    src.loop = true;
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'lowpass';
+    bp.frequency.value = 540;
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 480;
+    src.connect(bp);
+    bp.connect(lp);
+    lp.connect(this.bgRainGain);
+    src.start();
+    this.bgRainSrc = src;
   }
 
   _startBufferLoop(key, targetGain, currentSrcProp) {
@@ -176,16 +205,25 @@ export class HouseAudio {
     const entries = Object.entries(SFX_ASSETS);
     const total = entries.length;
 
-    await Promise.all(entries.map(async ([key, url]) => {
+    await Promise.all(entries.map(async ([key, stem]) => {
       try {
-        const res = await fetch(url);
-        if (!res.ok) return;
-        const ct = (res.headers.get('content-type') || '').toLowerCase();
-        // Guard against Vite dev server returning index.html on missing public/audio/* files
-        if (ct.includes('text/html')) return;
-        const arrBuf = await res.arrayBuffer();
-        if (!arrBuf || arrBuf.byteLength < 128) return;
-        const decoded = await this.ctx.decodeAudioData(arrBuf.slice(0));
+        const candidates = /\.(wav|mp3|ogg)$/i.test(stem)
+          ? [stem]
+          : [`${AUDIO_BASE}${stem}.wav`, `${AUDIO_BASE}${stem}.mp3`];
+        let decoded = null;
+        for (const url of candidates) {
+          try {
+            const res = await fetch(url);
+            if (!res.ok) continue;
+            const ct = (res.headers.get('content-type') || '').toLowerCase();
+            if (ct.includes('text/html')) continue;
+            const arrBuf = await res.arrayBuffer();
+            if (!arrBuf || arrBuf.byteLength < 128) continue;
+            decoded = await this.ctx.decodeAudioData(arrBuf.slice(0));
+            break;
+          } catch (_) {}
+        }
+        if (!decoded) return;
         this.bufferCache[key] = decoded;
         this.assetsLoadedCount += 1;
         if (this.onAssetStatus) this.onAssetStatus(this.assetsLoadedCount, total);
@@ -194,6 +232,8 @@ export class HouseAudio {
           this._startBufferLoop('horrorAmbience', this.bgAmbienceGain, 'bgAmbienceSrc');
         } else if (key === 'scaryWind' && !this.ambienceMutedBySequence) {
           this._startBufferLoop('scaryWind', this.bgWindGain, 'bgWindSrc');
+        } else if (key === 'rainIndoor' && !this.ambienceMutedBySequence) {
+          this._startBufferLoop('rainIndoor', this.bgRainGain, 'bgRainSrc');
         }
       } catch (_) {
         // Local studio file not present or unreadable; procedural fallback handles playback seamlessly
@@ -206,10 +246,13 @@ export class HouseAudio {
     this.ambienceMutedBySequence = false;
     const t = this.ctx.currentTime;
     if (this.bgAmbienceGain) {
-      this.bgAmbienceGain.gain.setTargetAtTime(0.24, t, 0.25);
+      this.bgAmbienceGain.gain.setTargetAtTime(0.12, t, 0.25);
     }
     if (this.bgWindGain) {
-      this.bgWindGain.gain.setTargetAtTime(0.10, t, 0.25);
+      this.bgWindGain.gain.setTargetAtTime(0.05, t, 0.25);
+    }
+    if (this.bgRainGain) {
+      this.bgRainGain.gain.setTargetAtTime(0.11, t, 0.25);
     }
     if (this.bufferCache.horrorAmbience && !this.bgAmbienceSrc) {
       this._startBufferLoop('horrorAmbience', this.bgAmbienceGain, 'bgAmbienceSrc');
@@ -218,6 +261,11 @@ export class HouseAudio {
       this._startBufferLoop('scaryWind', this.bgWindGain, 'bgWindSrc');
     } else if (!this.bgWindSrc) {
       this._startProceduralWindBed();
+    }
+    if (this.bufferCache.rainIndoor && !this.bgRainSrc) {
+      this._startBufferLoop('rainIndoor', this.bgRainGain, 'bgRainSrc');
+    } else if (!this.bgRainSrc) {
+      this._startProceduralRainBed();
     }
   }
 
@@ -244,7 +292,11 @@ export class HouseAudio {
       const maxDurSec = opts.maxDurationMs ? opts.maxDurationMs / 1000 : null;
 
       src.connect(gain);
-      this._connectOut(gain, opts.wet ?? 0.22);
+      if (typeof opts.pan === 'number' && Math.abs(opts.pan) > 0.02) {
+        this._connectPanned(gain, opts.pan, opts.wet ?? 0.22);
+      } else {
+        this._connectOut(gain, opts.wet ?? 0.22);
+      }
 
       if (maxDurSec && maxDurSec > 0.1) {
         const fadeStart = Math.max(t + 0.02, t + maxDurSec - 0.18);
@@ -285,7 +337,7 @@ export class HouseAudio {
     }
   }
 
-  update(fear01, tvProx01, phoneRinging, nowSec) {
+  update(fear01, tvProx01, phoneRinging, nowSec, rainProx01 = 0.35, phonePan = 0) {
     if (!this.started || !this.ctx) return;
     const t = this.ctx.currentTime;
     if (performance.now() < this.deadSilenceUntil) {
@@ -293,32 +345,59 @@ export class HouseAudio {
       this.staticGain.gain.setTargetAtTime(0.0005, t, 0.06);
       if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.001, t, 0.06);
       if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0005, t, 0.06);
+      if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.015, t, 0.06);
       return;
     }
 
     if (!this.ambienceMutedBySequence) {
-      this.droneGain.gain.setTargetAtTime(0.06 + fear01 * 0.16, t, 0.2);
-      this.staticGain.gain.setTargetAtTime(0.003 + tvProx01 * 0.065 + fear01 * 0.04, t, 0.2);
+      this.droneGain.gain.setTargetAtTime(0.02 + fear01 * 0.08, t, 0.25);
+      this.staticGain.gain.setTargetAtTime(tvProx01 > 0.05 ? (tvProx01 * 0.048) : 0.0002, t, 0.2);
       if (this.bgAmbienceGain) {
-        this.bgAmbienceGain.gain.setTargetAtTime(Math.min(0.62, 0.24 + fear01 * 0.36), t, 0.2);
+        this.bgAmbienceGain.gain.setTargetAtTime(Math.min(0.28, 0.10 + fear01 * 0.18), t, 0.25);
       }
       if (this.bgWindGain) {
-        this.bgWindGain.gain.setTargetAtTime(Math.min(0.28, 0.08 + fear01 * 0.16), t, 0.2);
+        this.bgWindGain.gain.setTargetAtTime(Math.min(0.12, 0.04 + fear01 * 0.08), t, 0.25);
+      }
+      if (this.bgRainGain) {
+        this.bgRainGain.gain.setTargetAtTime(Math.min(0.20, 0.08 + rainProx01 * 0.11), t, 0.3);
       }
     }
 
-    if (nowSec - this.lastTick > 1.0) { this.lastTick = nowSec; this.playClockTick(); }
     if (phoneRinging && nowSec - this.lastRing > 2.8) {
       this.lastRing = nowSec;
-      this.playPhoneRing();
+      this.playPhoneRing(phonePan);
     }
-    if (fear01 > 0.24) {
-      const interval = Math.max(0.34, 1.25 - fear01 * 0.88);
+    if (fear01 > 0.26) {
+      const interval = Math.max(0.36, 1.25 - fear01 * 0.86);
       if (nowSec - this.lastBeat > interval) {
         this.lastBeat = nowSec;
         this.playHeartbeat(0.16 + fear01 * 0.38);
       }
     }
+  }
+
+  // Distant rolling thunder synced with window lightning flashes
+  playThunder(distant = true, pan = -0.35) {
+    this.init();
+    this._playAsset(
+      'thunder',
+      { volume: distant ? 0.52 : 0.82, rate: 0.92 + Math.random() * 0.14, pan, wet: 0.45 },
+      () => {
+        if (!this.ctx || this.muted) return;
+        const t = this.ctx.currentTime;
+        const src = this._noise(this.brownBuf, t, 2.8);
+        const lp = this.ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(190, t);
+        lp.frequency.exponentialRampToValueAtTime(65, t + 2.6);
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(0.001, t);
+        g.gain.linearRampToValueAtTime(distant ? 0.32 : 0.5, t + 0.2);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 2.75);
+        src.connect(lp); lp.connect(g);
+        this._connectPanned(g, pan, 0.55);
+      }
+    );
   }
 
   // 1. CREAKY DOOR
@@ -331,12 +410,13 @@ export class HouseAudio {
     );
   }
 
-  // 2. WARDROBE CREAK (Deep pitched creak + cloth rustle layer)
+  // 2. WARDROBE CREAK (Dedicated wardrobe-open.wav/.mp3 or slow doorOpen fallback + cloth rustle)
   playWardrobeCreak(slowEerie = false) {
     this.init();
+    const key = this.bufferCache.wardrobeOpen ? 'wardrobeOpen' : 'doorOpen';
     this._playAsset(
-      'doorOpen',
-      { volume: 0.88, rate: slowEerie ? 0.62 : 0.72 },
+      key,
+      { volume: 0.88, rate: key === 'wardrobeOpen' ? (slowEerie ? 0.88 : 1.0) : (slowEerie ? 0.62 : 0.72) },
       () => this._synthDoorCreakFallback(false)
     );
     if (this.ctx && !this.muted) {
@@ -353,10 +433,11 @@ export class HouseAudio {
     }
   }
 
-  // Heavy wardrobe slam
+  // Heavy wardrobe slam (dedicated wardrobe-close.wav/.mp3 or doorClose fallback)
   playWardrobeSlam() {
     this.init();
-    this._playAsset('doorClose', { volume: 0.95, rate: 1.35 }, () => this._synthDoorCreakFallback(true));
+    const key = this.bufferCache.wardrobeClose ? 'wardrobeClose' : 'doorClose';
+    this._playAsset(key, { volume: 0.95, rate: key === 'wardrobeClose' ? 1.0 : 1.35 }, () => this._synthDoorCreakFallback(true));
     this._playAsset('terrorSweep', { volume: 0.55, maxDurationMs: 1400 }, () => this._synthSweepFallback(0.42));
     this.playDoorSlam();
   }
@@ -489,21 +570,27 @@ export class HouseAudio {
     osc.connect(g); this._connectOut(g, 0.5); osc.start(t); osc.stop(t + 1.2);
   }
 
-  playPhoneRing() {
+  playPhoneRing(pan = 0) {
     if (!this.ctx || this.muted) return;
     const t = this.ctx.currentTime;
-    [0, 0.45].forEach((off) => {
+    [0, 0.48].forEach((off) => {
       const osc1 = this.ctx.createOscillator(), osc2 = this.ctx.createOscillator();
+      const trem = this.ctx.createOscillator(), tremG = this.ctx.createGain();
+      const bp = this.ctx.createBiquadFilter();
       const g = this.ctx.createGain();
-      osc1.type = 'sine'; osc1.frequency.value = 780;
-      osc2.type = 'sine'; osc2.frequency.value = 812;
+      osc1.type = 'triangle'; osc1.frequency.value = 1180;
+      osc2.type = 'sine'; osc2.frequency.value = 1520;
+      bp.type = 'bandpass'; bp.frequency.value = 1350; bp.Q.value = 2.8;
+      trem.frequency.value = 22; tremG.gain.value = 0.045;
       g.gain.setValueAtTime(0.001, t + off);
-      g.gain.linearRampToValueAtTime(0.11, t + off + 0.03);
-      g.gain.setValueAtTime(0.11, t + off + 0.3);
-      g.gain.exponentialRampToValueAtTime(0.001, t + off + 0.36);
-      osc1.connect(g); osc2.connect(g); this._connectOut(g, 0.45);
-      osc1.start(t + off); osc2.start(t + off);
-      osc1.stop(t + off + 0.38); osc2.stop(t + off + 0.38);
+      g.gain.linearRampToValueAtTime(0.095, t + off + 0.025);
+      g.gain.setValueAtTime(0.09, t + off + 0.32);
+      g.gain.exponentialRampToValueAtTime(0.001, t + off + 0.38);
+      trem.connect(tremG); tremG.connect(g.gain);
+      osc1.connect(bp); osc2.connect(bp); bp.connect(g);
+      this._connectPanned(g, pan, 0.48);
+      osc1.start(t + off); osc2.start(t + off); trem.start(t + off);
+      osc1.stop(t + off + 0.4); osc2.stop(t + off + 0.4); trem.stop(t + off + 0.4);
     });
   }
 
@@ -528,6 +615,11 @@ export class HouseAudio {
       g.gain.exponentialRampToValueAtTime(0.001, t + off + 0.2);
       osc.connect(g); g.connect(this.masterGain); osc.start(t + off); osc.stop(t + off + 0.22);
     });
+  }
+
+  playTvStaticOff() {
+    this.init();
+    this._playAsset('tvStaticOff', { volume: 0.85 }, () => this.playBreakerSnap());
   }
 
   playBreakerSnap() {
@@ -581,25 +673,33 @@ export class HouseAudio {
     });
   }
 
-  playFootstep(vol = 0.28, heavy = false) {
+  playFootstep(vol = 0.28, heavy = false, surface = 'wood') {
     if (!this.ctx || this.muted) return;
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(heavy ? 75 : (115 + Math.random() * 25), t);
-    osc.frequency.exponentialRampToValueAtTime(heavy ? 24 : 36, t + (heavy ? 0.16 : 0.1));
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + (heavy ? 0.18 : 0.11));
-    osc.connect(g); this._connectOut(g, heavy ? 0.5 : 0.28); osc.start(t); osc.stop(t + (heavy ? 0.19 : 0.12));
+    const baseF = heavy ? 72 : (surface === 'tile' ? 185 : surface === 'wet' ? 98 : 112);
+    osc.frequency.setValueAtTime(baseF + Math.random() * 24, t);
+    osc.frequency.exponentialRampToValueAtTime(heavy ? 24 : (surface === 'tile' ? 68 : 34), t + (heavy ? 0.16 : 0.095));
+    g.gain.setValueAtTime(vol * (surface === 'tile' ? 0.65 : 1.0), t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + (heavy ? 0.18 : 0.105));
+    osc.connect(g); this._connectOut(g, heavy ? 0.5 : (surface === 'tile' ? 0.42 : 0.26));
+    osc.start(t); osc.stop(t + (heavy ? 0.19 : 0.115));
 
-    const src = this._noise(this.brownBuf, t, 0.065);
+    const noiseBuf = (surface === 'wet' || surface === 'tile') ? this.whiteBuf : this.brownBuf;
+    const dur = surface === 'wet' ? 0.11 : (surface === 'tile' ? 0.045 : 0.065);
+    const src = this._noise(noiseBuf, t, dur);
     const bp = this.ctx.createBiquadFilter();
-    bp.type = 'bandpass'; bp.frequency.value = heavy ? 420 : (750 + Math.random() * 200); bp.Q.value = 1.6;
-    const ng = this.ctx.createGain(); ng.gain.setValueAtTime(vol * 0.85, t);
-    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.065);
-    src.connect(bp); bp.connect(ng); this._connectOut(ng, 0.25);
+    bp.type = 'bandpass';
+    bp.frequency.value = heavy ? 420 : (surface === 'tile' ? 1750 + Math.random() * 350 : surface === 'wet' ? 2300 + Math.random() * 450 : 680 + Math.random() * 200);
+    bp.Q.value = surface === 'tile' ? 3.2 : 1.5;
+    const ng = this.ctx.createGain();
+    ng.gain.setValueAtTime(vol * (surface === 'wet' ? 0.58 : surface === 'tile' ? 0.42 : 0.8), t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    src.connect(bp); bp.connect(ng); this._connectOut(ng, surface === 'tile' ? 0.4 : 0.25);
 
-    if (!heavy && Math.random() < 0.18) {
-      setTimeout(() => this.playFloorCreak(), 40);
+    if (!heavy && surface === 'wood' && Math.random() < 0.16) {
+      setTimeout(() => this.playFloorCreak(), 45);
     }
   }
 
@@ -663,6 +763,7 @@ export class HouseAudio {
     if (this.staticGain) this.staticGain.gain.setTargetAtTime(0.0001, t0, 0.5);
     if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.0001, t0, 0.7);
     if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0001, t0, 0.7);
+    if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.0001, t0, 0.7);
 
     const src = this.ctx.createBufferSource();
     src.buffer = this.whiteBuf;
@@ -726,6 +827,7 @@ export class HouseAudio {
     if (this.staticGain) this.staticGain.gain.setTargetAtTime(0.0001, tStart, 0.6);
     if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
     if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
+    if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
 
     if (!this.endingBus) {
       this.endingBus = this.ctx.createGain();
@@ -868,8 +970,8 @@ export class HouseAudio {
     schedulePhrase();
   }
 
-  // Water drip & faucet toggle SFX for Kitchen / Bathroom
-  playWaterDrip() {
+  // Water drip & faucet toggle SFX for Kitchen / Bathroom (with stereo pan)
+  playWaterDrip(pan = 0) {
     if (!this.ctx || this.muted) return;
     const t = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
@@ -881,7 +983,7 @@ export class HouseAudio {
     g.gain.linearRampToValueAtTime(0.09, t + 0.01);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
     osc.connect(g);
-    this._connectOut(g, 0.55);
+    this._connectPanned(g, pan, 0.55);
     osc.start(t);
     osc.stop(t + 0.08);
   }
@@ -926,6 +1028,7 @@ export class HouseAudio {
       if (this.staticGain) this.staticGain.gain.setTargetAtTime(0.0005, t, 0.05);
       if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.001, t, 0.05);
       if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0005, t, 0.05);
+      if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.015, t, 0.05);
     }
   }
 

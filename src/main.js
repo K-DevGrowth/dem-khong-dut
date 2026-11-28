@@ -27,7 +27,7 @@ import { createShadowPresence } from "./world/entity.js";
 // Game logic & director modules
 import { createGameState } from "./game/state.js";
 import { createTimerManager } from "./game/timerManager.js";
-import { loadSavedRun, clearSavedRun } from "./game/saveManager.js";
+import { loadSavedRun } from "./game/saveManager.js";
 import {
   computeStereoPan,
   createShadowEventState,
@@ -60,14 +60,6 @@ import {
   updateMatch,
 } from "./player/match.js";
 import { createHeldPaperSystem, updateHeldPaper } from "./player/heldPaper.js";
-import {
-  createHplPhysicsState,
-  isHplGrabbable,
-  startHplGrab,
-  releaseHplGrab,
-  applyHplMouseDrag,
-  updateHplPhysics,
-} from "./player/hplPhysics.js";
 import {
   keys,
   clearKeys,
@@ -247,7 +239,14 @@ function initGame() {
   const blinkSub = document.getElementById("blink-sub");
   const crosshair = document.getElementById("crosshair");
   const interactPrompt = document.getElementById("interact-prompt");
-  const hplHint = document.getElementById("hpl-hint");
+  const paperOverlay = document.getElementById("paper-overlay");
+  const paperSheet = document.getElementById("paper-sheet");
+  const paperHeader = document.getElementById("paper-header");
+  const paperSubHeader = document.getElementById("paper-subheader");
+  const paperBody = document.getElementById("paper-body");
+  const paperNoteWrap = document.getElementById("paper-note-wrap");
+  const paperNote = document.getElementById("paper-note");
+  const btnClosePaper = document.getElementById("btn-close-paper");
   const subtitleBox = document.getElementById("subtitle-box");
   const subtitleSpeaker = document.getElementById("subtitle-speaker");
   const subtitleText = document.getElementById("subtitle-text");
@@ -317,10 +316,9 @@ function initGame() {
   const state = createGameState();
   const hudCache = createHudCache();
   const shadowEvent = createShadowEventState();
-  const hplGrab = createHplPhysicsState();
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x06080c, 0.105);
+  scene.fog = new THREE.FogExp2(0x04060a, 0.125);
 
   const initWidth = Math.max(
     1,
@@ -427,7 +425,6 @@ function initGame() {
     tvStaticTex,
     shadow,
     shadowEvent,
-    hplGrab,
     hudCache,
     matchGroup: matchSystem.matchGroup,
     matchLight: matchSystem.matchLight,
@@ -448,7 +445,7 @@ function initGame() {
     blinkSub,
     crosshair,
     interactPrompt,
-    hplHint,
+    paperOverlay,
     subtitleBox,
     subtitleSpeaker,
     subtitleText,
@@ -532,17 +529,6 @@ function initGame() {
           }),
         clearKeys,
       ),
-    releaseHplGrab: (throwProp = false) =>
-      releaseHplGrab(
-        hplGrab,
-        throwProp,
-        camera,
-        audio,
-        crosshair,
-        hplHint,
-        puzzles.breakerLeverPivot,
-        state,
-      ),
     triggerTrueEnding: (type = null) => triggerTrueEnding(type, ctx),
     setupLoopEnvironment: (loopNum) => {
       flashObjectiveToast(5500);
@@ -615,22 +601,52 @@ function initGame() {
   settingsController.applyAllSettings();
 
   // =========================================================
-  // 4. HELD PAPER & CLUE INSPECTION
+  // 4. HELD PAPER & CLUE INSPECTION (CRISP 2D DOM READER)
   // =========================================================
   function openHeldPaperUI(kind, loopNum) {
+    const content = getHeldPaperContent(kind, loopNum);
     if (materials.heldPaperMat.map) materials.heldPaperMat.map.dispose();
     materials.heldPaperMat.map = makeHeldPaperTexture(kind, loopNum);
     materials.heldPaperMat.needsUpdate = true;
+
     state.holdingPaper = true;
     state.holdingPaperSource = kind;
     state.paperAnim = 0;
-    heldPaperSystem.heldPaperGroup.visible = true;
+    heldPaperSystem.heldPaperGroup.visible = false;
     matchSystem.matchGroup.visible = false;
     crosshair.style.opacity = "0";
     subtitleBox.classList.remove("visible");
     clearInteractUI(hudCache, { crosshair, interactPrompt });
+    clearKeys();
 
-    const content = getHeldPaperContent(kind, loopNum);
+    if (paperOverlay && paperSheet && content) {
+      paperSheet.className = `paper-sheet theme-${content.theme || "calendar"}`;
+      if (paperHeader) paperHeader.textContent = content.header || "";
+      if (paperSubHeader) {
+        if (content.subHeader) {
+          paperSubHeader.textContent = content.subHeader;
+          paperSubHeader.classList.remove("hidden");
+        } else {
+          paperSubHeader.textContent = "";
+          paperSubHeader.classList.add("hidden");
+        }
+      }
+      if (paperBody) paperBody.textContent = content.body || "";
+      if (paperNoteWrap && paperNote) {
+        if (content.note) {
+          paperNote.textContent = content.note;
+          paperNoteWrap.classList.remove("hidden");
+        } else {
+          paperNote.textContent = "";
+          paperNoteWrap.classList.add("hidden");
+        }
+      }
+      paperOverlay.classList.remove("hidden");
+      if (document.pointerLockElement) {
+        try { document.exitPointerLock(); } catch (_) {}
+      }
+    }
+
     if (content && content.voice) {
       narrator.speak(content.voice, kind === "fridge_note");
     }
@@ -641,6 +657,7 @@ function initGame() {
     const src = state.holdingPaperSource;
     state.holdingPaper = false;
     state.holdingPaperSource = null;
+    if (paperOverlay) paperOverlay.classList.add("hidden");
     crosshair.style.opacity = "";
     if (state.matchTimer > 0) matchSystem.matchGroup.visible = true;
     interactPrompt.classList.remove("visible");
@@ -844,29 +861,54 @@ function initGame() {
       ctx.updateHUD();
     } else if (currentTarget.type === "tv") {
       currentTarget.checkedInLoop = state.loop;
-      audio.playBreakerSnap();
-      audio.playHeavyBreath(0.22);
-      const tvLines = {
-        2: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "TV tự bật lúc mất điện... Giữa màn nhiễu trắng lờ mờ hiện bóng một con hẻm mưa lúc 02:14.",
-        },
-        3: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "Bản tin thời tiết từ ngày 14/11 cứ phát lặp lại không ngừng — chiếc TV này đã kẹt ở đêm đó suốt nhiều tuần.",
-        },
-        4: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "Âm thanh nhiễu rè xen lẫn tiếng gõ cửa dồn dập... Không phải TV hư, là ký ức của mình đang phát lại.",
-        },
-        5: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "Màn hình chớp tắt theo nhịp đèn xe cấp cứu ngoài cửa sổ. Mọi thứ trong căn nhà này đều dừng lại lúc 02:14.",
-        },
-      };
-      const info = tvLines[state.loop] || tvLines[2];
-      showSubtitle(info.speaker, info.text, 5600, state.loop >= 4);
-      ctx.recordAnomalyFound();
+      if (state.loop === 4 && !state.tvTurnedOff) {
+        state.tvTurnedOff = true;
+        house.lights.tvLight.intensity = 0;
+        materials.tvScreenMat.map = null;
+        materials.tvScreenMat.color.setHex(0x050608);
+        materials.tvScreenMat.needsUpdate = true;
+        audio.triggerDeadSilence(1600);
+        audio.playTvStaticOff();
+        state.shakeTime = 0.35;
+        // Brief uncanny apparition appearance near study doorway when TV snaps off
+        shadow.group.position.set(2.4, 0, -4.45);
+        shadow.group.visible = true;
+        timers.setTimeout(() => {
+          if (state.loop === 4 && !state.ended && shadowEvent.mode === "hidden") {
+            shadow.group.visible = false;
+          }
+        }, 780);
+        objectiveText.textContent = house.objects.phoneObj.answered
+          ? "TV đã tắt — cửa phòng làm việc mở rồi! Vào xem bản chép tin nhắn thoại"
+          : "TV đã tắt — hãy nghe điện thoại bàn đang réo rồi vào phòng làm việc";
+        showSubtitle(
+          "Màn hình TV tắt phụt",
+          "Tiếng nhiễu tắt ngấm... Cả căn phòng đột ngột im bặt. Hình như vừa có bóng người lướt qua cửa phòng làm việc!",
+          5800,
+          true,
+        );
+        ctx.recordAnomalyFound();
+      } else {
+        audio.playBreakerSnap();
+        audio.playHeavyBreath(0.22);
+        const tvLines = {
+          2: {
+            speaker: "Màn hình TV nhiễu hạt",
+            text: "TV tự bật lúc mất điện... Giữa màn nhiễu trắng lờ mờ hiện bóng một con hẻm mưa lúc 02:14.",
+          },
+          3: {
+            speaker: "Màn hình TV nhiễu hạt",
+            text: "Bản tin thời tiết từ ngày 14/11 cứ phát lặp lại không ngừng — chiếc TV này đã kẹt ở đêm đó suốt nhiều tuần.",
+          },
+          5: {
+            speaker: "Màn hình TV nhiễu hạt",
+            text: "Màn hình chớp tắt theo nhịp đèn xe cấp cứu ngoài cửa sổ. Mọi thứ trong căn nhà này đều dừng lại lúc 02:14.",
+          },
+        };
+        const info = tvLines[state.loop] || tvLines[2];
+        showSubtitle(info.speaker, info.text, 5600, state.loop >= 4);
+        ctx.recordAnomalyFound();
+      }
     } else if (currentTarget.type === "broken_mug") {
       currentTarget.checkedInLoop = state.loop;
       audio.playFloorCreak();
@@ -897,10 +939,14 @@ function initGame() {
           5600,
         );
       } else if (state.loop === 3) {
+        state.phoneCheckedLoop3 = true;
+        if (state.anomaliesFound + 1 >= state.anomaliesRequired) {
+          objectiveText.textContent = "Đã xem nhật ký cuộc gọi → vào phòng làm việc kiểm tra tờ lịch";
+        }
         showSubtitle(
           "Màn hình sáng đỏ · 02:08",
-          "4 cuộc gọi nhỡ từ Alice lúc 02:08 ngày 14/11 — khi máy đang bật Im lặng! Không phải kẻ lạ đâu...",
-          5800,
+          "4 cuộc gọi nhỡ từ Alice lúc 02:08 ngày 14/11 — khi máy đang bật Im lặng! Khoan đã... hôm nay thật sự là ngày mấy?",
+          6000,
           true,
         );
       } else {
@@ -962,6 +1008,11 @@ function initGame() {
       completeBreakerFix();
     } else if (currentTarget.type === "bath_mirror") {
       currentTarget.checkedInLoop = state.loop;
+      if (state.loop === 3 && !state.bathEscaped) {
+        state.bathEscaped = true;
+        audio.playDoorCreak(false);
+        objectiveText.textContent = "Cửa phòng tắm mở chốt rồi → kiểm tra điện thoại sáng đỏ ngoài phòng khách";
+      }
       ctx.recordAnomalyFound();
       if (state.loop === 1) {
         audio.playHeavyBreath(0.18);
@@ -1001,6 +1052,10 @@ function initGame() {
       currentTarget.dripping = false;
       house.objects.bathWaterMesh.visible = false;
       audio.playFaucetToggle(true);
+      if (state.loop === 3 && !state.bathEscaped) {
+        state.bathEscaped = true;
+        objectiveText.textContent = "Cửa phòng tắm hết kẹt rồi → soi gương hoặc ra kiểm tra điện thoại sáng đỏ";
+      }
       const info = wasRunning ? LOOP_STORY.bathFaucet2 : LOOP_STORY.bathFaucet1;
       showSubtitle(info.speaker, info.text, 5400, wasRunning);
     } else if (currentTarget.type === "kitchen_faucet") {
@@ -1015,6 +1070,7 @@ function initGame() {
       showSubtitle(info.speaker, info.text, 5400, wasRunning);
     } else if (currentTarget.type === "fridge") {
       currentTarget.checkedInLoop = state.loop;
+      state.fridgeChecked = true;
       ctx.recordAnomalyFound();
       audio.playDoorCreak(false);
       if (state.loop === 1) {
@@ -1041,6 +1097,7 @@ function initGame() {
       }
     } else if (currentTarget.type === "kitchen_note") {
       currentTarget.readInLoop = state.loop;
+      ctx.recordAnomalyFound();
       audio.playMemoryChime(false);
       const key =
         state.loop === 1
@@ -1078,6 +1135,7 @@ function initGame() {
       }
     } else if (currentTarget.type === "wardrobe") {
       currentTarget.checkedInLoop = state.loop;
+      ctx.recordAnomalyFound();
       if (state.loop === 1) {
         audio.playWardrobeCreak(false);
         house.objects.wardrobeObj.targetAngle = -0.45;
@@ -1184,6 +1242,33 @@ function initGame() {
         );
         return;
       }
+      if (state.loop === 2 && !state.fridgeChecked) {
+        audio.playDoorSlam();
+        showSubtitle(
+          "Chưa kiểm tra tủ lạnh",
+          "Tủ lạnh trong Nhà bếp vẫn đang hở sáng bất thường... Hãy kiểm tra bên trong trước khi xem hóa đơn.",
+          5000,
+        );
+        return;
+      }
+      if (state.loop === 3 && !state.phoneCheckedLoop3) {
+        audio.playDoorSlam();
+        showSubtitle(
+          "Điện thoại ngoài phòng khách",
+          "Chiếc điện thoại trên bàn phòng khách đang sáng đỏ bất thường... Hãy kiểm tra nó trước.",
+          5000,
+        );
+        return;
+      }
+      if (state.loop === 4 && !state.tvTurnedOff) {
+        audio.playDoorSlam();
+        showSubtitle(
+          "Tiếng nhiễu quá ồn",
+          "Màn hình TV nhiễu hạt ngoài phòng khách đang kêu chói tai khiến đầu óc quay cuồng... Hãy ra tắt TV trước.",
+          5000,
+        );
+        return;
+      }
       if (state.loop === TOTAL_LOOPS && !state.codeUnlocked) {
         keypadController.openKeypad();
         return;
@@ -1243,6 +1328,34 @@ function initGame() {
         );
         return;
       }
+      if (
+        currentTarget.id === "door_bathroom" &&
+        state.loop === 3 &&
+        !state.bathEscaped
+      ) {
+        audio.playDoorSlam();
+        currentTarget.rattleTime = 0.28;
+        showSubtitle(
+          "Cửa phòng tắm bị kẹt!",
+          "Tay nắm kẹt cứng trong hơi nước... Hãy khóa vòi nước hoặc nhìn lên mặt gương phía sau trước đã.",
+          4800,
+        );
+        return;
+      }
+      if (
+        currentTarget.id === "door_study" &&
+        state.loop === 4 &&
+        !state.tvTurnedOff
+      ) {
+        audio.playDoorSlam();
+        currentTarget.rattleTime = 0.28;
+        showSubtitle(
+          "Cửa phòng làm việc kẹt chặt",
+          "Tiếng nhiễu TV ngoài phòng khách đang dội thẳng vào tai... Hãy tắt chiếc TV nhiễu hạt trước.",
+          4800,
+        );
+        return;
+      }
       const willClose = currentTarget.isOpen;
       currentTarget.isOpen = !currentTarget.isOpen;
       currentTarget.targetOffset = currentTarget.isOpen ? -Math.PI * 0.48 : 0;
@@ -1265,12 +1378,12 @@ function initGame() {
     if (!choiceScreen.classList.contains("hidden")) {
       if (e.key === "1") {
         audio.init();
-        resolveMoralChoice("confront", ctx);
+        resolveMoralChoice(state.choiceSwapped ? "avoid" : "confront", ctx);
         return;
       }
       if (e.key === "2") {
         audio.init();
-        resolveMoralChoice("avoid", ctx);
+        resolveMoralChoice(state.choiceSwapped ? "confront" : "avoid", ctx);
         return;
       }
       return;
@@ -1345,24 +1458,6 @@ function initGame() {
         showSubtitle,
       );
     if (
-      e.code === "KeyG" &&
-      hplGrab.active &&
-      hplGrab.target &&
-      hplGrab.target.type === "hpl_prop"
-    ) {
-      releaseHplGrab(
-        hplGrab,
-        true,
-        camera,
-        audio,
-        crosshair,
-        hplHint,
-        puzzles.breakerLeverPivot,
-        state,
-      );
-      return;
-    }
-    if (
       shadowEvent.voicemailHold &&
       (e.code === "KeyE" || e.code === "Space" || e.code === "Enter")
     ) {
@@ -1408,25 +1503,7 @@ function initGame() {
       return;
     audio.init();
 
-    if (e.button === 2) {
-      if (
-        hplGrab.active &&
-        hplGrab.target &&
-        hplGrab.target.type === "hpl_prop"
-      ) {
-        releaseHplGrab(
-          hplGrab,
-          true,
-          camera,
-          audio,
-          crosshair,
-          hplHint,
-          puzzles.breakerLeverPivot,
-          state,
-        );
-      }
-      return;
-    }
+    if (e.button === 2) return;
 
     isDragging = true;
     lastX = e.clientX;
@@ -1450,18 +1527,6 @@ function initGame() {
   window.addEventListener("mouseup", (e) => {
     if (e.button === 0) {
       isDragging = false;
-      if (hplGrab.active) {
-        releaseHplGrab(
-          hplGrab,
-          false,
-          camera,
-          audio,
-          crosshair,
-          hplHint,
-          puzzles.breakerLeverPivot,
-          state,
-        );
-      }
     }
   });
 
@@ -1481,26 +1546,6 @@ function initGame() {
       lastX = e.clientX;
       lastY = e.clientY;
     } else {
-      return;
-    }
-
-    if (
-      hplGrab.active &&
-      hplGrab.target &&
-      hplGrab.target.type !== "hpl_prop"
-    ) {
-      applyHplMouseDrag(
-        dx,
-        dy,
-        hplGrab,
-        settings,
-        state,
-        audio,
-        puzzles.breakerLeverPivot,
-        completeBreakerFix,
-        (loop) => openChoiceModal(loop, ctx),
-        showSubtitle,
-      );
       return;
     }
 
@@ -1597,7 +1642,8 @@ function initGame() {
       !journalScreen.classList.contains("hidden") ||
       !keypadScreen.classList.contains("hidden") ||
       !choiceScreen.classList.contains("hidden") ||
-      !endingScreen.classList.contains("hidden")
+      !endingScreen.classList.contains("hidden") ||
+      (paperOverlay && !paperOverlay.classList.contains("hidden"))
     );
   }
 
@@ -1619,18 +1665,6 @@ function initGame() {
     state.paused = true;
     clearKeys();
     isDragging = false;
-    if (hplGrab.active) {
-      releaseHplGrab(
-        hplGrab,
-        false,
-        camera,
-        audio,
-        crosshair,
-        hplHint,
-        puzzles.breakerLeverPivot,
-        state,
-      );
-    }
     if (document.pointerLockElement) {
       try {
         document.exitPointerLock();
@@ -1657,18 +1691,9 @@ function initGame() {
     clearFinaleTimers();
     clearKeys();
     isDragging = false;
-    if (hplGrab.active) {
-      releaseHplGrab(
-        hplGrab,
-        false,
-        camera,
-        audio,
-        crosshair,
-        hplHint,
-        puzzles.breakerLeverPivot,
-        state,
-      );
-    }
+    if (paperOverlay) paperOverlay.classList.add("hidden");
+    state.holdingPaper = false;
+    state.holdingPaperSource = null;
     if (document.pointerLockElement) {
       try {
         document.exitPointerLock();
@@ -1827,17 +1852,25 @@ function initGame() {
   document
     .getElementById("btn-interact")
     .addEventListener("click", triggerInteract);
+  if (btnClosePaper) {
+    btnClosePaper.addEventListener("click", () => lowerHeldPaperUI());
+  }
+  if (paperOverlay) {
+    paperOverlay.addEventListener("click", (ev) => {
+      if (ev.target === paperOverlay) lowerHeldPaperUI();
+    });
+  }
 
-  // Choice Dialog Buttons
+  // Choice Dialog Buttons (respects per-loop choice order)
   if (btnChoiceA)
     btnChoiceA.addEventListener("click", () => {
       audio.init();
-      resolveMoralChoice("confront", ctx);
+      resolveMoralChoice(state.choiceSwapped ? "avoid" : "confront", ctx);
     });
   if (btnChoiceB)
     btnChoiceB.addEventListener("click", () => {
       audio.init();
-      resolveMoralChoice("avoid", ctx);
+      resolveMoralChoice(state.choiceSwapped ? "confront" : "avoid", ctx);
     });
 
   // Ending Switcher Buttons
@@ -1927,6 +1960,8 @@ function initGame() {
   let clockTickTimer = 0;
   let clockMinutesBack = 14;
   let rainFrameSkip = 0;
+  let lightningCooldown = 14.0 + Math.random() * 10.0;
+  let lightningTimer = 0;
 
   const _tvPos = new THREE.Vector3(-3.85, 0.9, -6.6);
 
@@ -2039,8 +2074,8 @@ function initGame() {
       );
     }
 
-    // TV static noise (only upload texture when near living room)
-    if (state.loop >= 2) {
+    // TV static noise (only upload texture when near living room and TV is still on)
+    if (state.loop >= 2 && !(state.loop === 4 && state.tvTurnedOff)) {
       house.lights.tvLight.intensity =
         1.05 + Math.sin(tSec * 29) * 0.25 + Math.cos(tSec * 43) * 0.15;
       tvFrameSkip = (tvFrameSkip + 1) % preset.tvSkip;
@@ -2159,7 +2194,16 @@ function initGame() {
         eyeHaze.style.opacity = ((1 - eyeOpen) * 0.72).toFixed(2);
 
         let cx, cy, cz, ry, rx, rz;
-        if (p < 0.42) {
+        if (state.loop === 3 || state.loop === 4) {
+          // Disoriented standing wake-up (Bathroom in Loop 3, Living Room TV in Loop 4)
+          const tOpen = smooth(p);
+          cx = state.pos.x;
+          cy = state.pos.y - (1 - tOpen) * 0.08;
+          cz = state.pos.z;
+          ry = state.yaw;
+          rx = state.pitch - (1 - tOpen) * 0.14;
+          rz = Math.sin((1 - tOpen) * Math.PI) * 0.06;
+        } else if (p < 0.42) {
           const t1 = smooth(p / 0.42);
           cx = -1.62;
           cy = 0.8 + t1 * 0.04;
@@ -2234,19 +2278,55 @@ function initGame() {
         sprinting,
       );
 
-      // 5. Water faucet drip audio
+      // 5. Water faucet drip audio (spatial stereo panned)
       dripTimer -= dt;
       if (dripTimer <= 0) {
         dripTimer = 2.2 + Math.random() * 1.8;
         if (
-          (house.objects.kitchenFaucetObj.dripping &&
-            state.pos.distanceTo(house.objects.kitchenFaucetObj.worldPos) <
-              6.5) ||
-          (house.objects.bathFaucetObj.dripping &&
-            state.pos.distanceTo(house.objects.bathFaucetObj.worldPos) < 6.0)
+          house.objects.kitchenFaucetObj.dripping &&
+          state.pos.distanceTo(house.objects.kitchenFaucetObj.worldPos) < 6.5
         ) {
-          audio.playWaterDrip();
+          const pan = computeStereoPan(house.objects.kitchenFaucetObj.worldPos, state.pos, _playerRight);
+          audio.playWaterDrip(pan);
+        } else if (
+          house.objects.bathFaucetObj.dripping &&
+          state.pos.distanceTo(house.objects.bathFaucetObj.worldPos) < 6.0
+        ) {
+          const pan = computeStereoPan(house.objects.bathFaucetObj.worldPos, state.pos, _playerRight);
+          audio.playWaterDrip(pan);
         }
+      }
+
+      // 5b. Storm lightning flashes outside rainy windows + distant thunder
+      if (shadowEvent.mode !== "loop3_chase" && !state.holdingPaper) {
+        if (lightningTimer > 0) {
+          lightningTimer = Math.max(0, lightningTimer - dt);
+          const p = lightningTimer / 0.55;
+          const pulse = (p > 0.72 || (p > 0.25 && p < 0.48)) ? 3.2 : 0.0;
+          house.lights.lightningLight.intensity = pulse;
+          if (house.lights.livingWindowMoon && state.loop !== 5) {
+            house.lights.livingWindowMoon.intensity = pulse > 0 ? 2.85 : 1.15;
+          }
+        } else {
+          if (house.lights.lightningLight.intensity > 0) {
+            house.lights.lightningLight.intensity = 0;
+            if (house.lights.livingWindowMoon && state.loop !== 5) {
+              house.lights.livingWindowMoon.intensity = 1.15;
+            }
+          }
+          lightningCooldown -= dt;
+          if (lightningCooldown <= 0) {
+            lightningCooldown = 19.0 + Math.random() * 15.0;
+            lightningTimer = 0.55;
+            const thunderDelay = 650 + Math.floor(Math.random() * 750);
+            timers.setTimeout(() => {
+              if (!state.running || state.paused || state.ended) return;
+              audio.playThunder(true, -0.38);
+            }, thunderDelay);
+          }
+        }
+      } else if (house.lights.lightningLight.intensity > 0) {
+        house.lights.lightningLight.intensity = 0;
       }
 
       // 6. Horror events & tension
@@ -2256,15 +2336,23 @@ function initGame() {
       // 7. Fear level & Lighting
       updateFearAndLighting(dt, tSec, ctx);
 
-      // 8. Dynamic audio drone update
+      // 8. Dynamic audio drone & indoor rain proximity update
       const tvDist = state.pos.distanceTo(_tvPos);
       const tvProx = state.loop >= 2 ? Math.max(0, 1 - tvDist / 7.5) : 0;
+      const winProx = Math.max(0, 1 - Math.abs(state.pos.x + 3.6) / 5.5);
+      const doorProx = Math.max(0, 1 - Math.abs(state.pos.z + 10.2) / 5.5);
+      const rainProx = Math.min(1, Math.max(winProx, doorProx));
+      const phonePan = house.objects.phoneObj.ringing
+        ? computeStereoPan(house.objects.phoneObj.worldPos, state.pos, _playerRight)
+        : 0;
       if (!shadowEvent.melodyStarted && !shadowEvent.shadowStopped) {
         audio.update(
           Math.max(state.fear / 100, shadowTension),
           tvProx,
           house.objects.phoneObj.ringing,
           tSec,
+          rainProx,
+          phonePan,
         );
       }
       state.wasMoving = isMoving;
@@ -2304,33 +2392,11 @@ function initGame() {
         currentTarget = findInteractable();
         const promptLabel = currentTarget ? currentTarget.label() : "";
         const shouldShow = Boolean(promptLabel);
-        const canGrab = Boolean(
-          currentTarget && isHplGrabbable(currentTarget, state),
-        );
-        crosshair.classList.toggle("grab", canGrab && !hplGrab.active);
-
-        if (hplHint) {
-          if (hplGrab.active && hplGrab.target) {
-            const ht = hplGrab.target;
-            let htxt = "";
-            if (ht.type === "door")
-              htxt = `Đang kéo cửa: ${Math.round((Math.abs(ht.currentOffset) / (Math.PI * 0.62)) * 100)}%`;
-            else if (ht.type === "hpl_drawer")
-              htxt = `Đang kéo ngăn kéo: ${Math.round((ht.openDist / ht.maxSlide) * 100)}%`;
-            else if (ht.type === "breaker")
-              htxt = `Đang gạt cầu dao lên: ${Math.round(((hplGrab.leverAngle + 0.55) / 0.75) * 100)}%`;
-            else if (ht.type === "hpl_prop")
-              htxt = `Đang cầm ${ht.name} · [Chuột phải] / [G] Ném đánh lạc hướng`;
-            hplHint.textContent = htxt;
-            hplHint.classList.toggle("visible", Boolean(htxt));
-          } else {
-            hplHint.classList.remove("visible");
-          }
-        }
+        crosshair.classList.remove("grab");
 
         if (shouldShow !== hudCache.interactActive) {
           hudCache.interactActive = shouldShow;
-          crosshair.classList.toggle("active", shouldShow && !canGrab);
+          crosshair.classList.toggle("active", shouldShow);
           interactPrompt.classList.toggle("visible", shouldShow);
         }
         if (shouldShow && hudCache.interactText !== promptLabel) {

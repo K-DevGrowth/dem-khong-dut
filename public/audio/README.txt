@@ -1,0 +1,20 @@
+Thu muc am thanh Foley & Ambience cho 02:14 — Dem Khong Dut (v1.5.0)
+=====================================================================
+Game tu dong uu tien doc file .wav (tai truc tiep tu Mixkit khong can doi duoi),
+neu khong co .wav se doc .mp3 cung ten (hoac dung am thanh mac dinh neu chua co file):
+
+  1. door-open.wav        (hoac .mp3) — Keo mo cua go (VD: Creaky door open)
+  2. door-close.wav       (hoac .mp3) — Dong cua go (VD: Creaky closing wood door)
+  3. wardrobe-open.wav    (hoac .mp3) — Keo mo tu quan ao (VD: Scary wooden door opening)
+  4. wardrobe-close.wav   (hoac .mp3) — Dong/sap tu quan ao (VD: Cabinet door closing)
+  5. door-knock.wav       (hoac .mp3) — Go cua go (VD: Knocking on a thick wooden door)
+  6. rain-indoor.wav      (hoac .mp3) — Tieng mua nen trong nha
+  7. thunder.wav          (hoac .mp3) — Tieng sam ren xa
+  8. horror-ambience.wav  (hoac .mp3) — Nen khong khi u am
+  9. scary-wind.wav       (hoac .mp3) — Gio dem ngoai hem
+ 10. glass-hit.wav        (hoac .mp3) — Khung anh roi vo kinh / nut guong
+ 11. glass-debris.wav     (hoac .mp3) — Manh kinh vo vang
+ 12. terror-sweep.wav     (hoac .mp3) — Tieng giat minh / bien co
+ 13. horror-sweep.wav     (hoac .mp3) — Chuyen vong lap
+ 14. fox-cry.wav          (hoac .mp3) — Tieng keu la ngoai con hem dem
+ 15. tv-static-off.wav    (hoac .mp3) — [MOI Vong 4] Tieng tat TV CRT nhiễu hat

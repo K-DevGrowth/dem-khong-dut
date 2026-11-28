@@ -82,7 +82,12 @@ export function updatePlayerMovement(dt, tSec, state, camera, colliders, audio, 
     state.stepAccum += curSpeed * dt;
     if (state.stepAccum > 1.15) {
       state.stepAccum = 0;
-      audio.playFootstep(sprinting ? 0.38 : 0.26, false);
+      const surface = state.pos.z < -10.5
+        ? 'wet'
+        : (state.pos.x < -4.0 || (state.pos.x > 3.5 && state.pos.z > -1.0))
+          ? 'tile'
+          : 'wood';
+      audio.playFootstep(sprinting ? 0.36 : 0.24, false, surface);
     }
   }
 

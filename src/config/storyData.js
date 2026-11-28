@@ -114,45 +114,45 @@ export const LOOP_STORY = {
     clueTitle: 'Tờ lịch bàn (Ghi chú khuya)',
     clueSpeaker: 'Mẩu giấy trên bàn',
     clueText: '“Trời mưa khuya lắm rồi. Nếu có tiếng gõ cửa lúc nửa đêm, đừng vội mở — kiểm tra kỹ chốt khóa trước đã.”',
-    journal: 'Vòng 1 (02:14): Căn nhà vắng lặng khác thường. Steve nghĩ Alice chỉ ra ngoài mua đồ ăn khuya và cảnh giác với tiếng gõ cửa lạ ngoài hành lang.',
+    journal: 'Vòng 1 (02:14): Căn nhà vắng lặng khác thường. Steve nghĩ Alice chỉ ra ngoài mua đồ ăn khuya và cảnh giác với tiếng gõ cửa ngoài hành lang.',
     doorLockedText: 'Chốt cửa vẫn đang cài. Kiểm tra đủ 2 dấu vết trong nhà và xem giấy trên bàn làm việc trước.'
   },
   2: {
     clockSub: 'Vòng 2/5 · Mất điện · Mùi ẩm mốc',
-    objective: 'Vào Nhà bếp bật Cầu dao điện & kiểm tra 2 dấu vết (vũng nước, tủ lạnh, giấy bếp)',
+    objective: 'Vào Nhà bếp bật Cầu dao điện & kiểm tra Tủ lạnh đang hở sáng',
     wakeSpeaker: 'Steve · Trong bóng tối',
-    wakeText: 'Lại 02:14... Cầu dao vừa sập tối om, dưới khe cửa chính có nước mưa thấm vào. Ai đó lại gõ cửa! Nhìn ánh đèn đỏ phía Nhà bếp bên trái phòng khách để gạt cầu dao trước.',
+    wakeText: 'Cầu dao vừa sập tối om... Dưới khe cửa chính có nước mưa thấm vào, còn phía Nhà bếp bên trái đang hắt ra ánh đèn tủ lạnh mờ xanh và chấm đèn đỏ của hộp cầu dao.',
     clueTitle: 'Hóa đơn quán đêm 23:40',
     clueSpeaker: 'Hóa đơn trên bàn làm việc',
-    clueText: '“14/11 · 23:40 · 2 phần cháo nóng. Steve, trời bắt đầu mưa rồi, em ghé mua cháo về cho anh ăn.” — Khoan đã, nếu mới mua tối nay, sao hộp cháo trong tủ lạnh đã mốc xanh?',
-    journal: 'Vòng 2: Hóa đơn ghi 23:40 ngày 14/11 với 2 phần cháo nóng, nhưng hộp cháo trong tủ lạnh đã nguội lạnh và lên mốc xanh từ nhiều ngày trước.',
-    doorLockedText: 'Tay nắm cửa lạnh buốt. Hãy vào Nhà bếp bật cầu dao, kiểm tra đủ 2 dấu vết và đọc tờ hóa đơn trên bàn làm việc.'
+    clueText: '“14/11 · 23:40 · 2 phần cháo nóng.” — Khoan đã, nếu mới mua tối nay, tại sao hộp cháo trong tủ lạnh lại lạnh ngắt và đóng váng mốc như để cả tuần rồi?',
+    journal: 'Vòng 2: Hóa đơn ghi 23:40 ngày 14/11 với 2 phần cháo nóng, nhưng hộp cháo trong tủ lạnh đã mốc xanh. Thời gian trong căn nhà này có gì đó không khớp.',
+    doorLockedText: 'Tay nắm cửa lạnh buốt. Hãy bật cầu dao trong Nhà bếp, kiểm tra tủ lạnh và đọc tờ hóa đơn trên bàn làm việc.'
   },
   3: {
-    clockSub: 'Vòng 3/5 · 14/11 · Những tuần lễ biến mất',
-    objective: 'Kiểm tra 3 dấu vết (điện thoại sáng đỏ, đồng hồ chạy ngược, khung ảnh) → phòng làm việc',
-    wakeSpeaker: 'Steve · Ký ức rạn nứt',
-    wakeText: 'Đồng hồ đầu giường đang chạy ngược! Cháo đã mốc, lịch treo tường bị xé nham nhở... Không phải tối nay. Màn hình điện thoại ngoài phòng khách đang phát sáng đỏ rực.',
+    clockSub: 'Vòng 3/5 · Phòng tắm mờ sương · 02:08',
+    objective: 'Khóa vòi nước & soi gương phòng tắm → kiểm tra màn hình điện thoại ngoài phòng khách',
+    wakeSpeaker: 'Steve · Trước gương phòng tắm',
+    wakeText: 'Khoan đã... sao mình lại đứng trong phòng tắm thế này? Vòi nước đang xả ầm ầm, hơi nước phủ kín mặt gương — và cửa phòng tắm phía sau như bị kẹt chặt rồi!',
     clueTitle: 'Nhật ký cuộc gọi 02:08 & Tờ lịch xé dở',
     clueSpeaker: 'Hồ sơ trên bàn làm việc',
-    clueText: '“14/11 · 02:08 — 4 cuộc gọi nhỡ liên tiếp từ Alice (Máy bật Im lặng).” Bên cạnh là tờ lịch đã bị gạch chéo suốt 3 tuần kể từ ngày 14/11.',
-    journal: 'Vòng 3 (Mâu thuẫn vỡ lẽ): Đêm 14/11 đã trôi qua nhiều tuần. Steve mới nhận ra người gọi liên tiếp lúc 02:08 không phải ai xa lạ — mà là Alice.',
-    doorLockedText: 'Cửa chính chưa thể mở. Hãy kiểm tra đủ 3 dấu vết (điện thoại, đồng hồ, khung ảnh) rồi vào phòng làm việc.'
+    clueText: '“14/11 · 02:08 — 4 cuộc gọi nhỡ liên tiếp từ Alice (Máy bật Im lặng).” Tờ lịch bàn bị gạch chéo suốt 3 tuần... Không thể nào, chẳng phải mới tối nay sao?',
+    journal: 'Vòng 3 (02:08): Steve tỉnh dậy trong phòng tắm mờ sương, rồi phát hiện tờ lịch đã trôi qua 3 tuần kể từ 14/11 và 4 cuộc gọi nhỡ từ Alice khi máy bật Im lặng.',
+    doorLockedText: 'Cửa chính chưa thể mở. Hãy kiểm tra điện thoại sáng đỏ ngoài phòng khách rồi vào phòng làm việc.'
   },
   4: {
-    clockSub: 'Vòng 4/5 · 02:09 · Người đứng ngoài mưa',
-    objective: 'Kiểm tra 3 dấu vết (tin nhắn thoại 02:09, khung ảnh vỡ, điện thoại bàn) → phòng làm việc',
-    wakeSpeaker: 'Steve · Nhận ra sự thật',
-    wakeText: 'Chiếc gối của Alice bên cạnh biến mất rồi... Tiếng gõ cửa suốt từ nãy không phải kẻ lạ. Bóng Đen lẩn khuất quanh đây là ký ức về đêm mình đã chốt cửa bỏ mặc cô ấy.',
+    clockSub: 'Vòng 4/5 · Màn hình nhiễu hạt · 02:09',
+    objective: 'Nghe điện thoại bàn đang réo & tắt màn hình TV nhiễu hạt để mở lối vào phòng làm việc',
+    wakeSpeaker: 'Steve · Giữa phòng khách',
+    wakeText: 'Tiếng nhiễu TV chói tai quá... Điện thoại bàn cũng đang réo liên hồi. Cửa phòng làm việc phía bên phải bị kẹt cứng — phải tắt chiếc TV và nhấc máy nghe trước đã.',
     clueTitle: 'Bản chép tin nhắn thoại 02:09',
     clueSpeaker: 'Tin nhắn thoại của Alice',
-    clueText: '“02:09 — Steve, chắc anh ngủ say rồi. Em gõ cửa mãi không thấy anh ra, điện thoại cũng không bắt máy... Không sao đâu, em tự đi bộ ra đầu hẻm bắt xe nhé. Mai mình nói tiếp.”',
-    journal: 'Vòng 4 (02:09): Tiếng gõ cửa đáng sợ hóa ra là Alice đứng dưới mưa cầu cứu. Sau 4 cuộc gọi nhỡ và cánh cửa chốt trong, cô ấy để lại tin nhắn thoại rồi quay lưng đi vào con hẻm tối.',
-    doorLockedText: 'Chưa thể rời đi. Hãy kiểm tra đủ 3 dấu vết và đọc bản chép tin nhắn thoại trên bàn làm việc.'
+    clueText: '“02:09 — Steve... em gõ cửa mãi không thấy anh ra, điện thoại cũng không bắt máy... Không sao đâu, em tự đi bộ ra đầu hẻm nhé. Chuyện lúc tối, mai mình nói tiếp.”',
+    journal: 'Vòng 4 (02:09): Không có kẻ lạ nào cả. Tiếng gõ cửa đáng sợ suốt từ đầu chính là Alice đứng dưới mưa cầu cứu — trước khi cô ấy quay lưng bước vào con hẻm tối.',
+    doorLockedText: 'Chưa thể rời đi. Hãy nghe điện thoại bàn, tắt màn hình TV nhiễu rồi đọc bản chép tin nhắn thoại trên bàn làm việc.'
   },
   5: {
     clockSub: 'Vòng 5/5 · 02:14 · Đối diện chốt khóa',
-    objective: 'Kiểm tra 3 dấu vết cuối → mở khóa mã 4 số (0214 / 1411) trên bàn làm việc',
+    objective: 'Kiểm tra 3 dấu vết cuối → giải khóa mã 4 số trên bàn làm việc',
     wakeSpeaker: 'Steve · 02:14',
     wakeText: 'Ngoài cửa sổ ánh đèn xanh–đỏ của xe cấp cứu đang chớp liên hồi... Bó hoa cúc trắng đã nằm dưới khung ảnh vỡ. Đã đến lúc mở hộp hồ sơ trên bàn làm việc và đối diện đêm 14/11.',
     clueTitle: 'Giấy báo tử của Alice (02:14)',
@@ -183,10 +183,10 @@ export const LOOP_STORY = {
     5: { speaker: 'Khung ảnh vỡ & Hoa trắng', text: 'Bó hoa cúc trắng lặng lẽ nằm bên khung ảnh vỡ. Đằng sau mặt gỗ hằn vết khắc “14/11”.' }
   },
   anomalyScrawl: {
-    2: { speaker: 'Chữ đỏ trên tường', text: 'Trên tường phòng khách hiện dòng chữ mờ: “SAO ANH KHÔNG MỞ? Ngoài này lạnh quá...”' },
-    3: { speaker: 'Chữ đỏ trên tường', text: 'Dòng chữ đổi thành: “ĐÃ 3 TUẦN TỪ 14/11 — KHÔNG PHẢI KẺ LẠ ĐÂU”.' },
-    4: { speaker: 'Chữ đỏ trên tường', text: 'Nét chữ cào sâu vào vữa: “NGƯỜI GÕ CỬA LÀ ALICE — CHÍNH ANH ĐÃ CHỐT KHÓA”.' },
-    5: { speaker: 'Chữ đỏ trên tường', text: 'Dòng chữ cuối cùng: “MỞ CHỐT KHÓA RA · BƯỚC KHỎI ĐÊM 14/11”.' }
+    2: { speaker: 'Chữ đỏ trên tường', text: 'Trên tường vữa ẩm hiện dòng chữ mờ: “LẠNH QUÁ... sao anh không mở?”' },
+    3: { speaker: 'Chữ đỏ trên tường', text: 'Dòng chữ hằn sâu hơn: “02:08 · IM LẶNG — 4 cuộc gọi không ai nghe”.' },
+    4: { speaker: 'Chữ đỏ trên tường', text: 'Nét chữ cào rách lớp sơn: “CHỐT KHÓA Ở BÊN TRONG — anh đâu có ngủ quên...”' },
+    5: { speaker: 'Chữ đỏ trên tường', text: 'Dòng chữ cuối cùng: “14/11 · 02:14 — mở cửa ra đi, Steve.”' }
   },
   brokenMug: {
     1: { speaker: 'Chiếc cốc vỡ trên sàn', text: 'Mảnh sứ vỡ vương vãi... Kỳ lạ, nước trà quanh đó đã khô cong thành vệt ố nâu từ lâu chứ không phải mới đổ.' },

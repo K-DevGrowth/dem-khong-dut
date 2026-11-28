@@ -21,7 +21,23 @@ export function makePlasterPBR() {
     ctx.strokeStyle = '#120d09'; ctx.lineWidth = 4; ctx.strokeRect(x, 382, 96, 98);
     bctx.strokeStyle = '#303030'; bctx.lineWidth = 5; bctx.strokeRect(x, 382, 96, 98);
   }
-  ctx.fillStyle = '#16100b'; ctx.fillRect(0, 492, 512, 20);
+  // Ceiling & lower-wall dampness / grime vignette for lived-in eerie depth
+  const topGrime = ctx.createLinearGradient(0, 0, 0, 96);
+  topGrime.addColorStop(0, 'rgba(6, 5, 4, 0.58)');
+  topGrime.addColorStop(1, 'rgba(6, 5, 4, 0)');
+  ctx.fillStyle = topGrime;
+  ctx.fillRect(0, 0, 512, 96);
+  for (let s = 0; s < 14; s++) {
+    const sx = Math.random() * 512;
+    const sw = 10 + Math.random() * 26;
+    const sh = 60 + Math.random() * 140;
+    const sg = ctx.createLinearGradient(0, 0, 0, sh);
+    sg.addColorStop(0, 'rgba(10, 12, 10, 0.24)');
+    sg.addColorStop(1, 'rgba(10, 12, 10, 0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(sx, 0, sw, sh);
+  }
+  ctx.fillStyle = '#140e09'; ctx.fillRect(0, 490, 512, 22);
   const map = new THREE.CanvasTexture(c), bumpMap = new THREE.CanvasTexture(b);
   [map, bumpMap].forEach((t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2.5, 1); });
   return { map, bumpMap };
@@ -105,17 +121,21 @@ export function makeBathMirrorTex(mode) {
     });
   }
   if (mode === 'cracked') {
-    ctx.fillStyle = 'rgba(18, 26, 32, 0.82)';
-    ctx.font = 'bold 26px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = 'rgba(18, 26, 32, 0.86)';
+    ctx.font = 'bold 16px "Be Vietnam Pro", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('ĐỪNG TRỐN NỮA', 128, 235);
+    ctx.fillText('NGƯỜI NGOÀI CỬA LÀ ALICE', 128, 212);
+    ctx.font = 'bold 24px "Be Vietnam Pro", sans-serif';
+    ctx.fillText('ĐỪNG TRỐN NỮA', 128, 244);
     ctx.strokeStyle = 'rgba(235, 246, 255, 0.86)';
     ctx.lineWidth = 2;
     [[128, 120, 18, 36], [128, 120, 244, 72], [128, 120, 48, 305], [128, 120, 215, 290], [128, 120, 128, 8]].forEach(([x1, y1, x2, y2]) => {
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo((x1 + x2) / 2 + 10, (y1 + y2) / 2 - 6); ctx.lineTo(x2, y2); ctx.stroke();
     });
   }
-  return new THREE.CanvasTexture(c);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 export function makeRugTexture(primary, accent) {
@@ -208,7 +228,9 @@ export function makeWallScrawl(line1, line2) {
   const ctx = c.getContext('2d'); ctx.clearRect(0, 0, 512, 256);
   ctx.fillStyle = 'rgba(182, 34, 26, 0.88)'; ctx.font = 'bold 38px "Times New Roman", serif'; ctx.fillText(line1, 24, 118);
   ctx.fillStyle = 'rgba(162, 32, 24, 0.8)'; ctx.font = 'italic 28px "Times New Roman", serif'; ctx.fillText(line2, 24, 172);
-  return new THREE.CanvasTexture(c);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 export function makeAlleyWallTex() {
@@ -301,9 +323,10 @@ export function makeGlintTex() {
 export function makeHeldPaperTexture(kind, loopNum) {
   const info = getHeldPaperContent(kind, loopNum);
   const c = document.createElement('canvas');
-  c.width = 768;
-  c.height = 960;
+  c.width = 1024;
+  c.height = 1280;
   const ctx = c.getContext('2d');
+  ctx.scale(1024 / 768, 1280 / 960);
 
   const grad = ctx.createLinearGradient(0, 0, 768, 960);
   if (info.theme === 'sticky') {
@@ -404,6 +427,10 @@ export function makeHeldPaperTexture(kind, loopNum) {
   ctx.textAlign = 'left';
 
   const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.generateMipmaps = false;
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
   tex.needsUpdate = true;
   return tex;
 }
@@ -479,4 +506,17 @@ export function createWindowRainSystem() {
 
   updateWindowRain(0.016, false);
   return { rainWinTex, updateWindowRain };
+}
+
+export function makeContactShadowTex() {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64, 64, 14, 64, 64, 62);
+  g.addColorStop(0.0, 'rgba(0, 0, 0, 0.72)');
+  g.addColorStop(0.55, 'rgba(0, 0, 0, 0.36)');
+  g.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
 }

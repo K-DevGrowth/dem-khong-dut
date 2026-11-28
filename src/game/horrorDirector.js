@@ -79,6 +79,24 @@ export function updateShadowEvents(dt, tSec, isMoving, ctx) {
   camera.getWorldDirection(_camDir);
   let tension = 0;
 
+  // Uncanny idle animation whenever the Shadow Entity is visible: broken-neck snap twitch + writhing tendrils
+  if (shadow.group.visible) {
+    const twitchGate = Math.sin(tSec * 2.7) * Math.sin(tSec * 7.3);
+    const snap = twitchGate > 0.86 ? -0.46 : 0.0;
+    shadow.headGroup.rotation.z = 0.34 + snap + Math.sin(tSec * 19.0) * (snap ? 0.14 : 0.018);
+    if (shadow.torsoGroup) {
+      shadow.torsoGroup.rotation.x = 0.18 + Math.sin(tSec * 2.1) * 0.035;
+      shadow.torsoGroup.position.y = 1.18 + Math.sin(tSec * 2.1) * 0.018;
+    }
+    if (shadow.tendrils) {
+      for (let i = 0; i < shadow.tendrils.length; i++) {
+        const td = shadow.tendrils[i];
+        td.mesh.rotation.z = td.baseRz + Math.sin(tSec * 2.6 + i * 1.1) * 0.06;
+        td.mesh.rotation.x = td.baseRx + Math.cos(tSec * 2.1 + i * 0.9) * 0.04;
+      }
+    }
+  }
+
   // Loop 2: Family portrait crashes off wall
   if (state.loop === 2 && !shadowEvent.portraitFell && state.pos.z < -4.2) {
     shadowEvent.portraitFell = true;
@@ -463,7 +481,7 @@ export function updateFearAndLighting(dt, tSec, ctx) {
       }, 950);
     } else {
       state.fear = 72;
-      showSubtitle('Cơn hoảng loạn · Áp lực 100%!', 'Tim đập loạn nhịp, chân nặng trĩu... Quẹt diêm [F] hoặc tìm ánh sáng ngay trước khi ngất đi!', 5200, true);
+      showSubtitle('Cơn hoảng loạn!', 'Tim đập loạn nhịp, chân nặng trĩu... Quẹt diêm [F] hoặc tìm ánh sáng ngay trước khi ngất đi!', 5200, true);
     }
   }
 

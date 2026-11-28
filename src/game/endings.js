@@ -237,7 +237,7 @@ export function beginLoop1AfterIntro(ctx) {
   state.running = true;
   document.body.classList.remove('pre-start');
   setupLoopEnvironment(1, ctx);
-  setTimeout(() => {
+  (ctx.timers ? ctx.timers.setTimeout : setTimeout)(() => {
     if (state.running && state.loop === 1 && !state.ended) {
       showSubtitle(LOOP_STORY[1].wakeSpeaker, LOOP_STORY[1].wakeText, 7200);
     }
@@ -268,6 +268,8 @@ export function startNewGame(withIntro = true, ctx) {
 
   clearIntroTimers();
   clearFinaleTimers();
+  if (ctx.timers) ctx.timers.clearAll();
+  clearSavedRun();
   lightWhiteout.style.transition = 'opacity 0.12s linear';
   audio.stopEndingMelody();
 
@@ -296,7 +298,7 @@ export function startNewGame(withIntro = true, ctx) {
     state.running = true;
     document.body.classList.remove('pre-start');
     setupLoopEnvironment(1, ctx);
-    setTimeout(() => {
+    (ctx.timers ? ctx.timers.setTimeout : setTimeout)(() => {
       if (state.running && state.loop === 1 && !state.ended) {
         showSubtitle(LOOP_STORY[1].wakeSpeaker, LOOP_STORY[1].wakeText, 7200);
       }

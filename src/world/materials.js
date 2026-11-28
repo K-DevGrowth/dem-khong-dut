@@ -64,18 +64,18 @@ export function createMaterials() {
   const portraitMat = new THREE.MeshStandardMaterial({ map: portraitCleanTex, roughness: 0.65 });
 
   const bathMirrorCleanTex = makeBathMirrorTex('clean');
-  const bathMirrorFogTex = makeBathMirrorTex('fog');
+  const bathMirrorFogTex = makeBathMirrorTex('fog0214');
   const bathMirrorGhostTex = makeBathMirrorTex('ghost');
   const bathMirrorCrackedTex = makeBathMirrorTex('cracked');
   const bathMirrorMat = new THREE.MeshStandardMaterial({ map: bathMirrorCleanTex, roughness: 0.14, metalness: 0.78 });
 
-  const scrawlTex2 = makeWallScrawl('SAO ANH KHÔNG MỞ?', 'Ngoài này lạnh quá...');
-  const scrawlTex3 = makeWallScrawl('ĐÃ 3 TUẦN TỪ 14/11', 'Không phải kẻ lạ đâu');
-  const scrawlTex4 = makeWallScrawl('NGƯỜI GÕ CỬA LÀ ALICE', 'Chính anh đã chốt khóa');
-  const scrawlTex5 = makeWallScrawl('MỞ CHỐT KHÓA RA', 'Bước khỏi đêm 14/11');
+  const scrawlTex2 = makeWallScrawl('LẠNH QUÁ...', 'sao anh không mở?');
+  const scrawlTex3 = makeWallScrawl('02:08 · IM LẶNG', '4 cuộc gọi không ai nghe');
+  const scrawlTex4 = makeWallScrawl('CHỐT KHÓA Ở BÊN TRONG', 'anh đâu có ngủ quên...');
+  const scrawlTex5 = makeWallScrawl('14/11 · 02:14', 'mở cửa ra đi, Steve.');
   const wallScrawlMat = new THREE.MeshStandardMaterial({ map: scrawlTex2, transparent: true, roughness: 0.9 });
 
-  const heldPaperMat = new THREE.MeshBasicMaterial({ map: makeHeldPaperTexture('clue', 1), depthTest: false });
+  const heldPaperMat = new THREE.MeshBasicMaterial({ map: makeHeldPaperTexture('clue', 1), depthTest: false, toneMapped: false });
 
   const coreShadowMat = new THREE.MeshBasicMaterial({ color: 0x030305 });
   const mistMat = new THREE.MeshBasicMaterial({

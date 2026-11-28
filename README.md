@@ -52,7 +52,7 @@ dem-khong-dut/
 
 1. **Khởi đầu điện ảnh (Cinematic Awakening)**: Mở đầu nền đen chữ trắng, hiệu ứng chớp mắt mờ sương và 3 giai đoạn thức giấc trên giường (nằm -> ngồi dậy -> đứng xuống sàn).
 2. **5 Vòng lặp thời gian tâm lý (Psychological Time Loops)**: Tìm các điểm dị thường (đồng hồ chạy ngược, vết cào trên tường, bóng người ngoài cửa sổ, hoa cúc trắng, vũng nước mưa...).
-3. **Vật lý xúc giác HPL (Tactile Physics)**: Giữ chuột trái kéo mở từng cánh cửa gỗ, kéo ngăn kéo bàn làm việc, gạt cần cầu dao điện, cầm chai lọ ném để đánh lạc hướng Bóng Đen.
+3. **Tương tác trực quan & Đọc tài liệu sắc nét**: Nhấn `[E]` mở/đóng cửa gỗ, kéo ngăn kéo, gạt cần cầu dao điện và đọc thư từ/hồ sơ qua giao diện giấy 2D sắc nét.
 4. **Hệ thống ánh sáng & que diêm**: Quẹt diêm [F] soi đường trong bóng tối, thắp các ngọn nến rải rác để xua tan cảm giác hoảng loạn (Panic Attack).
 5. **Âm thanh không gian & Giọng đọc**:
    - Âm thanh 3D Binaural Stereo định hướng tiếng thì thầm, gõ cửa, tiếng cáo đêm và tiếng bước chân trên trần nhà.
@@ -88,6 +88,12 @@ Bản dựng tối ưu được xuất ra thư mục `dist/` với Three.js đư
 npm run preview
 ```
 
+### Đóng gói tài liệu Codebase (`docs/`):
+```bash
+npm run bundle
+```
+Tự động quét cấu trúc thư mục và chia nhỏ toàn bộ mã nguồn vào thư mục `docs/` (gồm `docs/README.md` và các tệp theo từng mô-đun). Chạy lại lệnh này mỗi khi thêm, sửa, xóa hoặc thay đổi cấu trúc tệp.
+
 ---
 
 ## ⌨️ Bảng điều khiển phím tắt
@@ -97,9 +103,7 @@ npm run preview
 | `W`, `A`, `S`, `D` / Mũi tên | Di chuyển nhân vật |
 | `Shift` (giữ) | Chạy nhanh (tiêu hao diêm nhanh hơn) |
 | Chuột / Di ngón tay | Xoay góc nhìn (hỗ trợ Pointer Lock) |
-| `Chuột trái` (giữ + kéo) | Kéo đẩy cửa, ngăn kéo bàn, cần cầu dao |
-| `Chuột phải` / `G` | Ném đồ vật đang cầm để đánh lạc hướng |
-| `E` | Tương tác nhanh / Đóng mở cửa / Xem manh mối |
+| `E` | Tương tác / Đóng mở cửa, ngăn kéo, cầu dao / Đọc & hạ giấy |
 | `F` | Quẹt / Thổi tắt que diêm |
 | `J` | Mở / Đóng sổ tay ký ức |
 | `O` / `Esc` | Mở / Đóng bảng Cài đặt đồ họa |

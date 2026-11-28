@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { makeFlameSpriteTex, makeGlowHaloTex } from "../world/textures.js";
 
 export function createMatchSystem(scene, camera) {
-  // Brighter, wider warm flame with softer falloff (decay 1.25) and NO expensive 6-pass PointLight shadow cubemap
-  const matchLight = new THREE.PointLight(0xff9942, 0, 10.5, 1.45);
+  // Tight, warm, fragile flame pool (creates dramatic dark corners instead of washing out the whole room)
+  const matchLight = new THREE.PointLight(0xff8b36, 0, 6.4, 1.95);
   matchLight.position.set(0.18, -0.06, -0.34);
   matchLight.castShadow = false;
   camera.add(matchLight);
@@ -91,7 +91,7 @@ export function toggleOrStrikeMatch(
   state.matchesLeft--;
   state.matchTimer = state.matchMax;
   matchGroup.visible = true;
-  matchLight.intensity = 1.95;
+  matchLight.intensity = 1.82;
   audio.playMatchStrike();
   updateHUD();
 }
@@ -114,7 +114,7 @@ export function updateMatch(
       state.matchTimer - dt * (sprinting ? 1.4 : 1.0),
     );
     const fade = Math.min(1, state.matchTimer / 3.2);
-    matchLight.intensity = (1.95 + Math.sin(tSec * 19) * 0.18) * fade;
+    matchLight.intensity = (1.82 + Math.sin(tSec * 19) * 0.22 + Math.cos(tSec * 31) * 0.10) * fade;
     const flk = 1 + Math.sin(tSec * 23) * 0.09 + Math.cos(tSec * 37) * 0.06;
     const stretch = 1 + Math.sin(tSec * 17) * 0.13;
     flameMesh.scale.set(flk * fade, stretch * fade, flk * fade);

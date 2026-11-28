@@ -62,6 +62,12 @@ export function createDoorsSystem(scene, materials, colliders, interactables, ge
         if (d.id === 'door_study' && state.loop === 1 && !state.studyKeyFound) {
           return 'Cửa phòng làm việc (Khóa — tìm chìa khóa trước)';
         }
+        if (d.id === 'door_bathroom' && state.loop === 3 && !state.bathEscaped) {
+          return 'Cửa phòng tắm bị kẹt (Khóa vòi nước & soi gương trước)';
+        }
+        if (d.id === 'door_study' && state.loop === 4 && !state.tvTurnedOff) {
+          return 'Cửa phòng làm việc bị kẹt (Tắt TV nhiễu hạt trước)';
+        }
         return d.isOpen ? 'Nhấn [E] đóng cửa' : 'Nhấn [E] mở cửa';
       }
     };

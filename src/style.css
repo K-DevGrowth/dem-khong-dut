@@ -1502,3 +1502,155 @@ canvas {
   height: 100% !important;
   display: block;
 }
+
+/* === CRISP 2D PAPER READER OVERLAY === */
+#paper-overlay {
+  z-index: 38;
+  background: rgba(3, 4, 7, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.paper-sheet {
+  position: relative;
+  width: min(560px, 92vw);
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 34px 36px 26px;
+  border-radius: 6px;
+  color: #201a14;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.82),
+    inset 0 0 60px rgba(38, 28, 18, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(58, 46, 34, 0.35);
+  animation: paperRise 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@keyframes paperRise {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.paper-sheet.theme-calendar {
+  background: linear-gradient(160deg, #e7decb 0%, #d4c6ab 100%);
+}
+.paper-sheet.theme-sticky {
+  background: linear-gradient(160deg, #f6e9b6 0%, #e1ce88 100%);
+}
+.paper-sheet.theme-wet {
+  background: linear-gradient(160deg, #dce0da 0%, #bec6be 100%);
+}
+.paper-sheet.theme-frost {
+  background: linear-gradient(160deg, #e1eff6 0%, #b7d1df 100%);
+}
+.paper-sheet.theme-scrawl {
+  background: linear-gradient(160deg, #d5cdc0 0%, #b4aa9b 100%);
+}
+.paper-sheet.theme-report {
+  background: linear-gradient(160deg, #dfd7c7 0%, #c6bcab 100%);
+}
+.paper-sheet.theme-certificate {
+  background: linear-gradient(160deg, #dbd6cc 0%, #beb8ab 100%);
+  border: 2px solid rgba(40, 36, 32, 0.55);
+}
+
+.paper-top-rule {
+  height: 4px;
+  width: 100%;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  background: #8b2b24;
+}
+.paper-sheet.theme-sticky .paper-top-rule { background: #8a641b; }
+.paper-sheet.theme-frost .paper-top-rule { background: #1f4c63; }
+.paper-sheet.theme-wet .paper-top-rule,
+.paper-sheet.theme-report .paper-top-rule,
+.paper-sheet.theme-certificate .paper-top-rule { background: #2c2620; }
+.paper-sheet.theme-scrawl .paper-top-rule { background: #6b1812; }
+
+.paper-header {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: clamp(16px, 2.3vw, 20px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #251d16;
+  line-height: 1.35;
+}
+.paper-sheet.theme-calendar .paper-header { color: #7c231c; }
+.paper-sheet.theme-sticky .paper-header { color: #6c4d13; }
+.paper-sheet.theme-frost .paper-header { color: #17384a; }
+.paper-sheet.theme-scrawl .paper-header { color: #5b140f; }
+.paper-sheet.theme-certificate .paper-header { text-align: center; font-size: clamp(19px, 2.6vw, 23px); }
+
+.paper-subheader {
+  margin-top: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-align: center;
+  color: #3a332b;
+}
+.paper-subheader.hidden { display: none; }
+
+.paper-divider {
+  height: 1px;
+  margin: 14px 0 18px;
+  background: rgba(52, 42, 32, 0.25);
+}
+
+.paper-body {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  font-size: clamp(17px, 2.2vw, 19.5px);
+  font-style: italic;
+  line-height: 1.72;
+  color: #1c1610;
+  white-space: pre-line;
+}
+.paper-sheet.theme-report .paper-body {
+  font-style: normal;
+  font-size: clamp(15.5px, 2vw, 17.5px);
+  line-height: 1.75;
+}
+.paper-sheet.theme-scrawl .paper-body {
+  color: #5c120d;
+  font-weight: 500;
+}
+
+.paper-note-wrap.hidden { display: none; }
+.paper-note-divider {
+  height: 1px;
+  margin: 22px 0 14px;
+  background: rgba(52, 42, 32, 0.22);
+}
+.paper-note {
+  margin: 0;
+  font-family: 'Lora', Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.62;
+  color: #46382b;
+}
+
+.paper-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+.paper-close-btn {
+  padding: 9px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(46, 36, 26, 0.35);
+  background: rgba(34, 26, 18, 0.08);
+  color: #2b2219;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.paper-close-btn:hover {
+  background: rgba(34, 26, 18, 0.16);
+  border-color: rgba(46, 36, 26, 0.65);
+}

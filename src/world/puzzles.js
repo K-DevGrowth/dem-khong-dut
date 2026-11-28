@@ -360,6 +360,9 @@ export function createPuzzlesSystem(scene, materials, interactables, getState) {
         return `Hồ sơ trên bàn (Kiểm tra thêm ${state.anomaliesRequired - state.anomaliesFound} điểm bất thường trước)`;
       }
       if (state.loop === 2 && !state.breakerFixed) return 'Hồ sơ trên bàn (Tối om — cần bật cầu dao trong Nhà bếp)';
+      if (state.loop === 2 && !state.fridgeChecked) return 'Hồ sơ trên bàn (Hãy kiểm tra tủ lạnh hở sáng trong Nhà bếp trước)';
+      if (state.loop === 3 && !state.phoneCheckedLoop3) return 'Hồ sơ trên bàn (Kiểm tra màn hình điện thoại sáng đỏ ngoài phòng khách trước)';
+      if (state.loop === 4 && !state.tvTurnedOff) return 'Hồ sơ trên bàn (Tắt màn hình TV nhiễu hạt ngoài phòng khách trước)';
       if (state.loop === TOTAL_LOOPS && !state.codeUnlocked) return 'Nhấn [E] mở khóa mã 4 số hộp hồ sơ';
       return `Nhấn [E] xem: ${LOOP_STORY[state.loop].clueTitle}`;
     }

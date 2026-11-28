@@ -1,12 +1,13 @@
 {
   "name": "0214-ngay-khong-chiu-qua",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "bundle": "node scripts/bundle-codebase.mjs"
   },
   "dependencies": {
     "three": "^0.160.0"
