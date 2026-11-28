@@ -11,7 +11,7 @@ export function createSettingsController(els, settings, GFX_PRESETS, renderer, s
     );
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
-    renderer.toneMappingExposure = preset.exposure * (settings.gamma || 1.0);
+    applyGammaLive();
 
     document.body.classList.toggle('gfx-low', level === 'low');
     document.body.classList.toggle('no-film-grain', !settings.filmGrain);
@@ -59,6 +59,28 @@ export function createSettingsController(els, settings, GFX_PRESETS, renderer, s
 
     if (dustPoints) dustPoints.visible = preset.dust;
     renderer.shadowMap.needsUpdate = true;
+  }
+
+  function applyGammaLive() {
+    const preset = GFX_PRESETS[settings.graphics] || GFX_PRESETS.medium;
+    const g = settings.gamma || 1.0;
+    // 1. Lift WebGL toneMappingExposure
+    renderer.toneMappingExposure = preset.exposure * Math.pow(g, 1.35);
+    // 2. Lift 3D HemisphereLight ambient shadow fill so dark rooms visibly brighten
+    if (lights.nightHemi) {
+      lights.nightHemi.intensity = Math.max(0.06, Math.min(1.15, 0.22 * Math.pow(g, 1.85)));
+    }
+    // 3. Apply smooth perceptual brightness/gamma lift on the 3D canvas container
+    if (els.container) {
+      const cssBright = g >= 1.0 ? (1.0 + (g - 1.0) * 0.55) : (0.62 + g * 0.38);
+      els.container.style.filter = Math.abs(g - 1.0) < 0.02 ? '' : `brightness(${cssBright.toFixed(2)})`;
+    }
+    // 4. Update live calibration preview strip inside Settings modal
+    const gBox = document.getElementById('gamma-preview-box');
+    if (gBox) {
+      const pBright = Math.max(0.35, Math.min(2.4, Math.pow(g, 1.35)));
+      gBox.style.filter = `brightness(${pBright.toFixed(2)})`;
+    }
   }
 
   function applyAudioSettings() {
@@ -141,8 +163,7 @@ export function createSettingsController(els, settings, GFX_PRESETS, renderer, s
     els.sliderGamma.addEventListener('input', () => {
       settings.gamma = parseFloat(els.sliderGamma.value) || 1.0;
       if (els.gammaDisplay) els.gammaDisplay.textContent = `${Math.round(settings.gamma * 100)}%`;
-      const preset = GFX_PRESETS[settings.graphics] || GFX_PRESETS.medium;
-      renderer.toneMappingExposure = preset.exposure * settings.gamma;
+      applyGammaLive();
       saveSettingsFn(settings);
     });
   }

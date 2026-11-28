@@ -674,6 +674,7 @@ function initGame() {
     camera,
     audio,
     {
+      nightHemi: house.lights.nightHemi,
       matchLight: matchSystem.matchLight,
       bedroomLampLight: house.lights.bedroomLampLight,
     },

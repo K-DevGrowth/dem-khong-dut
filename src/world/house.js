@@ -1161,6 +1161,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
 
   return {
     lights: {
+      nightHemi,
       bedroomLampLight,
       livingWindowMoon,
       lightningLight,

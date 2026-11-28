@@ -2663,3 +2663,22 @@ body.no-film-grain #film-grain {
 body.subtitles-off #subtitle-box {
   display: none;
 }
+
+/* === v1.9.2: LIVE GAMMA CALIBRATION BAR & REAL-TIME PREVIEW === */
+.gamma-preview-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #060608;
+  border: 1px solid rgba(214, 208, 198, 0.12);
+  text-align: center;
+}
+.gamma-preview-text {
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #363432;
+}
+body:not(.pre-start) #settings-screen {
+  background: rgba(3, 3, 4, 0.62);
+  backdrop-filter: blur(2px);
+}

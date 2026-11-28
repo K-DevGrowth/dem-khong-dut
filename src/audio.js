@@ -132,7 +132,7 @@ export class HouseAudio {
     flt.type = 'lowpass'; flt.frequency.value = 95;
     this.droneGain.gain.value = 0.025;
     osc1.connect(flt); flt.connect(this.droneGain);
-    this.droneGain.connect(this.masterGain);
+    this.droneGain.connect(this.ambienceBus);
     osc1.start();
 
     // TV static layer
@@ -143,7 +143,7 @@ export class HouseAudio {
     this.staticGain = this.ctx.createGain();
     this.staticGain.gain.value = 0.0004;
     src.connect(bp); bp.connect(this.staticGain);
-    this.staticGain.connect(this.masterGain);
+    this.staticGain.connect(this.ambienceBus);
     src.start();
 
     // Ambience gain buses (routed cleanly through ambienceBus -> masterGain)
