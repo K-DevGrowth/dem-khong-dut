@@ -6,12 +6,12 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Cấu hình dự án, HTML entry point và tài liệu gốc  
-> **Số tập tin:** 6 | **Tổng số dòng:** 619 | **Dung lượng:** 31.4 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 621 | **Dung lượng:** 31.6 KB
 
 ## Mục lục tập tin
 
 - [`.gitignore`](#gitignore) (6 dòng · 0.1 KB)
-- [`index.html`](#index-html) (453 dòng · 22.7 KB)
+- [`index.html`](#index-html) (455 dòng · 22.9 KB)
 - [`package.json`](#package-json) (18 dòng · 0.3 KB)
 - [`README.md`](#readme-md) (110 dòng · 6.9 KB)
 - [`THIRD_PARTY_LICENSES.md`](#third-party-licenses-md) (12 dòng · 1.1 KB)
@@ -34,7 +34,7 @@ Thumbs.db
 ---
 
 <a id="index-html"></a>
-## Tập tin: `index.html` (453 dòng)
+## Tập tin: `index.html` (455 dòng)
 
 ```html
 <!DOCTYPE html>
@@ -175,40 +175,42 @@ Thumbs.db
   <div id="eyelid-top"></div>
   <div id="eyelid-bottom"></div>
 
-  <!-- MAIN TITLE SCREEN (Option A: No early spoilers) -->
+  <!-- FULLSCREEN CLASSIC HORROR TITLE SCREEN -->
   <div id="start-screen">
-    <div class="title-wrap">
-      <div class="title-kicker">Đêm Mưa · Phòng Ngủ · <span class="demo-tag-inline">DEMO</span></div>
+    <div class="title-fullscreen">
+      <div class="title-kicker">14/11 · ĐÊM MƯA · BẢN THỬ NGHIỆM</div>
       <h1 class="title-main">02:14</h1>
       <div class="title-sub">Đêm Không Dứt <span class="demo-tag">DEMO</span></div>
       <p class="title-desc">Mưa vẫn gõ đều ngoài cửa sổ. Chiếc giường bên cạnh đã lạnh, đồng hồ đầu giường cứ dừng ở 02:14 — và có tiếng gõ trầm đục vang lên sau cánh cửa chính.</p>
-      <div class="start-btn-row">
-        <button id="btn-continue" class="wake-btn continue-btn hidden" type="button">Tiếp tục</button>
-        <button id="btn-start" class="wake-btn" type="button">Bắt đầu</button>
-      </div>
-      <div class="title-hint">WASD di chuyển · Chuột xoay nhìn · E tương tác · F quẹt diêm · Shift chạy · J ghi chép · O cài đặt</div>
+      <nav class="title-menu" aria-label="Menu chính">
+        <button id="btn-continue" class="menu-btn hidden" type="button">Tiếp tục</button>
+        <button id="btn-start" class="menu-btn" type="button">Chơi mới</button>
+        <button id="btn-title-settings" class="menu-btn" type="button">Cài đặt</button>
+        <button id="btn-title-exit" class="menu-btn menu-btn-exit" type="button">Thoát</button>
+      </nav>
+      <div class="title-hint">↑↓ / Chuột chọn mục · WASD di chuyển · E tương tác · F quẹt diêm · J ghi chép</div>
     </div>
   </div>
 
-  <!-- HORROR & PHOTOSENSITIVITY WARNING MODAL (Shown on Start) -->
-  <div id="warning-screen" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="warning-title">
-    <div class="modal-card warning-card">
-      <div class="modal-kicker warning-kicker">Cảnh báo nội dung · Content Warning</div>
-      <h2 id="warning-title">Trước khi bước vào đêm 02:14</h2>
-      <div class="warning-list">
-        <div class="warning-item">
-          <strong>Yếu tố kinh dị tâm lý:</strong> Trò chơi chứa không khí u ám, bóng tối, tiếng động bất ngờ và các tình huống gây giật mình nhẹ.
-        </div>
-        <div class="warning-item">
-          <strong>Nhạy cảm ánh sáng:</strong> Có hiệu ứng chớp sáng (tia chớp ngoài cửa sổ, đèn xe cấp cứu, nhiễu màn hình TV). Người nhạy cảm với ánh sáng nhấp nháy nên cân nhắc.
-        </div>
-        <div class="warning-item">
-          <strong>Đề xuất trải nghiệm:</strong> Nên đeo tai nghe ở mức âm lượng vừa phải để cảm nhận âm thanh không gian rõ nhất.
-        </div>
+  <!-- FULLSCREEN BLACK CONTENT WARNING SCREEN (AAA Horror Style) -->
+  <div id="warning-screen" class="cw-screen hidden" role="dialog" aria-modal="true" aria-labelledby="warning-title">
+    <div class="cw-inner">
+      <div class="cw-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 56" width="54" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 3L61 52H3L32 3Z" fill="#e64526" stroke="#ff5e3a" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="29.5" y="18" width="5" height="19" rx="1.5" fill="#090808"/>
+          <circle cx="32" cy="43.5" r="3" fill="#090808"/>
+        </svg>
       </div>
-      <div class="warning-actions">
-        <button id="btn-warning-back" class="secondary-btn" type="button">Quay lại</button>
-        <button id="btn-warning-accept" class="primary-btn" type="button">Tôi đã hiểu — Bắt đầu</button>
+      <h2 id="warning-title" class="cw-title">Cảnh Báo Nội Dung</h2>
+      <div class="cw-paragraphs">
+        <p>Trò chơi này có chứa yếu tố kinh dị tâm lý, hình ảnh nhấp nháy, âm thanh đột ngột, không gian tối và đề cập đến mất mát tinh thần.</p>
+        <p>Mọi nhân vật, bối cảnh và tình tiết trong trò chơi đều là sản phẩm hư cấu. Đề xuất đeo tai nghe ở mức âm lượng vừa phải để có trải nghiệm tốt nhất.</p>
+        <p>Nếu bạn cảm thấy không thoải mái hoặc nhạy cảm với ánh sáng nhấp nháy trong quá trình chơi, vui lòng tạm dừng và nghỉ ngơi.</p>
+      </div>
+      <div class="cw-actions">
+        <button id="btn-warning-accept" class="cw-continue-btn" type="button">Tiếp tục</button>
+        <button id="btn-warning-back" class="cw-back-btn" type="button">Quay lại</button>
       </div>
     </div>
   </div>
@@ -340,14 +342,14 @@ Thumbs.db
         <div class="toggle-row">
           <div>
             <div class="settings-label">Hiển thị bộ đếm FPS</div>
-            <div class="settings-hint" style="margin-top:2px !important;">Hiện chỉ số khung hình trực tiếp ở góc trên màn hình.</div>
+            <div class="settings-hint tight">Hiện chỉ số khung hình trực tiếp ở góc trên màn hình.</div>
           </div>
           <button type="button" id="toggle-show-fps" class="toggle-switch" aria-label="Hiển thị bộ đếm FPS"></button>
         </div>
         <div class="toggle-row">
           <div>
             <div class="settings-label">Mượt camera (Camera Smoothing)</div>
-            <div class="settings-hint" style="margin-top:2px !important;">Làm êm chuyển động xoay góc nhìn, giảm cảm giác giật khi di chuột.</div>
+            <div class="settings-hint tight">Làm êm chuyển động xoay góc nhìn, giảm cảm giác giật khi di chuột.</div>
           </div>
           <button type="button" id="toggle-cam-smooth" class="toggle-switch" aria-label="Mượt camera"></button>
         </div>
@@ -501,7 +503,7 @@ Thumbs.db
 {
   "name": "0214-ngay-khong-chiu-qua",
   "private": true,
-  "version": "1.6.1-demo",
+  "version": "1.7.0-demo",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -6,13 +6,13 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Các mô-đun trong thư mục `src/game/`  
-> **Số tập tin:** 6 | **Tổng số dòng:** 1,604 | **Dung lượng:** 56.7 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 1,607 | **Dung lượng:** 57.1 KB
 
 ## Mục lục tập tin
 
 - [`src/game/endings.js`](#src-game-endings-js) (412 dòng · 13.1 KB)
 - [`src/game/horrorDirector.js`](#src-game-horrordirector-js) (496 dòng · 18.3 KB)
-- [`src/game/loopManager.js`](#src-game-loopmanager-js) (537 dòng · 20.9 KB)
+- [`src/game/loopManager.js`](#src-game-loopmanager-js) (540 dòng · 21.3 KB)
 - [`src/game/saveManager.js`](#src-game-savemanager-js) (54 dòng · 2.1 KB)
 - [`src/game/state.js`](#src-game-state-js) (54 dòng · 1.1 KB)
 - [`src/game/timerManager.js`](#src-game-timermanager-js) (51 dòng · 1.2 KB)
@@ -944,7 +944,7 @@ export function updateFearAndLighting(dt, tSec, ctx) {
 ---
 
 <a id="src-game-loopmanager-js"></a>
-## Tập tin: `src/game/loopManager.js` (537 dòng)
+## Tập tin: `src/game/loopManager.js` (540 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -1209,9 +1209,12 @@ export function setupLoopEnvironment(loopNum, ctx) {
     lights.studyLampLight.intensity = 0.75;
   }
 
+  if (objects.aliceCoatGroup) objects.aliceCoatGroup.visible = (loopNum === 1);
+  if (objects.wardrobeScrawlMesh) objects.wardrobeScrawlMesh.visible = (loopNum >= 3);
+
   if (loopNum === 1) {
     lights.bedroomLampLight.intensity = 1.15;
-    objects.wardrobeDoorPivot.rotation.y = 0; objects.wardrobeDoorPivot2.rotation.y = 0; objects.wardrobeObj.targetAngle = 0; objects.wardrobeEyes.visible = false;
+    objects.wardrobeDoorPivot.rotation.y = 0; objects.wardrobeDoorPivot2.rotation.y = 0; objects.wardrobeObj.targetAngle = 0; objects.wardrobeObj.targetAngle2 = 0; objects.wardrobeEyes.visible = false;
     materials.portraitMat.map = materials.portraitCleanTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.82, 1.82, -3.4); objects.portraitGroup.rotation.set(0.24, 0, 0);
     objects.portraitAnomalyObj.worldPos.set(-3.75, 1.75, -3.4);
@@ -1225,8 +1228,8 @@ export function setupLoopEnvironment(loopNum, ctx) {
   } else if (loopNum === 2) {
     lights.bedroomLampLight.intensity = 0;
     lights.bathLight.intensity = 0.08;
-    objects.wardrobeDoorPivot.rotation.y = -0.15; objects.wardrobeObj.targetAngle = -0.58;
-    objects.wardrobeDoorPivot2.rotation.y = 0; objects.wardrobeEyes.visible = false;
+    objects.wardrobeDoorPivot.rotation.y = -0.22; objects.wardrobeObj.targetAngle = -0.68;
+    objects.wardrobeDoorPivot2.rotation.y = 0.15; objects.wardrobeObj.targetAngle2 = 0.45; objects.wardrobeEyes.visible = false;
     materials.portraitMat.map = materials.portraitScratchedTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.82, 1.82, -3.4); objects.portraitGroup.rotation.set(0.38, 0, 0);
     objects.portraitAnomalyObj.worldPos.set(-3.75, 1.75, -3.4);
@@ -1242,8 +1245,8 @@ export function setupLoopEnvironment(loopNum, ctx) {
     (ctx.timers ? ctx.timers.setTimeout : setTimeout)(() => { if (state.loop === 2 && !state.ended) audio.playWardrobeCreak(true); }, 2100);
   } else if (loopNum === 3) {
     lights.bedroomLampLight.intensity = 0.72;
-    objects.wardrobeDoorPivot.rotation.y = -0.45; objects.wardrobeObj.targetAngle = -0.78;
-    objects.wardrobeDoorPivot2.rotation.y = 0.12; objects.wardrobeEyes.visible = false;
+    objects.wardrobeDoorPivot.rotation.y = -0.55; objects.wardrobeObj.targetAngle = -0.95;
+    objects.wardrobeDoorPivot2.rotation.y = 0.35; objects.wardrobeObj.targetAngle2 = 0.72; objects.wardrobeEyes.visible = false;
     materials.portraitMat.map = materials.portraitScratchedTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.82, 1.82, -3.4); objects.portraitGroup.rotation.set(Math.PI, 0, 0);
     objects.portraitAnomalyObj.worldPos.set(-3.75, 1.75, -3.4);
@@ -1257,8 +1260,8 @@ export function setupLoopEnvironment(loopNum, ctx) {
     lights.dawnLight.intensity = 0;
   } else if (loopNum === 4) {
     lights.bedroomLampLight.intensity = 0.45;
-    objects.wardrobeDoorPivot.rotation.y = -1.1; objects.wardrobeObj.targetAngle = -1.1;
-    objects.wardrobeDoorPivot2.rotation.y = 0.85; objects.wardrobeEyes.visible = false;
+    objects.wardrobeDoorPivot.rotation.y = -1.15; objects.wardrobeObj.targetAngle = -1.15;
+    objects.wardrobeDoorPivot2.rotation.y = 0.95; objects.wardrobeObj.targetAngle2 = 0.95; objects.wardrobeEyes.visible = false;
     materials.portraitMat.map = materials.portraitScratchedTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.45, 0.08, -3.4); objects.portraitGroup.rotation.set(0, 0.25, -Math.PI / 2);
     objects.portraitAnomalyObj.worldPos.set(-3.45, 0.35, -3.4);
@@ -1273,7 +1276,7 @@ export function setupLoopEnvironment(loopNum, ctx) {
   } else if (loopNum === 5) {
     lights.bedroomLampLight.intensity = 0;
     objects.wardrobeDoorPivot.rotation.y = -1.45; objects.wardrobeObj.targetAngle = -1.45;
-    objects.wardrobeDoorPivot2.rotation.y = 1.45; objects.wardrobeEyes.visible = false;
+    objects.wardrobeDoorPivot2.rotation.y = 1.35; objects.wardrobeObj.targetAngle2 = 1.35; objects.wardrobeEyes.visible = false;
     materials.portraitMat.map = materials.portraitScratchedTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.45, 0.08, -3.4); objects.portraitGroup.rotation.set(0, 0.35, -Math.PI / 2);
     objects.portraitAnomalyObj.worldPos.set(-3.45, 0.35, -3.4);

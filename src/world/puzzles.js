@@ -154,7 +154,6 @@ export function createPuzzlesSystem(scene, materials, interactables, getState) {
       label: () => dr.isOpen ? `Nhấn [E] đóng ${name}` : `Nhấn [E] mở ${name}`
     };
     hplDrawers.push(dr);
-    interactables.push(dr);
     return dr;
   }
 

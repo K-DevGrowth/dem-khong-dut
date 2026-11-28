@@ -6,13 +6,13 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Điểm khởi chạy chính, hệ thống âm thanh và stylesheet gốc  
-> **Số tập tin:** 3 | **Tổng số dòng:** 5,616 | **Dung lượng:** 183.8 KB
+> **Số tập tin:** 3 | **Tổng số dòng:** 6,175 | **Dung lượng:** 196.1 KB
 
 ## Mục lục tập tin
 
 - [`src/audio.js`](#src-audio-js) (1,211 dòng · 45.8 KB)
-- [`src/main.js`](#src-main-js) (2,524 dòng · 85.8 KB)
-- [`src/style.css`](#src-style-css) (1,881 dòng · 52.1 KB)
+- [`src/main.js`](#src-main-js) (2,622 dòng · 89.1 KB)
+- [`src/style.css`](#src-style-css) (2,342 dòng · 61.1 KB)
 
 ---
 
@@ -1236,7 +1236,7 @@ export class HouseAudio {
 ---
 
 <a id="src-main-js"></a>
-## Tập tin: `src/main.js` (2,524 dòng)
+## Tập tin: `src/main.js` (2,622 dòng)
 
 ```javascript
 import * as THREE from "three";
@@ -1600,6 +1600,8 @@ function initGame() {
   const pauseOverlay = document.getElementById("pause-overlay");
   const btnContinue = document.getElementById("btn-continue");
   const btnStart = document.getElementById("btn-start");
+  const btnTitleSettings = document.getElementById("btn-title-settings");
+  const btnTitleExit = document.getElementById("btn-title-exit");
   const btnResume = document.getElementById("btn-resume");
   const btnPauseSettings = document.getElementById("btn-pause-settings");
   const btnPauseTitle = document.getElementById("btn-pause-title");
@@ -1932,9 +1934,6 @@ function initGame() {
         }
       }
       paperOverlay.classList.remove("hidden");
-      if (document.pointerLockElement) {
-        try { document.exitPointerLock(); } catch (_) {}
-      }
     }
 
     if (content && content.voice) {
@@ -2428,7 +2427,8 @@ function initGame() {
       ctx.recordAnomalyFound();
       if (state.loop === 1) {
         audio.playWardrobeCreak(false);
-        house.objects.wardrobeObj.targetAngle = -0.45;
+        house.objects.wardrobeObj.targetAngle = -1.35;
+        house.objects.wardrobeObj.targetAngle2 = 1.15;
         showSubtitle(
           LOOP_STORY.wardrobe1.speaker,
           LOOP_STORY.wardrobe1.text,
@@ -2438,7 +2438,9 @@ function initGame() {
         audio.playScareChord();
         audio.playWardrobeSlam();
         house.objects.wardrobeObj.targetAngle = 0;
+        house.objects.wardrobeObj.targetAngle2 = 0;
         house.objects.wardrobeDoorPivot.rotation.y = 0;
+        house.objects.wardrobeDoorPivot2.rotation.y = 0;
         house.objects.wardrobeEyes.visible = false;
         state.shakeTime = 0.45;
         state.fear = Math.min(95, state.fear + 28);
@@ -2451,6 +2453,8 @@ function initGame() {
       } else {
         audio.playWoodScratch(4);
         audio.playHeavyBreath(0.32);
+        house.objects.wardrobeObj.targetAngle = -1.45;
+        house.objects.wardrobeObj.targetAngle2 = 1.35;
         showSubtitle(
           LOOP_STORY.wardrobe3.speaker,
           LOOP_STORY.wardrobe3.text,
@@ -2665,7 +2669,13 @@ function initGame() {
       return;
     }
     if (warningScreen && !warningScreen.classList.contains("hidden")) {
-      if (e.code === "Escape") warningScreen.classList.add("hidden");
+      if (e.code === "Escape") {
+        warningScreen.classList.add("hidden");
+      } else if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE") {
+        audio.init();
+        warningScreen.classList.add("hidden");
+        startNewGame(true, ctx);
+      }
       return;
     }
     if (state.inIntro) {
@@ -2952,12 +2962,12 @@ function initGame() {
     if (!btnContinue || !btnStart) return;
     const saved = loadSavedRun();
     if (saved) {
-      btnContinue.textContent = `Tiếp tục (Vòng ${saved.loop}/${TOTAL_LOOPS})`;
+      btnContinue.textContent = `Tiếp tục · Vòng ${saved.loop}/${TOTAL_LOOPS}`;
       btnContinue.classList.remove("hidden");
       btnStart.textContent = "Chơi mới";
     } else {
       btnContinue.classList.add("hidden");
-      btnStart.textContent = "Bắt đầu";
+      btnStart.textContent = "Chơi mới";
     }
   }
 
@@ -3089,6 +3099,90 @@ function initGame() {
   }
 
   refreshContinueButton();
+
+  // Title Screen Vertical Menu Bindings + Subtle Hover/Click Feedback + Keyboard ↑/↓ Navigation
+  const titleMenuBtns = Array.from(document.querySelectorAll("#start-screen .menu-btn"));
+  let titleSelectedIdx = 0;
+
+  function getVisibleTitleBtns() {
+    return titleMenuBtns.filter((b) => !b.classList.contains("hidden"));
+  }
+
+  function setTitleFocus(idx) {
+    const vis = getVisibleTitleBtns();
+    if (vis.length === 0) return;
+    titleSelectedIdx = (idx + vis.length) % vis.length;
+    vis.forEach((b, i) => b.classList.toggle("is-selected", i === titleSelectedIdx));
+  }
+
+  titleMenuBtns.forEach((btn) => {
+    btn.addEventListener("mouseenter", () => {
+      const vis = getVisibleTitleBtns();
+      const idx = vis.indexOf(btn);
+      if (idx >= 0 && idx !== titleSelectedIdx) {
+        setTitleFocus(idx);
+        if (audio.started) audio.playClockTick();
+      }
+    });
+    btn.addEventListener("click", () => {
+      audio.init();
+      audio.playClockTick();
+    });
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (
+      document.body.classList.contains("auth-locked") ||
+      startScreen.classList.contains("hidden") ||
+      (warningScreen && !warningScreen.classList.contains("hidden")) ||
+      (licensesScreen && !licensesScreen.classList.contains("hidden")) ||
+      !settingsScreen.classList.contains("hidden")
+    ) {
+      return;
+    }
+    const vis = getVisibleTitleBtns();
+    if (vis.length === 0) return;
+    if (e.code === "ArrowDown" || e.code === "KeyS") {
+      e.preventDefault();
+      audio.init();
+      setTitleFocus(titleSelectedIdx + 1);
+      audio.playClockTick();
+    } else if (e.code === "ArrowUp" || e.code === "KeyW") {
+      e.preventDefault();
+      audio.init();
+      setTitleFocus(titleSelectedIdx - 1);
+      audio.playClockTick();
+    } else if (e.code === "Enter" || e.code === "Space") {
+      e.preventDefault();
+      vis[titleSelectedIdx]?.click();
+    }
+  });
+
+  setTitleFocus(0);
+
+  if (btnTitleSettings) {
+    btnTitleSettings.addEventListener("click", () => {
+      settingsController.openSettings();
+    });
+  }
+
+  if (btnTitleExit) {
+    btnTitleExit.addEventListener("click", () => {
+      try {
+        sessionStorage.removeItem(AUTH_SESSION_KEY);
+      } catch (_) {}
+      document.body.classList.add("auth-locked");
+      if (authGate) authGate.classList.remove("hidden");
+      if (authInput) {
+        authInput.value = "";
+        authInput.focus();
+      }
+      if (authError) {
+        authError.textContent = "Đã thoát phiên thử nghiệm. Bạn có thể đóng tab trình duyệt hoặc đăng nhập lại.";
+      }
+      try { window.close(); } catch (_) {}
+    });
+  }
 
   // UI Button Bindings (Start opens Horror & Photosensitivity Warning first)
   document.getElementById("btn-start").addEventListener("click", () => {
@@ -3473,11 +3567,15 @@ function initGame() {
       }
     }
 
-    // Wardrobe & Fridge smooth door opening lerp
+    // Wardrobe (both doors) & Fridge smooth door opening lerp
     house.objects.wardrobeDoorPivot.rotation.y +=
       (house.objects.wardrobeObj.targetAngle -
         house.objects.wardrobeDoorPivot.rotation.y) *
-      (1 - Math.exp(-3.5 * dt));
+      (1 - Math.exp(-3.8 * dt));
+    house.objects.wardrobeDoorPivot2.rotation.y +=
+      ((house.objects.wardrobeObj.targetAngle2 || 0) -
+        house.objects.wardrobeDoorPivot2.rotation.y) *
+      (1 - Math.exp(-3.8 * dt));
     house.objects.fridgeDoorPivot.rotation.y +=
       (house.objects.fridgeObj.targetAngle -
         house.objects.fridgeDoorPivot.rotation.y) *
@@ -3768,7 +3866,7 @@ if (
 ---
 
 <a id="src-style-css"></a>
-## Tập tin: `src/style.css` (1,881 dòng)
+## Tập tin: `src/style.css` (2,342 dòng)
 
 ```css
 :root {
@@ -3806,8 +3904,8 @@ body.gfx-low .hud-pill,
 body.gfx-low .hud-btn,
 body.gfx-low .foley-panel,
 body.gfx-low .overlay-screen {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 #fear-vignette {
@@ -4036,8 +4134,8 @@ body.pre-start #hud-bottom,
 body.pre-start #crosshair,
 body.pre-start #interact-prompt,
 body.pre-start #foley-panel {
-  opacity: 0 !important;
-  pointer-events: none !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
 #start-screen {
@@ -4464,8 +4562,8 @@ body.pre-start #foley-panel {
 .keypad-btn.action {
   font-family: 'Be Vietnam Pro', sans-serif; font-size: 13px; color: var(--amber-bright);
 }
-.keypad-msg {
-  min-height: 20px; font-size: 12.5px; color: var(--mute); margin: 0 0 12px !important;
+.modal-card p.keypad-msg {
+  min-height: 20px; font-size: 12.5px; color: var(--mute); margin: 0 0 12px;
 }
 .keypad-msg.err { color: #ff6b63; }
 
@@ -4492,8 +4590,11 @@ body.pre-start #foley-panel {
 .settings-label {
   font-size: 13.5px; font-weight: 600; color: var(--ink);
 }
-.settings-hint {
-  font-size: 12px; color: var(--mute); margin: 8px 0 0 !important; line-height: 1.5 !important;
+.modal-card .settings-hint {
+  font-size: 12px; color: var(--mute); margin: 8px 0 0; line-height: 1.5;
+}
+.modal-card .settings-hint.tight {
+  margin-top: 2px;
 }
 .seg-group {
   display: grid; gap: 8px;
@@ -4856,13 +4957,13 @@ canvas {
   text-align: left;
   border-color: rgba(232, 155, 76, 0.34);
 }
-.choice-prompt {
+.modal-card p.choice-prompt {
   font-family: 'Lora', 'Times New Roman', serif;
   font-style: italic;
-  font-size: 15.5px !important;
-  line-height: 1.72 !important;
-  color: #e6dfd3 !important;
-  margin-bottom: 18px !important;
+  font-size: 15.5px;
+  line-height: 1.72;
+  color: #dcd7cd;
+  margin-bottom: 18px;
 }
 .choice-options {
   display: flex;
@@ -5263,7 +5364,7 @@ canvas {
 }
 
 #hpl-hint {
-  display: none !important;
+  display: none;
 }
 
 #subtitle-box {
@@ -5271,8 +5372,8 @@ canvas {
 }
 
 #canvas-container canvas {
-  width: 100% !important;
-  height: 100% !important;
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
@@ -5603,11 +5704,11 @@ body.auth-locked #canvas-container {
   font-size: 11.5px;
   color: #8fd2ce;
 }
-.license-item p {
-  margin: 4px 0 0 !important;
-  font-size: 12.5px !important;
-  line-height: 1.48 !important;
-  color: #b7b1a5 !important;
+.modal-card .license-item p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.48;
+  color: #9e9990;
 }
 
 #demo-footer {
@@ -5651,6 +5752,464 @@ body:not(.pre-start):not(.auth-locked) #demo-footer {
 }
 .footer-link-btn:hover {
   color: #fff2d9;
+}
+
+/* === v1.6.2: FULLSCREEN BLACK CONTENT WARNING (AAA HORROR STYLE) === */
+#warning-screen.cw-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 122;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px 72px;
+  transition: opacity 0.45s ease;
+}
+#warning-screen.cw-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.cw-inner {
+  width: min(680px, 100%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cw-icon {
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 14px rgba(230, 69, 38, 0.32));
+}
+.cw-title {
+  margin: 0 0 26px;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: clamp(24px, 3.6vw, 34px);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #e64526;
+}
+.cw-paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+.cw-paragraphs p {
+  margin: 0;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: clamp(14.5px, 1.85vw, 17px);
+  line-height: 1.72;
+  color: #e6e4df;
+  font-weight: 400;
+}
+.cw-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.cw-continue-btn {
+  padding: 11px 42px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  color: #ffffff;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.cw-continue-btn:hover {
+  background: rgba(230, 69, 38, 0.2);
+  border-color: #e64526;
+}
+.cw-back-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 12.5px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.cw-back-btn:hover {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* =========================================================
+   v1.7.0: CLASSIC PSYCHOLOGICAL HORROR UI THEME (NO !important)
+   Cold bone-white, matte film-black, ash-grey & dried-blood crimson
+   ========================================================= */
+:root {
+  --bg: #040405;
+  --panel: rgba(8, 8, 10, 0.92);
+  --border: rgba(214, 208, 198, 0.16);
+  --ink: #dad5cb;
+  --mute: #88837a;
+  --amber: #a8332b;
+  --amber-bright: #cf483e;
+  --teal: #8c9296;
+  --red: #b8322a;
+  --green: #7a9482;
+}
+
+/* Fullscreen Classic Horror Title Screen (Left-aligned over 3D bedroom) */
+#start-screen {
+  background: linear-gradient(
+    90deg,
+    rgba(3, 3, 4, 0.95) 0%,
+    rgba(4, 4, 5, 0.80) 38%,
+    rgba(4, 4, 5, 0.34) 72%,
+    rgba(3, 3, 4, 0.62) 100%
+  );
+  justify-content: flex-start;
+  align-items: center;
+  padding: 48px clamp(28px, 7vw, 110px) 76px;
+}
+
+.title-fullscreen {
+  width: min(470px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+#start-screen .title-kicker {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-family: monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: #a8332b;
+  margin-bottom: 10px;
+}
+
+#start-screen .title-main {
+  margin: 0;
+  font-family: 'Lora', Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(60px, 9vw, 96px);
+  line-height: 0.96;
+  letter-spacing: 0.08em;
+  color: #e6e1d7;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95);
+}
+
+#start-screen .title-sub {
+  margin: 6px 0 18px;
+  font-family: 'Lora', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(20px, 2.8vw, 26px);
+  color: #aba59b;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+#start-screen .title-desc {
+  margin: 0 0 28px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #8f8a80;
+  max-width: 410px;
+}
+
+/* Vertical AAA Horror Menu Buttons (hover, keyboard focus & tactile active state) */
+.title-menu {
+  width: min(300px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+
+.menu-btn {
+  position: relative;
+  width: 100%;
+  padding: 12px 16px 12px 18px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid rgba(218, 213, 203, 0.16);
+  border-radius: 0;
+  color: #b8b2a7;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease, padding-left 0.16s ease, transform 0.08s ease;
+}
+
+.menu-btn:hover,
+.menu-btn:focus-visible,
+.menu-btn.is-selected {
+  outline: none;
+  color: #f0ece3;
+  border-left-color: #c93b32;
+  background: linear-gradient(90deg, rgba(168, 51, 43, 0.18) 0%, rgba(168, 51, 43, 0.0) 100%);
+  padding-left: 26px;
+}
+
+.menu-btn:active {
+  transform: translateX(4px) scale(0.99);
+  background: linear-gradient(90deg, rgba(168, 51, 43, 0.30) 0%, rgba(168, 51, 43, 0.04) 100%);
+  color: #ffffff;
+}
+
+.menu-btn.menu-btn-exit {
+  margin-top: 6px;
+  color: #7d7870;
+}
+
+.menu-btn.menu-btn-exit:hover,
+.menu-btn.menu-btn-exit:focus-visible,
+.menu-btn.menu-btn-exit.is-selected {
+  color: #d97a73;
+  border-left-color: #8f2a24;
+}
+
+.menu-btn.hidden {
+  display: none;
+}
+
+#start-screen .title-hint {
+  margin-top: 0;
+  padding-top: 14px;
+  width: 100%;
+  border-top: 1px solid rgba(218, 213, 203, 0.10);
+  font-family: monospace;
+  font-size: 11.5px;
+  color: #6d6962;
+  letter-spacing: 0.04em;
+}
+
+/* Sharp, Matte Horror Aesthetic for All Modals, Cards & Controls (replaces modern SaaS look) */
+.demo-tag {
+  border-radius: 2px;
+  background: rgba(168, 51, 43, 0.16);
+  border: 1px solid rgba(168, 51, 43, 0.55);
+  color: #d46960;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+
+.demo-pill-badge {
+  border-radius: 2px;
+  background: rgba(168, 51, 43, 0.14);
+  border: 1px solid rgba(168, 51, 43, 0.45);
+  color: #c9584f;
+}
+
+.overlay-screen {
+  background: rgba(3, 3, 4, 0.90);
+  backdrop-filter: blur(4px);
+}
+
+.modal-card,
+.auth-card {
+  background: #09090b;
+  border: 1px solid rgba(214, 208, 198, 0.16);
+  border-radius: 2px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.95);
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+  background: rgba(168, 51, 43, 0.42);
+  border-radius: 0;
+}
+.modal-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 59, 50, 0.65);
+}
+
+.modal-kicker {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: #a8332b;
+}
+
+.modal-card h2 {
+  color: #e6e1d7;
+  font-weight: 500;
+}
+
+.license-item,
+.settings-section,
+.choice-btn,
+.journal-entry {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(214, 208, 198, 0.10);
+  border-radius: 2px;
+}
+
+.journal-entry {
+  border-left: 2px solid #a8332b;
+}
+
+.license-item strong,
+.journal-entry h3 {
+  color: #dad5cb;
+}
+
+.license-item span {
+  color: #9e6b66;
+}
+
+.choice-btn:hover {
+  border-color: rgba(168, 51, 43, 0.65);
+  background: rgba(168, 51, 43, 0.10);
+}
+
+.primary-btn,
+.wake-btn.auth-btn {
+  background: #8f2a24;
+  color: #f2ede4;
+  border: 1px solid #b83b33;
+  border-radius: 2px;
+  box-shadow: none;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.primary-btn:hover,
+.wake-btn.auth-btn:hover {
+  background: #a8332b;
+  border-color: #d45249;
+  color: #ffffff;
+  filter: none;
+  transform: none;
+}
+
+.secondary-btn,
+.seg-btn,
+.hud-btn,
+.keypad-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(214, 208, 198, 0.14);
+  border-radius: 2px;
+  color: #b5afa4;
+  box-shadow: none;
+}
+
+.secondary-btn:hover,
+.seg-btn:hover,
+.hud-btn:hover,
+.keypad-btn:hover {
+  border-color: rgba(168, 51, 43, 0.65);
+  background: rgba(168, 51, 43, 0.12);
+  color: #f0ece3;
+}
+
+.seg-btn.active {
+  background: rgba(168, 51, 43, 0.24);
+  border-color: #b83b33;
+  color: #f5efe6;
+  box-shadow: none;
+}
+
+.toggle-switch {
+  border-radius: 2px;
+}
+.toggle-switch::after {
+  border-radius: 1px;
+}
+.toggle-switch.on {
+  background: rgba(168, 51, 43, 0.32);
+  border-color: #b83b33;
+}
+.toggle-switch.on::after {
+  background: #e6dcd2;
+}
+
+.auth-input,
+.keypad-display {
+  border-radius: 2px;
+  border-color: rgba(214, 208, 198, 0.20);
+  color: #e6e1d7;
+  text-shadow: none;
+}
+.auth-input:focus {
+  border-color: #a8332b;
+  box-shadow: 0 0 0 1px rgba(168, 51, 43, 0.45);
+}
+
+#interact-prompt {
+  border-radius: 2px;
+  background: rgba(6, 6, 8, 0.92);
+  border: 1px solid rgba(214, 208, 198, 0.24);
+  color: #e6e1d7;
+}
+
+#subtitle-box {
+  border-radius: 2px;
+  background: rgba(5, 5, 7, 0.92);
+  border: 1px solid rgba(214, 208, 198, 0.08);
+  border-left: 2px solid #a8332b;
+}
+
+#subtitle-speaker {
+  color: #c9584f;
+}
+
+.hud-ghost-btn {
+  border-radius: 2px;
+}
+.hud-ghost-btn:hover {
+  border-color: rgba(168, 51, 43, 0.65);
+}
+
+.objective-toast {
+  border-left-color: #a8332b;
+}
+
+.hud-anomaly {
+  color: #c9bfb0;
+}
+.hud-anomaly.done {
+  color: #84a38d;
+}
+
+.footer-link-btn {
+  color: #c9584f;
+}
+.footer-link-btn:hover {
+  color: #e6e1d7;
+}
+
+#demo-footer {
+  background: rgba(4, 4, 5, 0.90);
+  border-top: 1px solid rgba(214, 208, 198, 0.08);
+  color: #7c776f;
+}
+
+/* Clean non-!important visibility rules */
+body.pre-start #hud-top,
+body.pre-start #hud-bottom,
+body.pre-start #crosshair,
+body.pre-start #interact-prompt,
+body.pre-start #foley-panel {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#canvas-container canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#hpl-hint {
+  display: none;
 }
 ```
 

@@ -359,6 +359,8 @@ function initGame() {
   const pauseOverlay = document.getElementById("pause-overlay");
   const btnContinue = document.getElementById("btn-continue");
   const btnStart = document.getElementById("btn-start");
+  const btnTitleSettings = document.getElementById("btn-title-settings");
+  const btnTitleExit = document.getElementById("btn-title-exit");
   const btnResume = document.getElementById("btn-resume");
   const btnPauseSettings = document.getElementById("btn-pause-settings");
   const btnPauseTitle = document.getElementById("btn-pause-title");
@@ -691,9 +693,6 @@ function initGame() {
         }
       }
       paperOverlay.classList.remove("hidden");
-      if (document.pointerLockElement) {
-        try { document.exitPointerLock(); } catch (_) {}
-      }
     }
 
     if (content && content.voice) {
@@ -1187,7 +1186,8 @@ function initGame() {
       ctx.recordAnomalyFound();
       if (state.loop === 1) {
         audio.playWardrobeCreak(false);
-        house.objects.wardrobeObj.targetAngle = -0.45;
+        house.objects.wardrobeObj.targetAngle = -1.35;
+        house.objects.wardrobeObj.targetAngle2 = 1.15;
         showSubtitle(
           LOOP_STORY.wardrobe1.speaker,
           LOOP_STORY.wardrobe1.text,
@@ -1197,7 +1197,9 @@ function initGame() {
         audio.playScareChord();
         audio.playWardrobeSlam();
         house.objects.wardrobeObj.targetAngle = 0;
+        house.objects.wardrobeObj.targetAngle2 = 0;
         house.objects.wardrobeDoorPivot.rotation.y = 0;
+        house.objects.wardrobeDoorPivot2.rotation.y = 0;
         house.objects.wardrobeEyes.visible = false;
         state.shakeTime = 0.45;
         state.fear = Math.min(95, state.fear + 28);
@@ -1210,6 +1212,8 @@ function initGame() {
       } else {
         audio.playWoodScratch(4);
         audio.playHeavyBreath(0.32);
+        house.objects.wardrobeObj.targetAngle = -1.45;
+        house.objects.wardrobeObj.targetAngle2 = 1.35;
         showSubtitle(
           LOOP_STORY.wardrobe3.speaker,
           LOOP_STORY.wardrobe3.text,
@@ -1424,7 +1428,13 @@ function initGame() {
       return;
     }
     if (warningScreen && !warningScreen.classList.contains("hidden")) {
-      if (e.code === "Escape") warningScreen.classList.add("hidden");
+      if (e.code === "Escape") {
+        warningScreen.classList.add("hidden");
+      } else if (e.code === "Enter" || e.code === "Space" || e.code === "KeyE") {
+        audio.init();
+        warningScreen.classList.add("hidden");
+        startNewGame(true, ctx);
+      }
       return;
     }
     if (state.inIntro) {
@@ -1711,12 +1721,12 @@ function initGame() {
     if (!btnContinue || !btnStart) return;
     const saved = loadSavedRun();
     if (saved) {
-      btnContinue.textContent = `Tiếp tục (Vòng ${saved.loop}/${TOTAL_LOOPS})`;
+      btnContinue.textContent = `Tiếp tục · Vòng ${saved.loop}/${TOTAL_LOOPS}`;
       btnContinue.classList.remove("hidden");
       btnStart.textContent = "Chơi mới";
     } else {
       btnContinue.classList.add("hidden");
-      btnStart.textContent = "Bắt đầu";
+      btnStart.textContent = "Chơi mới";
     }
   }
 
@@ -1848,6 +1858,90 @@ function initGame() {
   }
 
   refreshContinueButton();
+
+  // Title Screen Vertical Menu Bindings + Subtle Hover/Click Feedback + Keyboard ↑/↓ Navigation
+  const titleMenuBtns = Array.from(document.querySelectorAll("#start-screen .menu-btn"));
+  let titleSelectedIdx = 0;
+
+  function getVisibleTitleBtns() {
+    return titleMenuBtns.filter((b) => !b.classList.contains("hidden"));
+  }
+
+  function setTitleFocus(idx) {
+    const vis = getVisibleTitleBtns();
+    if (vis.length === 0) return;
+    titleSelectedIdx = (idx + vis.length) % vis.length;
+    vis.forEach((b, i) => b.classList.toggle("is-selected", i === titleSelectedIdx));
+  }
+
+  titleMenuBtns.forEach((btn) => {
+    btn.addEventListener("mouseenter", () => {
+      const vis = getVisibleTitleBtns();
+      const idx = vis.indexOf(btn);
+      if (idx >= 0 && idx !== titleSelectedIdx) {
+        setTitleFocus(idx);
+        if (audio.started) audio.playClockTick();
+      }
+    });
+    btn.addEventListener("click", () => {
+      audio.init();
+      audio.playClockTick();
+    });
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (
+      document.body.classList.contains("auth-locked") ||
+      startScreen.classList.contains("hidden") ||
+      (warningScreen && !warningScreen.classList.contains("hidden")) ||
+      (licensesScreen && !licensesScreen.classList.contains("hidden")) ||
+      !settingsScreen.classList.contains("hidden")
+    ) {
+      return;
+    }
+    const vis = getVisibleTitleBtns();
+    if (vis.length === 0) return;
+    if (e.code === "ArrowDown" || e.code === "KeyS") {
+      e.preventDefault();
+      audio.init();
+      setTitleFocus(titleSelectedIdx + 1);
+      audio.playClockTick();
+    } else if (e.code === "ArrowUp" || e.code === "KeyW") {
+      e.preventDefault();
+      audio.init();
+      setTitleFocus(titleSelectedIdx - 1);
+      audio.playClockTick();
+    } else if (e.code === "Enter" || e.code === "Space") {
+      e.preventDefault();
+      vis[titleSelectedIdx]?.click();
+    }
+  });
+
+  setTitleFocus(0);
+
+  if (btnTitleSettings) {
+    btnTitleSettings.addEventListener("click", () => {
+      settingsController.openSettings();
+    });
+  }
+
+  if (btnTitleExit) {
+    btnTitleExit.addEventListener("click", () => {
+      try {
+        sessionStorage.removeItem(AUTH_SESSION_KEY);
+      } catch (_) {}
+      document.body.classList.add("auth-locked");
+      if (authGate) authGate.classList.remove("hidden");
+      if (authInput) {
+        authInput.value = "";
+        authInput.focus();
+      }
+      if (authError) {
+        authError.textContent = "Đã thoát phiên thử nghiệm. Bạn có thể đóng tab trình duyệt hoặc đăng nhập lại.";
+      }
+      try { window.close(); } catch (_) {}
+    });
+  }
 
   // UI Button Bindings (Start opens Horror & Photosensitivity Warning first)
   document.getElementById("btn-start").addEventListener("click", () => {
@@ -2232,11 +2326,15 @@ function initGame() {
       }
     }
 
-    // Wardrobe & Fridge smooth door opening lerp
+    // Wardrobe (both doors) & Fridge smooth door opening lerp
     house.objects.wardrobeDoorPivot.rotation.y +=
       (house.objects.wardrobeObj.targetAngle -
         house.objects.wardrobeDoorPivot.rotation.y) *
-      (1 - Math.exp(-3.5 * dt));
+      (1 - Math.exp(-3.8 * dt));
+    house.objects.wardrobeDoorPivot2.rotation.y +=
+      ((house.objects.wardrobeObj.targetAngle2 || 0) -
+        house.objects.wardrobeDoorPivot2.rotation.y) *
+      (1 - Math.exp(-3.8 * dt));
     house.objects.fridgeDoorPivot.rotation.y +=
       (house.objects.fridgeObj.targetAngle -
         house.objects.fridgeDoorPivot.rotation.y) *

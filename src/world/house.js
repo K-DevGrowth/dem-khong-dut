@@ -290,8 +290,65 @@ export function createHouse(scene, materials, colliders, interactables, getState
   bedroomLampLight.shadow.bias = -0.002;
   scene.add(bedroomLampLight);
 
-  // Creepy Interactive Wardrobe
-  addBox(0.68, 2.25, 1.45, 3.0, 1.125, 2.95, materials.woodRichMat);
+  // Creepy Interactive Hollow Wardrobe (real open interior with rod, hangers, Alice's coat & back-wall scratches)
+  // Hollow outer shell: back, left side, right side, top, bottom + single collider
+  addBox(0.08, 2.25, 1.45, 3.30, 1.125, 2.95, materials.woodDarkMat, false); // Back panel
+  addBox(0.68, 2.25, 0.08, 3.00, 1.125, 2.26, materials.woodRichMat, false); // North side
+  addBox(0.68, 2.25, 0.08, 3.00, 1.125, 3.64, materials.woodRichMat, false); // South side
+  addBox(0.68, 0.08, 1.45, 3.00, 2.21, 2.95, materials.woodRichMat, false);  // Top panel
+  addBox(0.68, 0.12, 1.45, 3.00, 0.06, 2.95, materials.woodRichMat, false);  // Bottom base
+  colliders.push({ minX: 2.66, maxX: 3.34, minZ: 2.22, maxZ: 3.68, active: true });
+
+  // Metal clothes hanging rod & empty hangers inside
+  const wRod = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.30, 8), materials.chromeMat);
+  wRod.rotation.x = Math.PI / 2;
+  wRod.position.set(3.00, 1.88, 2.95);
+  scene.add(wRod);
+
+  // Alice's thick winter coat hanging inside (visible in Loop 1, vanishes in Loop 2+)
+  const aliceCoatGroup = new THREE.Group();
+  aliceCoatGroup.position.set(3.00, 1.42, 2.88);
+  const coatMat = new THREE.MeshStandardMaterial({ color: 0x4b2429, roughness: 0.90 });
+  const coatHanger = new THREE.Mesh(getBoxGeo(0.03, 0.02, 0.42), materials.woodRichMat);
+  coatHanger.position.set(0, 0.40, 0);
+  const coatBody = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.19, 0.88, 10), coatMat);
+  coatBody.scale.set(0.58, 1.0, 1.35);
+  coatBody.position.set(0, -0.05, 0);
+  const coatSleeveL = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.036, 0.62, 8), coatMat);
+  coatSleeveL.position.set(0, 0.05, -0.22);
+  coatSleeveL.rotation.x = 0.08;
+  const coatSleeveR = coatSleeveL.clone();
+  coatSleeveR.position.z = 0.22;
+  coatSleeveR.rotation.x = -0.08;
+  aliceCoatGroup.add(coatHanger, coatBody, coatSleeveL, coatSleeveR);
+  scene.add(aliceCoatGroup);
+
+  // Secondary dark shirt/jacket hanging beside it
+  const spareShirt = new THREE.Mesh(getBoxGeo(0.11, 0.68, 0.34), materials.blanketMat);
+  spareShirt.position.set(3.02, 1.48, 3.36);
+  scene.add(spareShirt);
+
+  // Scratched date clue inside back wall of wardrobe (revealed in Loops 3-5)
+  const wScrawlCanvas = document.createElement('canvas');
+  wScrawlCanvas.width = 256; wScrawlCanvas.height = 128;
+  const wScrawlCtx = wScrawlCanvas.getContext('2d');
+  wScrawlCtx.clearRect(0, 0, 256, 128);
+  wScrawlCtx.fillStyle = 'rgba(225, 212, 194, 0.82)';
+  wScrawlCtx.font = 'bold 24px monospace';
+  wScrawlCtx.textAlign = 'center';
+  wScrawlCtx.fillText('ALICE · 14/11', 128, 52);
+  wScrawlCtx.fillText('02:14', 128, 92);
+  const wScrawlTex = new THREE.CanvasTexture(wScrawlCanvas);
+  wScrawlTex.colorSpace = THREE.SRGBColorSpace;
+  const wardrobeScrawlMesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.92, 0.46),
+    new THREE.MeshBasicMaterial({ map: wScrawlTex, transparent: true })
+  );
+  wardrobeScrawlMesh.position.set(3.25, 1.48, 2.95);
+  wardrobeScrawlMesh.rotation.y = -Math.PI / 2;
+  wardrobeScrawlMesh.visible = false;
+  scene.add(wardrobeScrawlMesh);
+
   const wardrobeDoorPivot = new THREE.Group();
   wardrobeDoorPivot.position.set(2.65, 0, 2.27);
   scene.add(wardrobeDoorPivot);
@@ -310,6 +367,9 @@ export function createHouse(scene, materials, colliders, interactables, getState
   wDoorMesh2.position.set(0, 1.12, -0.34);
   wDoorMesh2.castShadow = true;
   wardrobeDoorPivot2.add(wDoorMesh2);
+  const wHandle2 = new THREE.Mesh(getBoxGeo(0.06, 0.14, 0.03), materials.brassMat);
+  wHandle2.position.set(-0.04, 1.12, -0.62);
+  wardrobeDoorPivot2.add(wHandle2);
 
   const wardrobeEyes = new THREE.Group();
   const eyeGeo = new THREE.SphereGeometry(0.015, 6, 6);
@@ -326,6 +386,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
     worldPos: new THREE.Vector3(2.6, 1.3, 2.95),
     checkedInLoop: 0,
     targetAngle: 0,
+    targetAngle2: 0,
     label: () => wardrobeObj.checkedInLoop === getState().loop ? '' : 'Nhấn [E] mở tủ quần áo'
   };
   interactables.push(wardrobeObj);
@@ -1100,6 +1161,8 @@ export function createHouse(scene, materials, colliders, interactables, getState
       wardrobeDoorPivot,
       wardrobeDoorPivot2,
       wardrobeEyes,
+      aliceCoatGroup,
+      wardrobeScrawlMesh,
       wardrobeObj,
       secondPillowMesh,
       mirrorMesh,
