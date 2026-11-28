@@ -348,7 +348,9 @@ function initGame() {
   const settingsScreen = document.getElementById("settings-screen");
   const gfxDescEl = document.getElementById("gfx-desc");
   const toggleShowFps = document.getElementById("toggle-show-fps");
+  const togglePsx = document.getElementById("toggle-psx");
   const toggleFilmGrain = document.getElementById("toggle-film-grain");
+  const radioIndicator = document.getElementById("radio-indicator");
   const toggleSubtitles = document.getElementById("toggle-subtitles");
   const toggleInvertY = document.getElementById("toggle-invert-y");
   const toggleHeadBob = document.getElementById("toggle-head-bob");
@@ -648,6 +650,7 @@ function initGame() {
       journalScreen,
       fpsBadge,
       gfxDescEl,
+      togglePsx,
       toggleFilmGrain,
       toggleShowFps,
       toggleSubtitles,
@@ -1646,6 +1649,7 @@ function initGame() {
     }
 
     if (!state.running || state.ended) return;
+    if (e.code === "KeyC" || e.code === "ControlLeft") state.crouching = !state.crouching;
     if (e.code === "KeyF")
       toggleOrStrikeMatch(
         state,
@@ -2724,6 +2728,27 @@ function initGame() {
       const phonePan = house.objects.phoneObj.ringing
         ? computeStereoPan(house.objects.phoneObj.worldPos, state.pos, _playerRight)
         : 0;
+      // Silent Hill Pocket Radio Static: crackles near unchecked anomalies or visible apparition
+      let radioProx = shadow.group.visible ? Math.max(0, 1 - state.pos.distanceTo(shadow.group.position) / 9.5) : 0;
+      const anomalyTypes = ["clock_anomaly", "chair_anomaly", "portrait_anomaly", "scrawl_anomaly", "smartphone", "broken_mug", "rain_puddle", "wardrobe", "mirror", "bath_mirror", "fridge"];
+      for (let i = 0; i < interactables.length; i++) {
+        const it = interactables[i];
+        if (!anomalyTypes.includes(it.type) || it.checkedInLoop === state.loop) continue;
+        if (it.type === "scrawl_anomaly" && !house.objects.wallScrawl.visible) continue;
+        if (it.type === "rain_puddle" && !house.objects.doorRainPuddle.visible) continue;
+        const d = state.pos.distanceTo(it.worldPos);
+        if (d < 4.4) {
+          radioProx = Math.max(radioProx, (1 - d / 4.4) * 0.72);
+        }
+      }
+      if (radioIndicator) {
+        const activeR = radioProx > 0.14;
+        radioIndicator.classList.toggle("crackling", activeR);
+        radioIndicator.classList.toggle("danger", radioProx > 0.58);
+        radioIndicator.textContent = radioProx > 0.58 ? "Radio: RÈ MẠNH" : (activeR ? "Radio: Nhiễu..." : "Radio: Im ắng");
+      }
+      const otherworld01 = state.loop >= 4 ? (state.loop === 5 ? 1.0 : 0.72) : (state.loop === 3 ? 0.28 : 0);
+
       if (!shadowEvent.melodyStarted && !shadowEvent.shadowStopped) {
         audio.update(
           Math.max(state.fear / 100, shadowTension),
@@ -2732,6 +2757,8 @@ function initGame() {
           tSec,
           rainProx,
           phonePan,
+          radioProx,
+          otherworld01,
         );
       }
       state.wasMoving = isMoving;

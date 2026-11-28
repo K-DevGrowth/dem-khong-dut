@@ -291,7 +291,7 @@ export function updateShadowEvents(dt, tSec, isMoving, ctx) {
       state.pos.set(4.4, 1.65, -4.5);
       state.velX = 0; state.velZ = 0;
       shadow.group.position.set(0.2, 0, -1.8);
-      showSubtitle('Steve', 'Đừng quay lại nữa! Chỉ còn một cơ hội — giữ [Shift] chạy thẳng qua Cửa chính!', 3800, true);
+      showSubtitle('02:14', 'Chạy thẳng ra Cửa chính!', 3200, true);
     }
   }
 

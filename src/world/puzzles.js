@@ -157,9 +157,9 @@ export function createPuzzlesSystem(scene, materials, interactables, getState) {
     return dr;
   }
 
-  createSlidingDrawer('drawer_bedroom', 'ngăn kéo tủ phòng ngủ', new THREE.Vector3(1.35, 0.62, 3.74), new THREE.Vector3(0, 0, -1), 0.36, 0.92, 0.22, 0.42, 'Bên trong ngăn kéo chỉ còn hộp diêm cũ rỗng và chiếc kẹp tóc của Alice.');
-  createSlidingDrawer('drawer_study', 'ngăn kéo bàn làm việc', new THREE.Vector3(6.95, 0.62, -4.3), new THREE.Vector3(-1, 0, 0), 0.36, 0.42, 0.18, 0.48, 'Ngăn kéo bàn làm việc chứa vài tờ lịch cũ đã xé nham nhở.');
-  createSlidingDrawer('drawer_kitchen', 'ngăn kéo tủ bếp', new THREE.Vector3(-6.15, 0.66, -3.96), new THREE.Vector3(0, 0, 1), 0.34, 0.72, 0.2, 0.42, 'Trong ngăn kéo bếp có đôi đũa gỗ và tờ hóa đơn cũ nhàu nát.');
+  createSlidingDrawer('drawer_bedroom', 'ngăn kéo tủ phòng ngủ', new THREE.Vector3(1.35, 0.62, 3.74), new THREE.Vector3(0, 0, -1), 0.36, 0.92, 0.22, 0.42, 'Hộp diêm rỗng. Không có đồ nào của mình.');
+  createSlidingDrawer('drawer_study', 'ngăn kéo bàn làm việc', new THREE.Vector3(6.95, 0.62, -4.3), new THREE.Vector3(-1, 0, 0), 0.36, 0.42, 0.18, 0.48, 'Mấy tờ lịch cũ xé dở.');
+  createSlidingDrawer('drawer_kitchen', 'ngăn kéo tủ bếp', new THREE.Vector3(-6.15, 0.66, -3.96), new THREE.Vector3(0, 0, 1), 0.34, 0.72, 0.2, 0.42, 'Tờ hóa đơn cũ đứng tên D. Tran.');
 
   // Throwable Props
   const hplProps = [];

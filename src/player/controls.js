@@ -41,8 +41,8 @@ export function updatePlayerMovement(dt, tSec, state, camera, colliders, audio, 
 
   const canMove = !state.holdingPaper && !shadowEvent.voicemailHold && !shadowEvent.whiteoutDone;
   const hasInput = canMove && _move.lengthSq() > 0;
-  const sprinting = !!(keys['ShiftLeft'] || keys['ShiftRight']);
-  let maxSpeed = sprinting ? 4.05 : 2.38;
+  const sprinting = !!((keys['ShiftLeft'] || keys['ShiftRight']) && !state.crouching);
+  let maxSpeed = state.crouching ? 1.48 : (sprinting ? 4.05 : 2.38);
   if (state.panicTimer > 0) {
     maxSpeed *= 0.54;
   }
@@ -78,6 +78,9 @@ export function updatePlayerMovement(dt, tSec, state, camera, colliders, audio, 
     state.velZ = 0;
   }
 
+  const targetEyeY = state.crouching ? 1.12 : 1.65;
+  state.pos.y += (targetEyeY - state.pos.y) * (1 - Math.exp(-10 * dt));
+
   if (isMoving) {
     state.stepAccum += curSpeed * dt;
     if (state.stepAccum > 1.15) {
@@ -87,7 +90,7 @@ export function updatePlayerMovement(dt, tSec, state, camera, colliders, audio, 
         : (state.pos.x < -4.0 || (state.pos.x > 3.5 && state.pos.z > -1.0))
           ? 'tile'
           : 'wood';
-      audio.playFootstep(sprinting ? 0.36 : 0.24, false, surface);
+      audio.playFootstep(sprinting ? 0.36 : (state.crouching ? 0.11 : 0.24), false, surface);
     }
   }
 

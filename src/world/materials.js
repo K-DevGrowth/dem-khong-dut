@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import {
   makePlasterPBR,
   makeHardwoodPBR,
+  makeOtherworldPlasterPBR,
+  makeOtherworldFloorPBR,
   makePanelDoorTexture,
   makeFabricTexture,
   makeMirrorTex,
@@ -16,6 +18,8 @@ import {
 export function createMaterials() {
   const plasterPBR = makePlasterPBR();
   const floorPBR = makeHardwoodPBR();
+  const otherworldPlasterPBR = makeOtherworldPlasterPBR();
+  const otherworldFloorPBR = makeOtherworldFloorPBR();
 
   const wallMat = new THREE.MeshStandardMaterial({
     map: plasterPBR.map,
@@ -91,6 +95,8 @@ export function createMaterials() {
   return {
     plasterPBR,
     floorPBR,
+    otherworldPlasterPBR,
+    otherworldFloorPBR,
     wallMat,
     ceilingMat,
     floorMat,

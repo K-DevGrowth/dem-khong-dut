@@ -6,15 +6,15 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Các mô-đun trong thư mục `src/game/`  
-> **Số tập tin:** 6 | **Tổng số dòng:** 1,607 | **Dung lượng:** 57.1 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 1,655 | **Dung lượng:** 58.1 KB
 
 ## Mục lục tập tin
 
-- [`src/game/endings.js`](#src-game-endings-js) (412 dòng · 13.1 KB)
-- [`src/game/horrorDirector.js`](#src-game-horrordirector-js) (496 dòng · 18.3 KB)
-- [`src/game/loopManager.js`](#src-game-loopmanager-js) (540 dòng · 21.3 KB)
+- [`src/game/endings.js`](#src-game-endings-js) (412 dòng · 12.3 KB)
+- [`src/game/horrorDirector.js`](#src-game-horrordirector-js) (497 dòng · 18.5 KB)
+- [`src/game/loopManager.js`](#src-game-loopmanager-js) (581 dòng · 22.8 KB)
 - [`src/game/saveManager.js`](#src-game-savemanager-js) (54 dòng · 2.1 KB)
-- [`src/game/state.js`](#src-game-state-js) (54 dòng · 1.1 KB)
+- [`src/game/state.js`](#src-game-state-js) (60 dòng · 1.2 KB)
 - [`src/game/timerManager.js`](#src-game-timermanager-js) (51 dòng · 1.2 KB)
 
 ---
@@ -52,50 +52,50 @@ export function unlockEnding(type) {
 }
 
 export const ALLEY_VOICES = [
-  { z: -16.5, speaker: 'Ký ức', text: '“Đoạn hẻm này tối quá… đi một mình em hơi sợ.” — “Vậy lần sau cứ gọi anh. Anh ra đón em.”' },
-  { z: -26.5, speaker: 'Ý nghĩ', text: 'Cô ấy đã gọi, đúng như mình từng nói. Vậy mà mình không bắt máy. Rồi tự giam mình trong đêm đó suốt bao lâu nay.' },
-  { z: -36.5, speaker: 'Ý nghĩ', text: 'Nhưng dù mình có kẹt lại trong đêm này mãi, cô ấy cũng không quay về được.' }
+  { z: -16.5, speaker: '02:08', text: 'Cửa sau đêm đó... không khóa.' },
+  { z: -26.5, speaker: 'Số 14', text: '“D. Tran”. Không phải tên mình.' },
+  { z: -36.5, speaker: '02:14', text: 'Ba nhịp gõ. Đèn xanh–đỏ ngoài kính.' }
 ];
 
-export const VOICEMAIL_LINE = '“...anh bảo cứ gọi mà... sao anh không nghe máy... (cười khẽ) Em đùa thôi. Chắc anh ngủ say rồi hả. Không sao đâu, lần này em tự đi được. Chuyện lúc tối, mai mình nói tiếp nha. Anh ngủ ngon.”';
-export const FINALE_LINE_5 = 'Mình đã tệ với cô ấy, điều đó không đổi. Nhưng cô ấy vẫn gọi. Lần này, mình nghe hết rồi.';
-export const FINALE_LINE_6 = 'Anh sẽ không quên em đâu. Kể cả những lỗi của anh. Chỉ là… từ hôm nay, anh sẽ sống tiếp.';
+export const VOICEMAIL_LINE = '[113 · 02:08:15] “...số 14... cửa sau mở rồi... hắn không ở ngoài nữa... hắn trong—” [NGẮT TÍN HIỆU · 02:08:42]';
+export const FINALE_LINE_5 = 'Chốt cửa trượt xuống.';
+export const FINALE_LINE_6 = '02:14.';
 
 export const ENDINGS_DATA = {
   true: {
     cls: '',
     badge: 'Kết thúc Thật · 1/3',
-    title: 'Bình Minh 15/11',
-    kicker: '15 tháng 11 · 05:48',
-    body: '“Không có kẻ lạ nào ngoài cửa cả — chỉ có em đứng dưới mưa và nỗi sợ của chính anh. Hôm nay, anh mở chốt khóa và bước ra khỏi đêm 14/11.”',
+    title: 'Số 14',
+    kicker: '15/11 · 05:48',
+    body: '“Cửa chính mở. Mưa tạt vào mặt. Ngoài bậc thềm chỉ có ánh đèn xanh–đỏ xoay đều trong sương.”',
     phoneTime: '05:48',
     phoneDate: '15/11',
     phoneIcon: '✓',
-    phoneTitle: 'Tin nhắn thoại của Alice · 02:09 · Đã nghe & lưu',
+    phoneTitle: 'Hồ sơ #0214 · Số 14',
     phoneBar: '100%'
   },
   normal: {
     cls: 'ending-normal',
     badge: 'Kết thúc Thường · 2/3',
-    title: 'Sáng Sớm Lạnh Lẽo',
-    kicker: '15 tháng 11 · 05:12',
-    body: '“Tôi bước ra khỏi căn nhà khi trời vừa tảng sáng. Tôi biết người gõ cửa đêm đó là Alice, nhưng trong lòng vẫn còn những mảnh ký ức chưa đủ can đảm đối diện.”',
+    title: 'Chìa Khóa Lạ',
+    kicker: '15/11 · 05:12',
+    body: '“Trời hửng sáng. Tôi bước ra khỏi hẻm. Trong túi áo vẫn còn một chùm chìa khóa — không có chìa nào vừa ổ cửa số 14.”',
     phoneTime: '05:12',
     phoneDate: '15/11',
     phoneIcon: '●',
-    phoneTitle: '1 tin nhắn thoại nghe dở · Alice (02:09)',
-    phoneBar: '36%'
+    phoneTitle: 'Băng 113 (02:08) · 00:31',
+    phoneBar: '42%'
   },
   bad: {
     cls: 'ending-bad',
     badge: 'Kết thúc Xấu · 3/3',
-    title: '02:14',
-    kicker: '14 tháng 11 · 02:14',
-    body: '“Tôi lại mở mắt trên giường giữa tiếng mưa. Tôi vẫn tự nhủ ngoài cửa là kẻ lạ — và bàn tay tôi lại gạt chặt chốt khóa thêm một lần nữa.”',
+    title: 'Gạt Chốt',
+    kicker: '14/11 · 02:14',
+    body: '“Mưa vẫn gõ ngoài kính. Đồng hồ đỏ 02:14. Sau cửa chính vang lên ba nhịp gõ trầm — tôi đứng dậy, gạt chặt chốt trên.”',
     phoneTime: '02:14',
     phoneDate: '14/11',
     phoneIcon: '✕',
-    phoneTitle: '4 cuộc gọi nhỡ · Alice · Chế độ Im lặng',
+    phoneTitle: 'Cuộc gọi đi: 113 · 02:08',
     phoneBar: '0%'
   }
 };
@@ -440,7 +440,7 @@ export function startQuickEndingTest(ctx) {
 ---
 
 <a id="src-game-horrordirector-js"></a>
-## Tập tin: `src/game/horrorDirector.js` (496 dòng)
+## Tập tin: `src/game/horrorDirector.js` (497 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -713,7 +713,7 @@ export function updateShadowEvents(dt, tSec, isMoving, ctx) {
         state.velX = 0;
         state.velZ = 0;
         audio.playMemoryChime(true);
-        showSubtitle('Tin nhắn thoại · Alice (02:09)', VOICEMAIL_LINE, 0, 'warm', false, true);
+        showSubtitle('Băng ghi âm · 113 (02:08)', VOICEMAIL_LINE, 0, 'cold', false, true);
       }
 
       return 0;
@@ -930,10 +930,11 @@ export function updateFearAndLighting(dt, tSec, ctx) {
     }
   }
 
-  // Tunnel Vision FOV
+  // Tunnel Vision FOV (relative to user's chosen base FOV in Settings)
+  const baseFov = (ctx.settings && ctx.settings.fov) ? ctx.settings.fov : 66;
   const targetFov = state.panicTimer > 0
-    ? 56 + Math.sin(tSec * 16) * 1.4
-    : (state.fear > 75 ? 66 - ((state.fear - 75) / 25) * 4.5 : 66);
+    ? Math.max(48, baseFov - 10) + Math.sin(tSec * 16) * 1.4
+    : (state.fear > 75 ? baseFov - ((state.fear - 75) / 25) * 4.5 : baseFov);
   if (Math.abs(camera.fov - targetFov) > 0.05) {
     camera.fov += (targetFov - camera.fov) * (1 - Math.exp(-7 * dt));
     camera.updateProjectionMatrix();
@@ -944,11 +945,12 @@ export function updateFearAndLighting(dt, tSec, ctx) {
 ---
 
 <a id="src-game-loopmanager-js"></a>
-## Tập tin: `src/game/loopManager.js` (540 dòng)
+## Tập tin: `src/game/loopManager.js` (581 dòng)
 
 ```javascript
 import * as THREE from 'three';
 import { TOTAL_LOOPS, LOOP_ANOMALY_REQ, LOOP_STORY, MORAL_CHOICES } from '../config/storyData.js';
+import { makeLoop5WallOrderTex, makeLoop5BathMirrorTex } from '../world/textures.js';
 import { saveRunProgress } from './saveManager.js';
 
 export function setupLoopEnvironment(loopNum, ctx) {
@@ -1211,6 +1213,7 @@ export function setupLoopEnvironment(loopNum, ctx) {
 
   if (objects.aliceCoatGroup) objects.aliceCoatGroup.visible = (loopNum === 1);
   if (objects.wardrobeScrawlMesh) objects.wardrobeScrawlMesh.visible = (loopNum >= 3);
+  if (loopNum !== 5 && objects.drawWardrobeClue) objects.drawWardrobeClue(null);
 
   if (loopNum === 1) {
     lights.bedroomLampLight.intensity = 1.15;
@@ -1274,13 +1277,52 @@ export function setupLoopEnvironment(loopNum, ctx) {
     objects.phoneObj.ringing = true; objects.phoneLed.intensity = 1.3;
     lights.dawnLight.intensity = 0;
   } else if (loopNum === 5) {
+    const palette = [
+      { id: 'red', name: 'Đỏ', hex: '#b8322a' },
+      { id: 'blue', name: 'Xanh dương', hex: '#2f6a96' },
+      { id: 'yellow', name: 'Vàng', hex: '#a88424' },
+      { id: 'green', name: 'Xanh lá', hex: '#3e7350' },
+    ];
+    for (let i = palette.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [palette[i], palette[j]] = [palette[j], palette[i]];
+    }
+    const digitPool = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    for (let i = digitPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [digitPool[i], digitPool[j]] = [digitPool[j], digitPool[i]];
+    }
+    const ordered = palette.map((c, idx) => ({ ...c, digit: digitPool[idx] }));
+    state.puzzleColorOrder = ordered;
+    state.puzzleCode = ordered.map((c) => String(c.digit)).join('');
+
+    const locPool = ordered.slice();
+    for (let i = locPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [locPool[i], locPool[j]] = [locPool[j], locPool[i]];
+    }
+    state.puzzleClues = {
+      kitchen: locPool[0],
+      fridge: locPool[1],
+      wardrobe: locPool[2],
+      bath: locPool[3],
+    };
+
     lights.bedroomLampLight.intensity = 0;
     objects.wardrobeDoorPivot.rotation.y = -1.45; objects.wardrobeObj.targetAngle = -1.45;
     objects.wardrobeDoorPivot2.rotation.y = 1.35; objects.wardrobeObj.targetAngle2 = 1.35; objects.wardrobeEyes.visible = false;
+    if (objects.drawWardrobeClue) objects.drawWardrobeClue(state.puzzleClues.wardrobe);
+
+    materials.bathMirrorMat.map = makeLoop5BathMirrorTex(state.puzzleClues.bath);
+    materials.bathMirrorMat.needsUpdate = true;
+
     materials.portraitMat.map = materials.portraitScratchedTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.45, 0.08, -3.4); objects.portraitGroup.rotation.set(0, 0.35, -Math.PI / 2);
     objects.portraitAnomalyObj.worldPos.set(-3.45, 0.35, -3.4);
-    materials.wallScrawlMat.map = materials.scrawlTex5; materials.wallScrawlMat.needsUpdate = true; objects.wallScrawl.visible = true;
+
+    materials.wallScrawlMat.map = makeLoop5WallOrderTex(state.puzzleColorOrder);
+    materials.wallScrawlMat.needsUpdate = true;
+    objects.wallScrawl.visible = true;
     lights.tvLight.intensity = 1.1;
     materials.tvScreenMat.map = ctx.tvStaticTex; materials.tvScreenMat.color.setHex(0xffffff); materials.tvScreenMat.needsUpdate = true;
     objects.chairGroup.position.set(0.25, 0.24, -4.6); objects.chairGroup.rotation.set(0.15, 0.4, Math.PI / 2);
@@ -1554,7 +1596,7 @@ export function clearSavedRun() {
 ---
 
 <a id="src-game-state-js"></a>
-## Tập tin: `src/game/state.js` (54 dòng)
+## Tập tin: `src/game/state.js` (60 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -1599,6 +1641,12 @@ export function createGameState() {
     tvTurnedOff: false,
     choiceSwapped: false,
     codeUnlocked: false,
+    paperFlipped: false,
+    paperTiltX: 0,
+    paperTiltY: 0,
+    puzzleCode: '4729',
+    puzzleColorOrder: [],
+    puzzleClues: null,
     anomaliesFound: 0,
     anomaliesRequired: 2,
     chaseCaughtCount: 0,

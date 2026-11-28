@@ -603,3 +603,71 @@ export function makeLoop5BathMirrorTex(clue) {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+
+
+// Silent Hill Otherworld Rusted & Peeling Industrial Wall Texture (Loops 4-5)
+export function makeOtherworldPlasterPBR() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  const b = document.createElement('canvas'); b.width = 512; b.height = 512;
+  const bctx = b.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#1e100c');
+  grad.addColorStop(0.55, '#341913');
+  grad.addColorStop(0.72, '#1c0e0a');
+  grad.addColorStop(1, '#120907');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, 512, 512);
+  bctx.fillStyle = '#757575'; bctx.fillRect(0, 0, 512, 512);
+
+  // Heavy rust blotches, peeling paint & dried grime
+  for (let i = 0; i < 1400; i++) {
+    const x = Math.random() * 512, y = Math.random() * 512, sz = 4 + Math.random() * 20;
+    const isRust = Math.random() < 0.55;
+    ctx.fillStyle = isRust
+      ? `rgba(${68 + Math.floor(Math.random() * 44)}, ${24 + Math.floor(Math.random() * 18)}, ${14 + Math.floor(Math.random() * 12)}, 0.24)`
+      : `rgba(14, 10, 9, 0.28)`;
+    ctx.fillRect(x, y, sz, sz);
+    const bv = isRust ? 160 : 50;
+    bctx.fillStyle = `rgba(${bv},${bv},${bv},0.3)`;
+    bctx.fillRect(x, y, sz, sz);
+  }
+  // Vertical rust/damp drips from ceiling
+  for (let s = 0; s < 26; s++) {
+    const sx = Math.random() * 512, sw = 4 + Math.random() * 16, sh = 90 + Math.random() * 260;
+    const sg = ctx.createLinearGradient(0, 0, 0, sh);
+    sg.addColorStop(0, 'rgba(38, 10, 6, 0.65)');
+    sg.addColorStop(1, 'rgba(38, 10, 6, 0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(sx, 0, sw, sh);
+  }
+  const map = new THREE.CanvasTexture(c), bumpMap = new THREE.CanvasTexture(b);
+  [map, bumpMap].forEach((t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2.5, 1); });
+  return { map, bumpMap };
+}
+
+export function makeOtherworldFloorPBR() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  const b = document.createElement('canvas'); b.width = 512; b.height = 512;
+  const bctx = b.getContext('2d');
+  ctx.fillStyle = '#140c0a'; ctx.fillRect(0, 0, 512, 512);
+  bctx.fillStyle = '#606060'; bctx.fillRect(0, 0, 512, 512);
+
+  // Grating / rusted iron planks feel
+  for (let y = 0; y < 512; y += 32) {
+    ctx.fillStyle = 'rgba(8, 5, 4, 0.72)'; ctx.fillRect(0, y, 512, 4);
+    bctx.fillStyle = '#181818'; bctx.fillRect(0, y, 512, 5);
+  }
+  for (let x = 0; x < 512; x += 64) {
+    ctx.fillStyle = 'rgba(8, 5, 4, 0.72)'; ctx.fillRect(x, 0, 4, 512);
+    bctx.fillStyle = '#181818'; bctx.fillRect(x, 0, 5, 512);
+  }
+  for (let i = 0; i < 900; i++) {
+    ctx.fillStyle = `rgba(${56 + Math.floor(Math.random() * 34)}, 22, 14, 0.22)`;
+    ctx.fillRect(Math.random() * 512, Math.random() * 512, 8 + Math.random() * 18, 8 + Math.random() * 18);
+  }
+  const map = new THREE.CanvasTexture(c), bumpMap = new THREE.CanvasTexture(b);
+  [map, bumpMap].forEach((t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4.5, 6); });
+  return { map, bumpMap };
+}

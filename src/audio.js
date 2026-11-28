@@ -40,6 +40,8 @@ export class HouseAudio {
     this.reverbSend = null;
     this.droneGain = null;
     this.staticGain = null;
+    this.radioGain = null;
+    this.otherworldGain = null;
     this.whiteBuf = null;
     this.brownBuf = null;
     this.lastBeat = 0;
@@ -134,6 +136,30 @@ export class HouseAudio {
     osc1.connect(flt); flt.connect(this.droneGain);
     this.droneGain.connect(this.ambienceBus);
     osc1.start();
+
+    // Silent Hill Pocket Radio Static layer (crackles when anomaly/entity is close)
+    const radioSrc = this.ctx.createBufferSource();
+    radioSrc.buffer = this.whiteBuf; radioSrc.loop = true;
+    const radioBp = this.ctx.createBiquadFilter();
+    radioBp.type = 'bandpass'; radioBp.frequency.value = 1950; radioBp.Q.value = 1.7;
+    const radioHp = this.ctx.createBiquadFilter();
+    radioHp.type = 'highpass'; radioHp.frequency.value = 680;
+    this.radioGain = this.ctx.createGain();
+    this.radioGain.gain.value = 0.0001;
+    radioSrc.connect(radioBp); radioBp.connect(radioHp); radioHp.connect(this.radioGain);
+    this.radioGain.connect(this.sfxBus);
+    radioSrc.start();
+
+    // Silent Hill Otherworld industrial metallic hum (ramps up in Loops 4-5)
+    const owOsc = this.ctx.createOscillator();
+    owOsc.type = 'sawtooth'; owOsc.frequency.value = 54;
+    const owLp = this.ctx.createBiquadFilter();
+    owLp.type = 'lowpass'; owLp.frequency.value = 135;
+    this.otherworldGain = this.ctx.createGain();
+    this.otherworldGain.gain.value = 0.0001;
+    owOsc.connect(owLp); owLp.connect(this.otherworldGain);
+    this.otherworldGain.connect(this.ambienceBus);
+    owOsc.start();
 
     // TV static layer
     const src = this.ctx.createBufferSource();
@@ -368,7 +394,7 @@ export class HouseAudio {
     }
   }
 
-  update(fear01, tvProx01, phoneRinging, nowSec, rainProx01 = 0.35, phonePan = 0) {
+  update(fear01, tvProx01, phoneRinging, nowSec, rainProx01 = 0.35, phonePan = 0, radioProx01 = 0, otherworld01 = 0) {
     if (!this.started || !this.ctx) return;
     const t = this.ctx.currentTime;
     if (performance.now() < this.deadSilenceUntil) {
@@ -377,6 +403,8 @@ export class HouseAudio {
       if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.001, t, 0.06);
       if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0005, t, 0.06);
       if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.015, t, 0.06);
+      if (this.radioGain) this.radioGain.gain.setTargetAtTime(0.0001, t, 0.05);
+      if (this.otherworldGain) this.otherworldGain.gain.setTargetAtTime(0.0001, t, 0.06);
       return;
     }
 
@@ -391,6 +419,13 @@ export class HouseAudio {
       }
       if (this.bgRainGain) {
         this.bgRainGain.gain.setTargetAtTime(Math.min(0.20, 0.08 + rainProx01 * 0.11), t, 0.3);
+      }
+      if (this.radioGain) {
+        const crackle = radioProx01 > 0.06 ? (0.012 + Math.pow(radioProx01, 1.45) * 0.095) * (0.72 + Math.sin(nowSec * 37) * 0.28) : 0.0001;
+        this.radioGain.gain.setTargetAtTime(crackle, t, 0.08);
+      }
+      if (this.otherworldGain) {
+        this.otherworldGain.gain.setTargetAtTime(otherworld01 > 0.05 ? otherworld01 * 0.055 : 0.0001, t, 0.4);
       }
     }
 
@@ -795,6 +830,8 @@ export class HouseAudio {
     if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.0001, t0, 0.7);
     if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0001, t0, 0.7);
     if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.0001, t0, 0.7);
+    if (this.radioGain) this.radioGain.gain.setTargetAtTime(0.0001, t0, 0.4);
+    if (this.otherworldGain) this.otherworldGain.gain.setTargetAtTime(0.0001, t0, 0.7);
 
     const src = this.ctx.createBufferSource();
     src.buffer = this.whiteBuf;
@@ -859,6 +896,8 @@ export class HouseAudio {
     if (this.bgAmbienceGain) this.bgAmbienceGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
     if (this.bgWindGain) this.bgWindGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
     if (this.bgRainGain) this.bgRainGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
+    if (this.radioGain) this.radioGain.gain.setTargetAtTime(0.0001, tStart, 0.4);
+    if (this.otherworldGain) this.otherworldGain.gain.setTargetAtTime(0.0001, tStart, 0.8);
 
     if (!this.endingBus) {
       this.endingBus = this.ctx.createGain();

@@ -2682,3 +2682,41 @@ body:not(.pre-start) #settings-screen {
   background: rgba(3, 3, 4, 0.62);
   backdrop-filter: blur(2px);
 }
+
+
+/* === v2.1.0: SILENT HILL EDITION (PSX/VHS SCANLINES & RADIO STATIC HUD) === */
+body.psx-mode #canvas-container canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#psx-scanlines {
+  display: none;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.24) 0px,
+    rgba(0, 0, 0, 0.24) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+body.psx-mode #psx-scanlines {
+  display: block;
+}
+
+.hud-radio {
+  font-family: monospace;
+  font-size: 11.5px;
+  color: rgba(182, 176, 166, 0.62);
+  letter-spacing: 0.04em;
+}
+.hud-radio.crackling {
+  color: #d9a05b;
+}
+.hud-radio.danger {
+  color: #e05246;
+}

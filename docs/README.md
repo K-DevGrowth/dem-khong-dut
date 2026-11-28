@@ -2,8 +2,8 @@
 
 # 📚 Codebase Bundle — 0214-ngay-khong-chiu-qua
 
-> **Phiên bản:** `1.7.0-demo`  
-> **Tổng số tập tin:** 35 | **Tổng số dòng:** 13,051 | **Tổng dung lượng:** 466.7 KB  
+> **Phiên bản:** `2.0.1-demo`  
+> **Tổng số tập tin:** 35 | **Tổng số dòng:** 14,073 | **Tổng dung lượng:** 492.0 KB  
 > **Cập nhật tự động:** Chạy `npm run bundle` mỗi khi thay đổi cấu trúc thư mục hoặc mã nguồn.
 
 ## 🗂️ Cấu trúc thư mục
@@ -17,15 +17,15 @@ dem-khong-dut/
 │   └── bundle-codebase.mjs (398 dòng)
 ├── src/
 │   ├── config/
-│   │   ├── heldPaperContent.js (114 dòng)
-│   │   ├── settings.js (76 dòng)
+│   │   ├── heldPaperContent.js (141 dòng)
+│   │   ├── settings.js (104 dòng)
 │   │   └── storyData.js (308 dòng)
 │   ├── game/
 │   │   ├── endings.js (412 dòng)
-│   │   ├── horrorDirector.js (496 dòng)
-│   │   ├── loopManager.js (540 dòng)
+│   │   ├── horrorDirector.js (497 dòng)
+│   │   ├── loopManager.js (581 dòng)
 │   │   ├── saveManager.js (54 dòng)
-│   │   ├── state.js (54 dòng)
+│   │   ├── state.js (60 dòng)
 │   │   └── timerManager.js (51 dòng)
 │   ├── player/
 │   │   ├── controls.js (101 dòng)
@@ -35,21 +35,21 @@ dem-khong-dut/
 │   ├── ui/
 │   │   ├── hud.js (65 dòng)
 │   │   ├── journal.js (77 dòng)
-│   │   ├── keypad.js (102 dòng)
-│   │   ├── settingsMenu.js (157 dòng)
+│   │   ├── keypad.js (103 dòng)
+│   │   ├── settingsMenu.js (294 dòng)
 │   │   └── subtitles.js (127 dòng)
 │   ├── world/
 │   │   ├── doors.js (86 dòng)
 │   │   ├── entity.js (348 dòng)
-│   │   ├── house.js (1,207 dòng)
+│   │   ├── house.js (1,233 dòng)
 │   │   ├── materials.js (142 dòng)
 │   │   ├── puzzles.js (422 dòng)
-│   │   └── textures.js (522 dòng)
-│   ├── audio.js (1,211 dòng)
-│   ├── main.js (2,622 dòng)
-│   └── style.css (2,342 dòng)
+│   │   └── textures.js (605 dòng)
+│   ├── audio.js (1,242 dòng)
+│   ├── main.js (2,809 dòng)
+│   └── style.css (2,684 dòng)
 ├── .gitignore (6 dòng)
-├── index.html (455 dòng)
+├── index.html (567 dòng)
 ├── package.json (18 dòng)
 ├── README.md (110 dòng)
 ├── THIRD_PARTY_LICENSES.md (12 dòng)
@@ -60,13 +60,13 @@ dem-khong-dut/
 
 | Tài liệu | Nhóm / Thư mục | Số file | Số dòng | Dung lượng |
 |---|---|---:|---:|---:|
-| [`root.md`](./root.md) | Root & Entry Files | 6 | 621 | 31.6 KB |
-| [`src-core.md`](./src-core.md) | src/ — Core Modules | 3 | 6,175 | 196.1 KB |
-| [`src-config.md`](./src-config.md) | src/config/ | 3 | 498 | 29.9 KB |
-| [`src-game.md`](./src-game.md) | src/game/ | 6 | 1,607 | 57.1 KB |
+| [`root.md`](./root.md) | Root & Entry Files | 6 | 733 | 37.6 KB |
+| [`src-core.md`](./src-core.md) | src/ — Core Modules | 3 | 6,735 | 213.0 KB |
+| [`src-config.md`](./src-config.md) | src/config/ | 3 | 553 | 21.8 KB |
+| [`src-game.md`](./src-game.md) | src/game/ | 6 | 1,655 | 58.1 KB |
 | [`src-player.md`](./src-player.md) | src/player/ | 4 | 477 | 16.7 KB |
-| [`src-ui.md`](./src-ui.md) | src/ui/ | 5 | 528 | 18.0 KB |
-| [`src-world.md`](./src-world.md) | src/world/ | 6 | 2,727 | 104.8 KB |
+| [`src-ui.md`](./src-ui.md) | src/ui/ | 5 | 666 | 23.6 KB |
+| [`src-world.md`](./src-world.md) | src/world/ | 6 | 2,836 | 108.5 KB |
 | [`scripts.md`](./scripts.md) | scripts/ — Build & Tooling | 1 | 398 | 11.2 KB |
 | [`public.md`](./public.md) | public/ | 1 | 20 | 1.4 KB |
 
@@ -75,22 +75,22 @@ dem-khong-dut/
 | Tập tin | Tài liệu chứa | Số dòng | Dung lượng |
 |---|---|---:|---:|
 | [`.gitignore`](./root.md#gitignore) | [`root.md`](./root.md) | 6 | 0.1 KB |
-| [`index.html`](./root.md#index-html) | [`root.md`](./root.md) | 455 | 22.9 KB |
+| [`index.html`](./root.md#index-html) | [`root.md`](./root.md) | 567 | 28.9 KB |
 | [`package.json`](./root.md#package-json) | [`root.md`](./root.md) | 18 | 0.3 KB |
 | [`README.md`](./root.md#readme-md) | [`root.md`](./root.md) | 110 | 6.9 KB |
 | [`THIRD_PARTY_LICENSES.md`](./root.md#third-party-licenses-md) | [`root.md`](./root.md) | 12 | 1.1 KB |
 | [`vite.config.js`](./root.md#vite-config-js) | [`root.md`](./root.md) | 20 | 0.3 KB |
-| [`src/audio.js`](./src-core.md#src-audio-js) | [`src-core.md`](./src-core.md) | 1,211 | 45.8 KB |
-| [`src/main.js`](./src-core.md#src-main-js) | [`src-core.md`](./src-core.md) | 2,622 | 89.1 KB |
-| [`src/style.css`](./src-core.md#src-style-css) | [`src-core.md`](./src-core.md) | 2,342 | 61.1 KB |
-| [`src/config/heldPaperContent.js`](./src-config.md#src-config-heldpapercontent-js) | [`src-config.md`](./src-config.md) | 114 | 6.4 KB |
-| [`src/config/settings.js`](./src-config.md#src-config-settings-js) | [`src-config.md`](./src-config.md) | 76 | 2.2 KB |
-| [`src/config/storyData.js`](./src-config.md#src-config-storydata-js) | [`src-config.md`](./src-config.md) | 308 | 21.3 KB |
-| [`src/game/endings.js`](./src-game.md#src-game-endings-js) | [`src-game.md`](./src-game.md) | 412 | 13.1 KB |
-| [`src/game/horrorDirector.js`](./src-game.md#src-game-horrordirector-js) | [`src-game.md`](./src-game.md) | 496 | 18.3 KB |
-| [`src/game/loopManager.js`](./src-game.md#src-game-loopmanager-js) | [`src-game.md`](./src-game.md) | 540 | 21.3 KB |
+| [`src/audio.js`](./src-core.md#src-audio-js) | [`src-core.md`](./src-core.md) | 1,242 | 47.0 KB |
+| [`src/main.js`](./src-core.md#src-main-js) | [`src-core.md`](./src-core.md) | 2,809 | 97.7 KB |
+| [`src/style.css`](./src-core.md#src-style-css) | [`src-core.md`](./src-core.md) | 2,684 | 68.3 KB |
+| [`src/config/heldPaperContent.js`](./src-config.md#src-config-heldpapercontent-js) | [`src-config.md`](./src-config.md) | 141 | 6.3 KB |
+| [`src/config/settings.js`](./src-config.md#src-config-settings-js) | [`src-config.md`](./src-config.md) | 104 | 3.4 KB |
+| [`src/config/storyData.js`](./src-config.md#src-config-storydata-js) | [`src-config.md`](./src-config.md) | 308 | 12.2 KB |
+| [`src/game/endings.js`](./src-game.md#src-game-endings-js) | [`src-game.md`](./src-game.md) | 412 | 12.3 KB |
+| [`src/game/horrorDirector.js`](./src-game.md#src-game-horrordirector-js) | [`src-game.md`](./src-game.md) | 497 | 18.5 KB |
+| [`src/game/loopManager.js`](./src-game.md#src-game-loopmanager-js) | [`src-game.md`](./src-game.md) | 581 | 22.8 KB |
 | [`src/game/saveManager.js`](./src-game.md#src-game-savemanager-js) | [`src-game.md`](./src-game.md) | 54 | 2.1 KB |
-| [`src/game/state.js`](./src-game.md#src-game-state-js) | [`src-game.md`](./src-game.md) | 54 | 1.1 KB |
+| [`src/game/state.js`](./src-game.md#src-game-state-js) | [`src-game.md`](./src-game.md) | 60 | 1.2 KB |
 | [`src/game/timerManager.js`](./src-game.md#src-game-timermanager-js) | [`src-game.md`](./src-game.md) | 51 | 1.2 KB |
 | [`src/player/controls.js`](./src-player.md#src-player-controls-js) | [`src-player.md`](./src-player.md) | 101 | 3.3 KB |
 | [`src/player/heldPaper.js`](./src-player.md#src-player-heldpaper-js) | [`src-player.md`](./src-player.md) | 33 | 1.1 KB |
@@ -98,14 +98,14 @@ dem-khong-dut/
 | [`src/player/match.js`](./src-player.md#src-player-match-js) | [`src-player.md`](./src-player.md) | 129 | 3.7 KB |
 | [`src/ui/hud.js`](./src-ui.md#src-ui-hud-js) | [`src-ui.md`](./src-ui.md) | 65 | 2.0 KB |
 | [`src/ui/journal.js`](./src-ui.md#src-ui-journal-js) | [`src-ui.md`](./src-ui.md) | 77 | 2.4 KB |
-| [`src/ui/keypad.js`](./src-ui.md#src-ui-keypad-js) | [`src-ui.md`](./src-ui.md) | 102 | 3.0 KB |
-| [`src/ui/settingsMenu.js`](./src-ui.md#src-ui-settingsmenu-js) | [`src-ui.md`](./src-ui.md) | 157 | 5.6 KB |
+| [`src/ui/keypad.js`](./src-ui.md#src-ui-keypad-js) | [`src-ui.md`](./src-ui.md) | 103 | 3.1 KB |
+| [`src/ui/settingsMenu.js`](./src-ui.md#src-ui-settingsmenu-js) | [`src-ui.md`](./src-ui.md) | 294 | 11.1 KB |
 | [`src/ui/subtitles.js`](./src-ui.md#src-ui-subtitles-js) | [`src-ui.md`](./src-ui.md) | 127 | 5.0 KB |
 | [`src/world/doors.js`](./src-world.md#src-world-doors-js) | [`src-world.md`](./src-world.md) | 86 | 2.9 KB |
 | [`src/world/entity.js`](./src-world.md#src-world-entity-js) | [`src-world.md`](./src-world.md) | 348 | 11.8 KB |
-| [`src/world/house.js`](./src-world.md#src-world-house-js) | [`src-world.md`](./src-world.md) | 1,207 | 47.7 KB |
+| [`src/world/house.js`](./src-world.md#src-world-house-js) | [`src-world.md`](./src-world.md) | 1,233 | 48.8 KB |
 | [`src/world/materials.js`](./src-world.md#src-world-materials-js) | [`src-world.md`](./src-world.md) | 142 | 5.5 KB |
 | [`src/world/puzzles.js`](./src-world.md#src-world-puzzles-js) | [`src-world.md`](./src-world.md) | 422 | 15.5 KB |
-| [`src/world/textures.js`](./src-world.md#src-world-textures-js) | [`src-world.md`](./src-world.md) | 522 | 21.4 KB |
+| [`src/world/textures.js`](./src-world.md#src-world-textures-js) | [`src-world.md`](./src-world.md) | 605 | 24.1 KB |
 | [`scripts/bundle-codebase.mjs`](./scripts.md#scripts-bundle-codebase-mjs) | [`scripts.md`](./scripts.md) | 398 | 11.2 KB |
 | [`public/audio/README.txt`](./public.md#public-audio-readme-txt) | [`public.md`](./public.md) | 20 | 1.4 KB |

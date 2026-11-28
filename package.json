@@ -1,7 +1,7 @@
 {
   "name": "0214-ngay-khong-chiu-qua",
   "private": true,
-  "version": "2.0.1-demo",
+  "version": "2.1.0-demo",
   "type": "module",
   "scripts": {
     "dev": "vite",

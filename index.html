@@ -32,6 +32,7 @@
     </div>
   </div>
   <div id="canvas-container"></div>
+  <div id="psx-scanlines"></div>
   <div id="film-grain"></div>
   <div id="fear-vignette"></div>
   <div id="danger-pulse"></div>
@@ -54,8 +55,9 @@
     <div class="hud-minimal-left">
       <div class="hud-status-line">
         <span id="loop-label" class="hud-clock">Vòng 1/5 · 02:14</span>
+        <span id="anomaly-pill" class="hud-anomaly sr-only"><span id="anomaly-label">Dấu vết: 0/2</span></span>
         <span class="hud-dot">·</span>
-        <span id="anomaly-pill" class="hud-anomaly"><span id="anomaly-label">Dấu vết: 0/2</span></span>
+        <span id="radio-indicator" class="hud-radio">Radio: Im ắng</span>
         <span class="hud-dot">·</span>
         <span class="hud-match-wrap">
           Diêm <strong id="match-count">10</strong>
@@ -148,7 +150,7 @@
       </nav>
       <div class="title-hint">
         <div>↑↓ / Chuột chọn mục · WASD di chuyển · E tương tác</div>
-        <div>F quẹt diêm · R lật giấy · J Nhật ký · O Cài đặt</div>
+        <div>F quẹt diêm · C cúi người · R lật giấy · J Nhật ký · O Cài đặt</div>
       </div>
     </div>
   </div>
@@ -327,6 +329,13 @@
         <div class="settings-section">
           <div class="toggle-row">
             <div>
+              <div class="settings-label">Chế độ Retro PSX / VHS (Silent Hill)</div>
+              <div class="settings-hint tight">Độ phân giải thấp cổ điển + scanline băng từ tăng độ ám ảnh.</div>
+            </div>
+            <button type="button" id="toggle-psx" class="toggle-switch" aria-label="Chế độ PSX"></button>
+          </div>
+          <div class="toggle-row">
+            <div>
               <div class="settings-label">Hiệu ứng nhiễu phim (Film Grain)</div>
               <div class="settings-hint tight">Tạo hạt nhiễu điện ảnh cổ điển trên màn hình.</div>
             </div>
@@ -430,6 +439,7 @@
           </div>
           <div class="settings-btn-row">
             <button id="btn-pad-toggle" class="hud-btn" type="button">Phím ảo cảm ứng</button>
+            <button id="btn-fullscreen" class="hud-btn" type="button">Toàn màn hình</button>
             <button id="btn-clear-save" class="hud-btn" type="button">Xóa tiến độ đã lưu</button>
             <button id="btn-foley" class="hud-btn" type="button" data-dev-only="true">Thử âm thanh</button>
             <button id="btn-test-ending" class="hud-btn" type="button" data-dev-only="true">Test kết thúc</button>
@@ -545,7 +555,7 @@
         <div class="phone-vm-row">
           <div id="ending-phone-icon" class="phone-vm-icon">✓</div>
           <div class="phone-vm-meta">
-            <div id="ending-phone-title" class="phone-vm-title">Tin nhắn thoại · 02:09 · đã nghe</div>
+            <div id="ending-phone-title" class="phone-vm-title">Hồ sơ #0214 · Số 14</div>
             <div class="phone-vm-bar"><div id="ending-phone-bar" class="phone-vm-bar-fill"></div></div>
           </div>
         </div>

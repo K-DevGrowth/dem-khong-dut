@@ -1,7 +1,7 @@
 export function createSettingsController(els, settings, GFX_PRESETS, renderer, scene, camera, audio, lights, dustPoints, materials, saveSettingsFn, state, callbacks) {
   function applyGraphicsQuality(level) {
     const preset = GFX_PRESETS[level] || GFX_PRESETS.medium;
-    const dpr = Math.min(window.devicePixelRatio || 1, preset.maxDpr);
+    const dpr = settings.psxMode ? 0.38 : Math.min(window.devicePixelRatio || 1, preset.maxDpr);
     renderer.setPixelRatio(dpr);
     const container = els.container;
     renderer.setSize(
@@ -14,6 +14,7 @@ export function createSettingsController(els, settings, GFX_PRESETS, renderer, s
     applyGammaLive();
 
     document.body.classList.toggle('gfx-low', level === 'low');
+    document.body.classList.toggle('psx-mode', Boolean(settings.psxMode));
     document.body.classList.toggle('no-film-grain', !settings.filmGrain);
     document.body.classList.toggle('subtitles-off', !settings.subtitles);
 
@@ -119,6 +120,7 @@ export function createSettingsController(els, settings, GFX_PRESETS, renderer, s
     if (els.sliderSfxVol) els.sliderSfxVol.value = String(Math.round(settings.sfxVol * 100));
     if (els.sfxVolDisplay) els.sfxVolDisplay.textContent = `${Math.round(settings.sfxVol * 100)}%`;
 
+    if (els.togglePsx) els.togglePsx.classList.toggle('on', Boolean(settings.psxMode));
     if (els.toggleFilmGrain) els.toggleFilmGrain.classList.toggle('on', settings.filmGrain);
     if (els.toggleShowFps) els.toggleShowFps.classList.toggle('on', settings.showFps);
     if (els.toggleSubtitles) els.toggleSubtitles.classList.toggle('on', settings.subtitles);
@@ -217,7 +219,16 @@ export function createSettingsController(els, settings, GFX_PRESETS, renderer, s
     });
   }
 
+  bindToggle(els.togglePsx, 'psxMode');
   bindToggle(els.toggleFilmGrain, 'filmGrain');
+
+  const btnFs = document.getElementById('btn-fullscreen');
+  if (btnFs) {
+    btnFs.addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {});
+      else document.exitFullscreen?.().catch(() => {});
+    });
+  }
   bindToggle(els.toggleShowFps, 'showFps');
   bindToggle(els.toggleSubtitles, 'subtitles');
   bindToggle(els.toggleInvertY, 'invertY');

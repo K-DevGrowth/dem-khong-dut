@@ -6,12 +6,12 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Cấu hình dự án, HTML entry point và tài liệu gốc  
-> **Số tập tin:** 6 | **Tổng số dòng:** 621 | **Dung lượng:** 31.6 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 733 | **Dung lượng:** 37.6 KB
 
 ## Mục lục tập tin
 
 - [`.gitignore`](#gitignore) (6 dòng · 0.1 KB)
-- [`index.html`](#index-html) (455 dòng · 22.9 KB)
+- [`index.html`](#index-html) (567 dòng · 28.9 KB)
 - [`package.json`](#package-json) (18 dòng · 0.3 KB)
 - [`README.md`](#readme-md) (110 dòng · 6.9 KB)
 - [`THIRD_PARTY_LICENSES.md`](#third-party-licenses-md) (12 dòng · 1.1 KB)
@@ -34,7 +34,7 @@ Thumbs.db
 ---
 
 <a id="index-html"></a>
-## Tập tin: `index.html` (455 dòng)
+## Tập tin: `index.html` (567 dòng)
 
 ```html
 <!DOCTYPE html>
@@ -45,10 +45,6 @@ Thumbs.db
   <title>02:14 — Đêm Không Dứt (DEMO)</title>
   <meta name="description" content="02:14 — Đêm Không Dứt (DEMO): Phiên bản thử nghiệm nội bộ trò chơi kinh dị tâm lý góc nhìn thứ nhất 3D." />
   <meta name="robots" content="noindex, nofollow" />
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
@@ -112,7 +108,7 @@ Thumbs.db
       </div>
     </div>
     <div class="hud-minimal-right">
-      <button id="btn-journal" class="hud-ghost-btn" type="button" title="Ghi chép (J)">Ghi chép (J)</button>
+      <button id="btn-journal" class="hud-ghost-btn" type="button" title="Nhật ký (J)">Nhật ký (J)</button>
       <button id="btn-settings" class="hud-ghost-btn" type="button" title="Cài đặt (O)">Cài đặt (O)</button>
     </div>
   </div>
@@ -177,18 +173,22 @@ Thumbs.db
 
   <!-- FULLSCREEN CLASSIC HORROR TITLE SCREEN -->
   <div id="start-screen">
+    <img class="title-bg-img" src="./title-bg.jpg" alt="" aria-hidden="true" />
+    <div class="title-bg-scrim" aria-hidden="true"></div>
     <div class="title-fullscreen">
       <div class="title-kicker">14/11 · ĐÊM MƯA · BẢN THỬ NGHIỆM</div>
-      <h1 class="title-main">02:14</h1>
-      <div class="title-sub">Đêm Không Dứt <span class="demo-tag">DEMO</span></div>
-      <p class="title-desc">Mưa vẫn gõ đều ngoài cửa sổ. Chiếc giường bên cạnh đã lạnh, đồng hồ đầu giường cứ dừng ở 02:14 — và có tiếng gõ trầm đục vang lên sau cánh cửa chính.</p>
+      <h1 class="title-main title-main-vi">Đêm Không Dứt</h1>
+      <div class="title-sub-row"><span class="demo-tag">DEMO</span></div>
       <nav class="title-menu" aria-label="Menu chính">
         <button id="btn-continue" class="menu-btn hidden" type="button">Tiếp tục</button>
         <button id="btn-start" class="menu-btn" type="button">Chơi mới</button>
         <button id="btn-title-settings" class="menu-btn" type="button">Cài đặt</button>
         <button id="btn-title-exit" class="menu-btn menu-btn-exit" type="button">Thoát</button>
       </nav>
-      <div class="title-hint">↑↓ / Chuột chọn mục · WASD di chuyển · E tương tác · F quẹt diêm · J ghi chép</div>
+      <div class="title-hint">
+        <div>↑↓ / Chuột chọn mục · WASD di chuyển · E tương tác</div>
+        <div>F quẹt diêm · R lật giấy · J Nhật ký · O Cài đặt</div>
+      </div>
     </div>
   </div>
 
@@ -239,8 +239,8 @@ Thumbs.db
           <p>Hiệu ứng âm thanh Foley/Ambience miễn phí bản quyền (khi dùng các tệp .wav/.mp3 từ Mixkit trong <code>public/audio/</code>).</p>
         </div>
         <div class="license-item">
-          <strong>Vercel Web Analytics</strong> — <span>Vercel Terms of Service (Free Tier)</span>
-          <p>Thống kê lượt truy cập ẩn danh không cookie nhằm giám sát bảo mật link thử nghiệm nội bộ.</p>
+          <strong>Hình ảnh nền màn hình chính (title-bg.jpg)</strong> — <span>AI-Generated (Google Gemini)</span>
+          <p>Ảnh minh họa đồng hồ 02:14 được tạo bằng công cụ AI Google Gemini, sử dụng cho phiên bản thử nghiệm nội bộ (không thương mại hóa).</p>
         </div>
         <div class="license-item">
           <strong>Web Audio API &amp; Web Speech API</strong> — <span>W3C Web Standards</span>
@@ -263,9 +263,9 @@ Thumbs.db
   <!-- BLACK-AND-WHITE INTRO OVERLAY (Option A: Unreliable Narrator) -->
   <div id="intro-screen">
     <div class="intro-content">
-      <p id="intro-line-1" class="intro-line">Tiếng mưa khuya đập đều lên khung cửa kính.</p>
-      <p id="intro-line-2" class="intro-line">Alice chưa về, hay đang ở phòng bên cạnh? Ngoài cửa chính vừa vang lên ba nhịp gõ rất khẽ.</p>
-      <p id="intro-line-3" class="intro-line intro-date">02:14 · Ai đó đang đứng ngoài cửa</p>
+      <p id="intro-line-1" class="intro-line">Mưa đập vào kính.</p>
+      <p id="intro-line-2" class="intro-line">Ba nhịp gõ trầm sau cửa chính.</p>
+      <p id="intro-line-3" class="intro-line intro-date">02:14</p>
     </div>
     <button id="intro-skip" type="button">Nhấn phím bất kỳ hoặc click để tiếp tục</button>
   </div>
@@ -304,87 +304,175 @@ Thumbs.db
     </div>
   </div>
 
-  <!-- SETTINGS OVERLAY -->
+  <!-- SETTINGS OVERLAY (3-TAB HORROR GAME STANDARD) -->
   <div id="settings-screen" class="overlay-screen hidden">
-    <div class="modal-card">
-      <div class="modal-kicker">Tối ưu hiệu năng &amp; Trải nghiệm</div>
-      <h2>Cài đặt trò chơi</h2>
+    <div class="modal-card settings-modal-card">
+      <div class="modal-kicker">Tùy chỉnh hệ thống</div>
+      <h2>Cài đặt</h2>
 
-      <!-- Chất lượng đồ họa -->
-      <div class="settings-section">
-        <div class="settings-label-row">
-          <span class="settings-label">Chất lượng đồ họa</span>
-        </div>
-        <div class="seg-group seg-3" id="gfx-preset-group">
-          <button type="button" class="seg-btn" data-gfx="low">Thấp</button>
-          <button type="button" class="seg-btn" data-gfx="medium">Trung bình</button>
-          <button type="button" class="seg-btn" data-gfx="high">Cao</button>
-        </div>
-        <p id="gfx-desc" class="settings-hint"></p>
+      <div class="settings-tabs" role="tablist">
+        <button type="button" class="settings-tab active" data-tab="graphics" role="tab">Đồ họa</button>
+        <button type="button" class="settings-tab" data-tab="audio" role="tab">Âm thanh</button>
+        <button type="button" class="settings-tab" data-tab="controls" role="tab">Điều khiển</button>
       </div>
 
-      <!-- Giới hạn FPS -->
-      <div class="settings-section">
-        <div class="settings-label-row">
-          <span class="settings-label">Giới hạn FPS</span>
-        </div>
-        <div class="seg-group seg-4" id="fps-limit-group">
-          <button type="button" class="seg-btn" data-fps="30">30 FPS</button>
-          <button type="button" class="seg-btn" data-fps="60">60 FPS</button>
-          <button type="button" class="seg-btn" data-fps="120">120 FPS</button>
-          <button type="button" class="seg-btn" data-fps="0">Không giới hạn</button>
-        </div>
-        <p class="settings-hint">Giới hạn FPS giúp khung hình ổn định hơn, giảm nóng máy và tiết kiệm pin/GPU.</p>
-      </div>
-
-      <!-- Bộ đếm FPS & Độ mượt Camera -->
-      <div class="settings-section">
-        <div class="toggle-row">
-          <div>
-            <div class="settings-label">Hiển thị bộ đếm FPS</div>
-            <div class="settings-hint tight">Hiện chỉ số khung hình trực tiếp ở góc trên màn hình.</div>
+      <!-- TAB 1: ĐỒ HỌA & HIỂN THỊ -->
+      <div class="settings-tab-panel" data-panel="graphics">
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Chất lượng đồ họa</span>
           </div>
-          <button type="button" id="toggle-show-fps" class="toggle-switch" aria-label="Hiển thị bộ đếm FPS"></button>
-        </div>
-        <div class="toggle-row">
-          <div>
-            <div class="settings-label">Mượt camera (Camera Smoothing)</div>
-            <div class="settings-hint tight">Làm êm chuyển động xoay góc nhìn, giảm cảm giác giật khi di chuột.</div>
+          <div class="seg-group seg-3" id="gfx-preset-group">
+            <button type="button" class="seg-btn" data-gfx="low">Thấp</button>
+            <button type="button" class="seg-btn" data-gfx="medium">Trung bình</button>
+            <button type="button" class="seg-btn" data-gfx="high">Cao</button>
           </div>
-          <button type="button" id="toggle-cam-smooth" class="toggle-switch" aria-label="Mượt camera"></button>
+          <p id="gfx-desc" class="settings-hint"></p>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Độ sáng (Gamma)</span>
+            <span id="gamma-display" class="sens-value">100%</span>
+          </div>
+          <input id="slider-gamma" class="range-slider" type="range" min="0.50" max="2.20" step="0.05" value="1.0" />
+          <div class="gamma-preview-box" id="gamma-preview-box">
+            <span class="gamma-preview-text">02:14 · Chỉnh đến khi nhìn thấy mờ dòng chữ này</span>
+          </div>
+          <p class="settings-hint">Áp dụng trực tiếp lên độ sáng khung hình 3D và vùng bóng tối trong nhà.</p>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Góc nhìn (FOV)</span>
+            <span id="fov-display" class="sens-value">66°</span>
+          </div>
+          <input id="slider-fov" class="range-slider" type="range" min="55" max="85" step="1" value="66" />
+          <p class="settings-hint">Tăng góc nhìn (72°–80°) giúp giảm chóng mặt khi chơi góc nhìn thứ nhất.</p>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Giới hạn FPS</span>
+          </div>
+          <div class="seg-group seg-4" id="fps-limit-group">
+            <button type="button" class="seg-btn" data-fps="30">30 FPS</button>
+            <button type="button" class="seg-btn" data-fps="60">60 FPS</button>
+            <button type="button" class="seg-btn" data-fps="120">120 FPS</button>
+            <button type="button" class="seg-btn" data-fps="0">Không giới hạn</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="toggle-row">
+            <div>
+              <div class="settings-label">Hiệu ứng nhiễu phim (Film Grain)</div>
+              <div class="settings-hint tight">Tạo hạt nhiễu điện ảnh cổ điển trên màn hình.</div>
+            </div>
+            <button type="button" id="toggle-film-grain" class="toggle-switch" aria-label="Nhiễu phim"></button>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="settings-label">Hiển thị bộ đếm FPS</div>
+              <div class="settings-hint tight">Hiện chỉ số khung hình trực tiếp ở góc trên màn hình.</div>
+            </div>
+            <button type="button" id="toggle-show-fps" class="toggle-switch" aria-label="Hiển thị bộ đếm FPS"></button>
+          </div>
         </div>
       </div>
 
-      <!-- Độ nhạy chuột -->
-      <div class="settings-section">
-        <div class="settings-label-row">
-          <span class="settings-label">Độ nhạy chuột / cảm ứng</span>
-          <span id="sens-display" class="sens-value">1.0x</span>
+      <!-- TAB 2: ÂM THANH & PHỤ ĐỀ -->
+      <div class="settings-tab-panel hidden" data-panel="audio">
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Âm lượng tổng (Master)</span>
+            <span id="master-vol-display" class="sens-value">88%</span>
+          </div>
+          <input id="slider-master-vol" class="range-slider" type="range" min="0" max="100" step="2" value="88" />
         </div>
-        <input id="slider-sens" class="range-slider" type="range" min="0.5" max="2.0" step="0.1" value="1.0" />
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Âm thanh nền &amp; Mưa (Ambience)</span>
+            <span id="ambience-vol-display" class="sens-value">85%</span>
+          </div>
+          <input id="slider-ambience-vol" class="range-slider" type="range" min="0" max="100" step="2" value="85" />
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Hiệu ứng &amp; Tiếng động (SFX)</span>
+            <span id="sfx-vol-display" class="sens-value">90%</span>
+          </div>
+          <input id="slider-sfx-vol" class="range-slider" type="range" min="0" max="100" step="2" value="90" />
+        </div>
+
+        <div class="settings-section">
+          <div class="toggle-row">
+            <div>
+              <div class="settings-label">Hiển thị phụ đề (Subtitles)</div>
+              <div class="settings-hint tight">Hiện lời thoại, suy nghĩ nhân vật và mô tả âm thanh quan trọng.</div>
+            </div>
+            <button type="button" id="toggle-subtitles" class="toggle-switch" aria-label="Hiển thị phụ đề"></button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Tắt tiếng nhanh &amp; Giọng đọc</span>
+          </div>
+          <div class="settings-btn-row">
+            <button id="btn-mute" class="hud-btn" type="button">Âm thanh: Bật</button>
+            <button id="btn-voice" class="hud-btn" type="button">Giọng kể: Tắt</button>
+            <select id="voice-select" class="hud-select" title="Chọn giọng đọc tiếng Việt"></select>
+          </div>
+        </div>
       </div>
 
-      <!-- Âm thanh & Giọng kể -->
-      <div class="settings-section">
-        <div class="settings-label-row">
-          <span class="settings-label">Âm thanh &amp; Giọng kể</span>
+      <!-- TAB 3: ĐIỀU KHIỂN & CHỐNG SAY 3D -->
+      <div class="settings-tab-panel hidden" data-panel="controls">
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Độ nhạy chuột / cảm ứng</span>
+            <span id="sens-display" class="sens-value">1.0x</span>
+          </div>
+          <input id="slider-sens" class="range-slider" type="range" min="0.5" max="2.0" step="0.1" value="1.0" />
         </div>
-        <div class="settings-btn-row">
-          <button id="btn-mute" class="hud-btn" type="button">Âm thanh: Bật</button>
-          <button id="btn-voice" class="hud-btn" type="button">Giọng kể: Tắt</button>
-          <select id="voice-select" class="hud-select" title="Chọn giọng đọc tiếng Việt"></select>
-        </div>
-      </div>
 
-      <!-- Tiện ích & Kiểm thử -->
-      <div class="settings-section">
-        <div class="settings-label-row">
-          <span class="settings-label">Tiện ích &amp; Kiểm thử</span>
+        <div class="settings-section">
+          <div class="toggle-row">
+            <div>
+              <div class="settings-label">Đảo ngược trục Y (Invert Y)</div>
+              <div class="settings-hint tight">Đẩy chuột lên để nhìn xuống và ngược lại.</div>
+            </div>
+            <button type="button" id="toggle-invert-y" class="toggle-switch" aria-label="Đảo ngược trục Y"></button>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="settings-label">Lắc đầu &amp; Rung màn hình (Head Bob)</div>
+              <div class="settings-hint tight">Tắt mục này nếu bạn dễ bị say 3D / chóng mặt khi di chuyển.</div>
+            </div>
+            <button type="button" id="toggle-head-bob" class="toggle-switch" aria-label="Lắc đầu và rung màn hình"></button>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="settings-label">Mượt camera (Camera Smoothing)</div>
+              <div class="settings-hint tight">Làm êm chuyển động xoay góc nhìn khi di chuột.</div>
+            </div>
+            <button type="button" id="toggle-cam-smooth" class="toggle-switch" aria-label="Mượt camera"></button>
+          </div>
         </div>
-        <div class="settings-btn-row">
-          <button id="btn-pad-toggle" class="hud-btn" type="button">Phím ảo</button>
-          <button id="btn-foley" class="hud-btn" type="button" data-dev-only="true">Thử âm thanh</button>
-          <button id="btn-test-ending" class="hud-btn" type="button" data-dev-only="true">Test kết thúc</button>
+
+        <div class="settings-section">
+          <div class="settings-label-row">
+            <span class="settings-label">Tiện ích &amp; Dữ liệu lưu</span>
+          </div>
+          <div class="settings-btn-row">
+            <button id="btn-pad-toggle" class="hud-btn" type="button">Phím ảo cảm ứng</button>
+            <button id="btn-clear-save" class="hud-btn" type="button">Xóa tiến độ đã lưu</button>
+            <button id="btn-foley" class="hud-btn" type="button" data-dev-only="true">Thử âm thanh</button>
+            <button id="btn-test-ending" class="hud-btn" type="button" data-dev-only="true">Test kết thúc</button>
+          </div>
         </div>
       </div>
 
@@ -400,7 +488,7 @@ Thumbs.db
     <div class="modal-card keypad-card">
       <div class="modal-kicker">Khóa mã hộp hồ sơ · Vòng 5</div>
       <h2>Nhập mật mã 4 số</h2>
-      <p style="font-size:13px; margin-bottom:10px;">Bốn chữ số lặp lại trên đồng hồ đầu giường, gương phòng tắm và tờ lịch bị xé dở.</p>
+      <p id="keypad-hint-desc" style="font-size:13px; margin-bottom:10px;">Ghép 4 chữ số màu theo đúng thứ tự màu vẽ trên tường phòng khách (xem mặt sau giấy bếp, tủ lạnh, tủ áo và gương phòng tắm).</p>
       <div id="keypad-display" class="keypad-display">----</div>
       <p id="keypad-msg" class="keypad-msg">Gõ phím số hoặc bấm trực tiếp bên dưới.</p>
       <div class="keypad-grid">
@@ -421,21 +509,45 @@ Thumbs.db
     </div>
   </div>
 
-  <!-- CRISP 2D PAPER READER OVERLAY -->
+  <!-- INTERACTIVE 3D TILT & FLIP PAPER READER OVERLAY -->
   <div id="paper-overlay" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="paper-header">
-    <div id="paper-sheet" class="paper-sheet theme-calendar">
-      <div class="paper-top-rule"></div>
-      <div id="paper-header" class="paper-header"></div>
-      <div id="paper-subheader" class="paper-subheader hidden"></div>
-      <div class="paper-divider"></div>
-      <div id="paper-body" class="paper-body"></div>
-      <div id="paper-note-wrap" class="paper-note-wrap hidden">
-        <div class="paper-note-divider"></div>
-        <p id="paper-note" class="paper-note"></p>
+    <div class="paper-stage">
+      <div id="paper-tilt-wrap" class="paper-tilt-wrap">
+        <div id="paper-card-3d" class="paper-card-3d">
+          <!-- FRONT FACE -->
+          <div id="paper-sheet" class="paper-sheet paper-face paper-face-front theme-calendar">
+            <div class="paper-top-rule"></div>
+            <div id="paper-header" class="paper-header"></div>
+            <div id="paper-subheader" class="paper-subheader hidden"></div>
+            <div class="paper-divider"></div>
+            <div id="paper-body" class="paper-body"></div>
+            <div id="paper-note-wrap" class="paper-note-wrap hidden">
+              <div class="paper-note-divider"></div>
+              <p id="paper-note" class="paper-note"></p>
+            </div>
+            <div class="paper-footer">
+              <button id="btn-flip-paper" class="paper-close-btn" type="button">Lật mặt sau (R)</button>
+              <button id="btn-close-paper" class="paper-close-btn" type="button">Hạ giấy xuống (E)</button>
+            </div>
+          </div>
+          <!-- BACK FACE -->
+          <div id="paper-sheet-back" class="paper-sheet paper-face paper-face-back theme-calendar">
+            <div class="paper-top-rule"></div>
+            <div id="paper-back-header" class="paper-header">MẶT SAU TỜ GIẤY</div>
+            <div class="paper-divider"></div>
+            <div id="paper-back-clue" class="paper-back-clue hidden">
+              <span id="paper-back-swatch" class="paper-color-swatch"></span>
+              <span id="paper-back-digit" class="paper-back-digit"></span>
+            </div>
+            <div id="paper-back-body" class="paper-body paper-back-body"></div>
+            <div class="paper-footer">
+              <button id="btn-flip-paper-back" class="paper-close-btn" type="button">Lật mặt trước (R)</button>
+              <button id="btn-close-paper-back" class="paper-close-btn" type="button">Hạ giấy xuống (E)</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="paper-footer">
-        <button id="btn-close-paper" class="paper-close-btn" type="button">Hạ giấy xuống (E / Esc)</button>
-      </div>
+      <div class="paper-controls-tip">Di chuột để nghiêng tờ giấy · Nhấn [R] lật mặt sau · Nhấn [E] hạ xuống</div>
     </div>
   </div>
 
@@ -503,7 +615,7 @@ Thumbs.db
 {
   "name": "0214-ngay-khong-chiu-qua",
   "private": true,
-  "version": "1.7.0-demo",
+  "version": "2.0.1-demo",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -646,15 +758,15 @@ Tự động quét cấu trúc thư mục và chia nhỏ toàn bộ mã nguồn 
 ```markdown
 # Bản quyền & Giấy phép Bên Thứ Ba — 02:14 — Đêm Không Dứt (DEMO)
 
-Dự án này là phiên bản thử nghiệm nội bộ (không thương mại hóa) sử dụng các thư viện mã nguồn mở và tài nguyên miễn phí sau:
+Dự án này là phiên bản thử nghiệm nội bộ (không thương mại hóa) sử dụng các thư viện mã nguồn mở và tài nguyên sau:
 
-| Thành phần | Giấy phép | Ghi chú |
+| Thành phần | Giấy phép / Nguồn | Ghi chú |
 |---|---|---|
 | **Three.js** (`three`) | MIT License | Thư viện đồ họa WebGL 3D (© Three.js Authors) |
 | **Vite** (`vite`) | MIT License | Công cụ đóng gói & máy chủ phát triển (© Evan You & Contributors) |
 | **Be Vietnam Pro & Lora** (Google Fonts) | SIL Open Font License 1.1 (OFL-1.1) | Phông chữ hiển thị giao diện tiếng Việt |
 | **Mixkit Free Sound Effects** | Mixkit Sound Effects Free License | Hiệu ứng âm thanh Foley & Ambience miễn phí trong `public/audio/` (nếu sử dụng bản tải từ Mixkit) |
-| **Vercel Web Analytics** | Vercel Terms of Service (Free Tier) | Thống kê lượt truy cập ẩn danh không cookie (`/ _vercel/insights/script.js`) |
+| **Ảnh nền màn hình chính (`public/title-bg.jpg`)** | AI-Generated (Google Gemini) | Ảnh minh họa tạo bằng Google Gemini cho bản thử nghiệm nội bộ, không thương mại hóa |
 | **Web Audio API & Web Speech API** | W3C Web Standards | API trình duyệt web tiêu chuẩn |
 ```
 

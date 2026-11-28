@@ -160,6 +160,22 @@ export function setupLoopEnvironment(loopNum, ctx) {
   objects.brokenMugGroup.visible = true;
   objects.doorRainPuddle.visible = loopNum >= 2;
   objects.flowersGroup.visible = loopNum >= 5;
+
+  // Silent Hill Otherworld transformation (Loops 4-5: rusted walls, grated floor, rust-ash fog)
+  const isOtherworld = loopNum >= 4;
+  if (materials.otherworldPlasterPBR && materials.plasterPBR) {
+    materials.wallMat.map = isOtherworld ? materials.otherworldPlasterPBR.map : materials.plasterPBR.map;
+    materials.wallMat.bumpMap = isOtherworld ? materials.otherworldPlasterPBR.bumpMap : materials.plasterPBR.bumpMap;
+    materials.wallMat.needsUpdate = true;
+  }
+  if (materials.otherworldFloorPBR && materials.floorPBR) {
+    materials.floorMat.map = isOtherworld ? materials.otherworldFloorPBR.map : materials.floorPBR.map;
+    materials.floorMat.bumpMap = isOtherworld ? materials.otherworldFloorPBR.bumpMap : materials.floorPBR.bumpMap;
+    materials.floorMat.needsUpdate = true;
+  }
+  if (scene.fog) {
+    scene.fog.color.setHex(loopNum >= 4 ? 0x0d0706 : (loopNum === 3 ? 0x060708 : 0x04060a));
+  }
   objects.secondPillowMesh.visible = loopNum <= 3;
   lights.ambRedLight.intensity = 0;
   lights.ambBlueLight.intensity = 0;

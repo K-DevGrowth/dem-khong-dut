@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS = {
   fpsLimit: 60,       // 30 | 60 | 120 | 0 (unlimited)
   gamma: 1.0,         // 0.50 - 2.20 (real-time exposure + ambient shadow lift)
   fov: 66,            // 55 - 85 degrees
+  psxMode: false,
   filmGrain: true,
   showFps: false,
 
@@ -81,6 +82,7 @@ export function loadSettings() {
       fpsLimit: [0, 30, 60, 120].includes(Number(p.fpsLimit)) ? Number(p.fpsLimit) : DEFAULT_SETTINGS.fpsLimit,
       gamma: clamp(p.gamma, 0.5, 2.2, DEFAULT_SETTINGS.gamma),
       fov: Math.round(clamp(p.fov, 55, 85, DEFAULT_SETTINGS.fov)),
+      psxMode: Boolean(p.psxMode),
       filmGrain: p.filmGrain !== undefined ? Boolean(p.filmGrain) : DEFAULT_SETTINGS.filmGrain,
       showFps: Boolean(p.showFps),
       masterVol: clamp(p.masterVol, 0, 1, DEFAULT_SETTINGS.masterVol),

@@ -6,16 +6,16 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Các mô-đun trong thư mục `src/world/`  
-> **Số tập tin:** 6 | **Tổng số dòng:** 2,727 | **Dung lượng:** 104.8 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 2,836 | **Dung lượng:** 108.5 KB
 
 ## Mục lục tập tin
 
 - [`src/world/doors.js`](#src-world-doors-js) (86 dòng · 2.9 KB)
 - [`src/world/entity.js`](#src-world-entity-js) (348 dòng · 11.8 KB)
-- [`src/world/house.js`](#src-world-house-js) (1,207 dòng · 47.7 KB)
+- [`src/world/house.js`](#src-world-house-js) (1,233 dòng · 48.8 KB)
 - [`src/world/materials.js`](#src-world-materials-js) (142 dòng · 5.5 KB)
 - [`src/world/puzzles.js`](#src-world-puzzles-js) (422 dòng · 15.5 KB)
-- [`src/world/textures.js`](#src-world-textures-js) (522 dòng · 21.4 KB)
+- [`src/world/textures.js`](#src-world-textures-js) (605 dòng · 24.1 KB)
 
 ---
 
@@ -470,7 +470,7 @@ export function createShadowPresence(scene, materials) {
 ---
 
 <a id="src-world-house-js"></a>
-## Tập tin: `src/world/house.js` (1,207 dòng)
+## Tập tin: `src/world/house.js` (1,233 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -718,26 +718,30 @@ export function createHouse(scene, materials, colliders, interactables, getState
   const clockCtx = clockCanvas.getContext('2d');
   const clockTex = new THREE.CanvasTexture(clockCanvas);
   clockTex.colorSpace = THREE.SRGBColorSpace;
-  function drawClockFace(text, color = '#ff4a3d') {
-    clockCtx.fillStyle = '#070709'; clockCtx.fillRect(0, 0, 256, 128);
-    clockCtx.shadowColor = color; clockCtx.shadowBlur = 14;
-    clockCtx.fillStyle = color; clockCtx.font = 'bold 76px monospace';
+  function drawClockFace(text, color = '#ff2a1e') {
+    clockCtx.fillStyle = '#050507'; clockCtx.fillRect(0, 0, 256, 128);
+    clockCtx.strokeStyle = '#1b1d22'; clockCtx.lineWidth = 8;
+    clockCtx.strokeRect(4, 4, 248, 120);
+    clockCtx.shadowColor = color; clockCtx.shadowBlur = 22;
+    clockCtx.fillStyle = color; clockCtx.font = 'bold 78px monospace';
     clockCtx.textAlign = 'center'; clockCtx.textBaseline = 'middle';
     clockCtx.fillText(text, 128, 66);
     clockTex.needsUpdate = true;
   }
   drawClockFace('02:14');
 
+  const clockFaceMat = new THREE.MeshBasicMaterial({ map: clockTex, toneMapped: false });
+  // Face index 5 is -Z (facing straight toward the player & bed instead of the back wall!)
   const clockMesh = new THREE.Mesh(
-    getBoxGeo(0.28, 0.14, 0.12),
-    [materials.metalMat, materials.metalMat, materials.metalMat, materials.metalMat, new THREE.MeshBasicMaterial({ map: clockTex }), materials.metalMat]
+    getBoxGeo(0.34, 0.16, 0.15),
+    [materials.metalMat, materials.metalMat, materials.metalMat, materials.metalMat, materials.metalMat, clockFaceMat]
   );
-  clockMesh.position.set(-0.2, 0.71, 3.85);
-  clockMesh.rotation.y = -0.35;
+  clockMesh.position.set(-0.2, 0.72, 3.82);
+  clockMesh.rotation.y = 0.24;
   scene.add(clockMesh);
 
-  // Emissive glow proxy instead of PointLight
-  const clockGlow = createGlowProxy(scene, 0xff3322, [-0.2, 0.74, 3.72], 0.42, 0.5, 0.42);
+  // Subtle red LED reflection on nightstand surface + glowing halo
+  const clockGlow = createGlowProxy(scene, 0xff261b, [-0.22, 0.74, 3.68], 0.52, 0.78, 0.52);
 
   const clockAnomalyObj = {
     type: 'clock_anomaly',
@@ -805,16 +809,36 @@ export function createHouse(scene, materials, colliders, interactables, getState
 
   // Scratched date clue inside back wall of wardrobe (revealed in Loops 3-5)
   const wScrawlCanvas = document.createElement('canvas');
-  wScrawlCanvas.width = 256; wScrawlCanvas.height = 128;
+  wScrawlCanvas.width = 256; wScrawlCanvas.height = 160;
   const wScrawlCtx = wScrawlCanvas.getContext('2d');
-  wScrawlCtx.clearRect(0, 0, 256, 128);
-  wScrawlCtx.fillStyle = 'rgba(225, 212, 194, 0.82)';
-  wScrawlCtx.font = 'bold 24px monospace';
-  wScrawlCtx.textAlign = 'center';
-  wScrawlCtx.fillText('ALICE · 14/11', 128, 52);
-  wScrawlCtx.fillText('02:14', 128, 92);
   const wScrawlTex = new THREE.CanvasTexture(wScrawlCanvas);
   wScrawlTex.colorSpace = THREE.SRGBColorSpace;
+  function drawWardrobeClue(clue = null) {
+    wScrawlCtx.clearRect(0, 0, 256, 160);
+    wScrawlCtx.textAlign = 'center';
+    if (clue) {
+      wScrawlCtx.fillStyle = clue.hex;
+      wScrawlCtx.beginPath();
+      wScrawlCtx.arc(128, 66, 40, 0, Math.PI * 2);
+      wScrawlCtx.fill();
+      wScrawlCtx.strokeStyle = 'rgba(240,235,225,0.75)';
+      wScrawlCtx.lineWidth = 3;
+      wScrawlCtx.stroke();
+      wScrawlCtx.fillStyle = '#f5f2eb';
+      wScrawlCtx.font = 'bold 46px monospace';
+      wScrawlCtx.fillText(String(clue.digit), 128, 82);
+      wScrawlCtx.fillStyle = 'rgba(232, 224, 210, 0.9)';
+      wScrawlCtx.font = 'bold 20px "Be Vietnam Pro", sans-serif';
+      wScrawlCtx.fillText(`MÀU ${clue.name.toUpperCase()}`, 128, 138);
+    } else {
+      wScrawlCtx.fillStyle = 'rgba(225, 212, 194, 0.82)';
+      wScrawlCtx.font = 'bold 24px monospace';
+      wScrawlCtx.fillText('ALICE · 14/11', 128, 64);
+      wScrawlCtx.fillText('02:14', 128, 108);
+    }
+    wScrawlTex.needsUpdate = true;
+  }
+  drawWardrobeClue(null);
   const wardrobeScrawlMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(0.92, 0.46),
     new THREE.MeshBasicMaterial({ map: wScrawlTex, transparent: true })
@@ -1365,18 +1389,18 @@ export function createHouse(scene, materials, colliders, interactables, getState
       ctx.strokeStyle = '#ff5a50'; ctx.lineWidth = 3;
       ctx.strokeRect(18, 168, 220, 104);
       ctx.fillStyle = '#ff7b72'; ctx.font = 'bold 23px sans-serif';
-      ctx.fillText('4 CUỘC GỌI NHỠ', 128, 204);
-      ctx.fillStyle = '#f5e8e6'; ctx.font = '19px sans-serif';
-      ctx.fillText('Alice · 02:08 (Im lặng)', 128, 240);
+      ctx.fillText('CUỘC GỌI ĐI · 113', 128, 204);
+      ctx.fillStyle = '#f5e8e6'; ctx.font = '18px sans-serif';
+      ctx.fillText('02:08 · Thời lượng 0:41', 128, 240);
     } else if (mode === 'voicemail') {
-      ctx.fillStyle = 'rgba(232, 155, 76, 0.24)';
+      ctx.fillStyle = 'rgba(212, 77, 66, 0.22)';
       ctx.fillRect(18, 168, 220, 108);
-      ctx.strokeStyle = '#f7c37c'; ctx.lineWidth = 3;
+      ctx.strokeStyle = '#d46960'; ctx.lineWidth = 3;
       ctx.strokeRect(18, 168, 220, 108);
-      ctx.fillStyle = '#f7c37c'; ctx.font = 'bold 22px sans-serif';
-      ctx.fillText('TIN NHẮN THOẠI', 128, 204);
-      ctx.fillStyle = '#f5efe6'; ctx.font = '19px sans-serif';
-      ctx.fillText('Alice · 02:09 (0:34)', 128, 242);
+      ctx.fillStyle = '#e69b94'; ctx.font = 'bold 21px sans-serif';
+      ctx.fillText('TIN NHẮN CHƯA GỬI', 128, 204);
+      ctx.fillStyle = '#f5efe6'; ctx.font = '17px sans-serif';
+      ctx.fillText('Gửi David · 02:09', 128, 242);
     } else {
       ctx.fillStyle = 'rgba(255,255,255,0.08)';
       ctx.fillRect(22, 180, 212, 64);
@@ -1612,6 +1636,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
 
   return {
     lights: {
+      nightHemi,
       bedroomLampLight,
       livingWindowMoon,
       lightningLight,
@@ -1638,6 +1663,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
       wardrobeEyes,
       aliceCoatGroup,
       wardrobeScrawlMesh,
+      drawWardrobeClue,
       wardrobeObj,
       secondPillowMesh,
       mirrorMesh,
@@ -1759,10 +1785,10 @@ export function createMaterials() {
   const bathMirrorCrackedTex = makeBathMirrorTex('cracked');
   const bathMirrorMat = new THREE.MeshStandardMaterial({ map: bathMirrorCleanTex, roughness: 0.14, metalness: 0.78 });
 
-  const scrawlTex2 = makeWallScrawl('LẠNH QUÁ...', 'sao anh không mở?');
-  const scrawlTex3 = makeWallScrawl('02:08 · IM LẶNG', '4 cuộc gọi không ai nghe');
-  const scrawlTex4 = makeWallScrawl('CHỐT KHÓA Ở BÊN TRONG', 'anh đâu có ngủ quên...');
-  const scrawlTex5 = makeWallScrawl('14/11 · 02:14', 'mở cửa ra đi, Steve.');
+  const scrawlTex2 = makeWallScrawl('ĐÂY KHÔNG PHẢI NHÀ ANH', 'kiểm tra lại khóa cửa đi');
+  const scrawlTex3 = makeWallScrawl('02:08 · GỌI 113', 'hắn đang ở trong nhà');
+  const scrawlTex4 = makeWallScrawl('NHÌN VÀO GƯƠNG ĐI', 'người trong ảnh không phải anh');
+  const scrawlTex5 = makeWallScrawl('14/11 · 02:14', 'mở chốt khóa ra.');
   const wallScrawlMat = new THREE.MeshStandardMaterial({ map: scrawlTex2, transparent: true, roughness: 0.9 });
 
   const heldPaperMat = new THREE.MeshBasicMaterial({ map: makeHeldPaperTexture('clue', 1), depthTest: false, toneMapped: false });
@@ -2265,7 +2291,7 @@ export function createPuzzlesSystem(scene, materials, interactables, getState) {
 ---
 
 <a id="src-world-textures-js"></a>
-## Tập tin: `src/world/textures.js` (522 dòng)
+## Tập tin: `src/world/textures.js` (605 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -2394,9 +2420,9 @@ export function makeBathMirrorTex(mode) {
     ctx.fillStyle = 'rgba(18, 26, 32, 0.86)';
     ctx.font = 'bold 16px "Be Vietnam Pro", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('NGƯỜI NGOÀI CỬA LÀ ALICE', 128, 212);
-    ctx.font = 'bold 24px "Be Vietnam Pro", sans-serif';
-    ctx.fillText('ĐỪNG TRỐN NỮA', 128, 244);
+    ctx.fillText('ĐÂY KHÔNG PHẢI NHÀ ANH', 128, 212);
+    ctx.font = 'bold 26px "Be Vietnam Pro", sans-serif';
+    ctx.fillText('ANH LÀ AI?', 128, 246);
     ctx.strokeStyle = 'rgba(235, 246, 255, 0.86)';
     ctx.lineWidth = 2;
     [[128, 120, 18, 36], [128, 120, 244, 72], [128, 120, 48, 305], [128, 120, 215, 290], [128, 120, 128, 8]].forEach(([x1, y1, x2, y2]) => {
@@ -2789,6 +2815,89 @@ export function makeContactShadowTex() {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 128, 128);
   return new THREE.CanvasTexture(c);
+}
+
+export function makeLoop5WallOrderTex(colorOrder) {
+  const c = document.createElement('canvas');
+  c.width = 768; c.height = 384;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 768, 384);
+
+  ctx.fillStyle = 'rgba(218, 210, 198, 0.88)';
+  ctx.font = 'bold 30px "Be Vietnam Pro", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('THỨ TỰ MỞ KHÓA HỘP HỒ SƠ', 384, 72);
+
+  const startX = 120;
+  const gap = 176;
+  colorOrder.forEach((item, idx) => {
+    const cx = startX + idx * gap;
+    const cy = 186;
+    ctx.fillStyle = item.hex;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(240, 234, 224, 0.65)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(235, 228, 218, 0.92)';
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText(String(idx + 1), cx, cy + 8);
+
+    ctx.font = 'bold 21px "Be Vietnam Pro", sans-serif';
+    ctx.fillText(item.name.toUpperCase(), cx, cy + 72);
+
+    if (idx < colorOrder.length - 1) {
+      ctx.fillStyle = 'rgba(218, 210, 198, 0.72)';
+      ctx.font = 'bold 34px monospace';
+      ctx.fillText('→', cx + gap * 0.5, cy + 12);
+    }
+  });
+
+  ctx.fillStyle = 'rgba(182, 34, 26, 0.85)';
+  ctx.font = 'italic 22px "Lora", serif';
+  ctx.fillText('Tìm 4 số màu: mặt sau giấy bếp · tủ lạnh · tủ áo · gương tắm', 384, 336);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+export function makeLoop5BathMirrorTex(clue) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 320;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 256, 320);
+  g.addColorStop(0, '#33424c'); g.addColorStop(0.5, '#1e2830'); g.addColorStop(1, '#12181e');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 320);
+
+  ctx.strokeStyle = 'rgba(235, 246, 255, 0.72)';
+  ctx.lineWidth = 2;
+  [[128, 110, 18, 36], [128, 110, 244, 72], [128, 110, 48, 305], [128, 110, 215, 290]].forEach(([x1, y1, x2, y2]) => {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo((x1 + x2) / 2 + 10, (y1 + y2) / 2 - 6); ctx.lineTo(x2, y2); ctx.stroke();
+  });
+
+  ctx.fillStyle = clue.hex;
+  ctx.beginPath();
+  ctx.arc(128, 140, 42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.fillStyle = '#f5f2eb';
+  ctx.font = 'bold 54px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(String(clue.digit), 128, 159);
+
+  ctx.fillStyle = 'rgba(230, 238, 242, 0.9)';
+  ctx.font = 'bold 20px "Be Vietnam Pro", sans-serif';
+  ctx.fillText(`MÀU ${clue.name.toUpperCase()}`, 128, 232);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 ```
 

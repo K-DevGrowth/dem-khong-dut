@@ -6,18 +6,18 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Điểm khởi chạy chính, hệ thống âm thanh và stylesheet gốc  
-> **Số tập tin:** 3 | **Tổng số dòng:** 6,175 | **Dung lượng:** 196.1 KB
+> **Số tập tin:** 3 | **Tổng số dòng:** 6,735 | **Dung lượng:** 213.0 KB
 
 ## Mục lục tập tin
 
-- [`src/audio.js`](#src-audio-js) (1,211 dòng · 45.8 KB)
-- [`src/main.js`](#src-main-js) (2,622 dòng · 89.1 KB)
-- [`src/style.css`](#src-style-css) (2,342 dòng · 61.1 KB)
+- [`src/audio.js`](#src-audio-js) (1,242 dòng · 47.0 KB)
+- [`src/main.js`](#src-main-js) (2,809 dòng · 97.7 KB)
+- [`src/style.css`](#src-style-css) (2,684 dòng · 68.3 KB)
 
 ---
 
 <a id="src-audio-js"></a>
-## Tập tin: `src/audio.js` (1,211 dòng)
+## Tập tin: `src/audio.js` (1,242 dòng)
 
 ```javascript
 // =========================================================
@@ -53,7 +53,12 @@ export class HouseAudio {
     this.ctx = null;
     this.muted = false;
     this.started = false;
+    this.masterVol = 0.88;
+    this.ambienceVol = 0.85;
+    this.sfxVol = 0.90;
     this.masterGain = null;
+    this.sfxBus = null;
+    this.ambienceBus = null;
     this.reverbSend = null;
     this.droneGain = null;
     this.staticGain = null;
@@ -94,8 +99,16 @@ export class HouseAudio {
     this.started = true;
 
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = this.muted ? 0 : 0.88;
+    this.masterGain.gain.value = this.muted ? 0 : this.masterVol;
     this.masterGain.connect(this.ctx.destination);
+
+    this.sfxBus = this.ctx.createGain();
+    this.sfxBus.gain.value = this.sfxVol;
+    this.sfxBus.connect(this.masterGain);
+
+    this.ambienceBus = this.ctx.createGain();
+    this.ambienceBus.gain.value = this.ambienceVol;
+    this.ambienceBus.connect(this.masterGain);
 
     // Pre-generate shared noise buffers
     const sr = this.ctx.sampleRate;
@@ -141,7 +154,7 @@ export class HouseAudio {
     flt.type = 'lowpass'; flt.frequency.value = 95;
     this.droneGain.gain.value = 0.025;
     osc1.connect(flt); flt.connect(this.droneGain);
-    this.droneGain.connect(this.masterGain);
+    this.droneGain.connect(this.ambienceBus);
     osc1.start();
 
     // TV static layer
@@ -152,21 +165,21 @@ export class HouseAudio {
     this.staticGain = this.ctx.createGain();
     this.staticGain.gain.value = 0.0004;
     src.connect(bp); bp.connect(this.staticGain);
-    this.staticGain.connect(this.masterGain);
+    this.staticGain.connect(this.ambienceBus);
     src.start();
 
-    // Ambience gain buses (routed cleanly through masterGain)
+    // Ambience gain buses (routed cleanly through ambienceBus -> masterGain)
     this.bgAmbienceGain = this.ctx.createGain();
     this.bgAmbienceGain.gain.value = 0.12;
-    this.bgAmbienceGain.connect(this.masterGain);
+    this.bgAmbienceGain.connect(this.ambienceBus);
 
     this.bgWindGain = this.ctx.createGain();
     this.bgWindGain.gain.value = 0.05;
-    this.bgWindGain.connect(this.masterGain);
+    this.bgWindGain.connect(this.ambienceBus);
 
     this.bgRainGain = this.ctx.createGain();
     this.bgRainGain.gain.value = 0.11;
-    this.bgRainGain.connect(this.masterGain);
+    this.bgRainGain.connect(this.ambienceBus);
 
     // Start procedural beds immediately; seamlessly replaced when MP3 buffers decode
     this._startProceduralWindBed();
@@ -334,12 +347,30 @@ export class HouseAudio {
   }
 
   _connectOut(node, wetAmount = 0.35) {
-    node.connect(this.masterGain);
+    const dest = this.sfxBus || this.masterGain;
+    node.connect(dest);
     if (this.reverbSend && wetAmount > 0) {
       const wg = this.ctx.createGain();
-      wg.gain.value = wetAmount;
+      wg.gain.value = wetAmount * this.sfxVol;
       node.connect(wg);
       wg.connect(this.reverbSend);
+    }
+  }
+
+  setVolumes(masterVol, ambienceVol, sfxVol) {
+    this.masterVol = Math.max(0, Math.min(1, Number(masterVol) ?? 0.88));
+    this.ambienceVol = Math.max(0, Math.min(1, Number(ambienceVol) ?? 0.85));
+    this.sfxVol = Math.max(0, Math.min(1, Number(sfxVol) ?? 0.90));
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    if (this.masterGain) {
+      this.masterGain.gain.setTargetAtTime(this.muted ? 0 : this.masterVol, t, 0.04);
+    }
+    if (this.ambienceBus) {
+      this.ambienceBus.gain.setTargetAtTime(this.ambienceVol, t, 0.04);
+    }
+    if (this.sfxBus) {
+      this.sfxBus.gain.setTargetAtTime(this.sfxVol, t, 0.04);
     }
   }
 
@@ -355,7 +386,7 @@ export class HouseAudio {
   setMuted(m) {
     this.muted = m;
     if (this.masterGain && this.ctx) {
-      this.masterGain.gain.setTargetAtTime(m ? 0 : 0.88, this.ctx.currentTime, 0.05);
+      this.masterGain.gain.setTargetAtTime(m ? 0 : this.masterVol, this.ctx.currentTime, 0.05);
     }
   }
 
@@ -1236,7 +1267,7 @@ export class HouseAudio {
 ---
 
 <a id="src-main-js"></a>
-## Tập tin: `src/main.js` (2,622 dòng)
+## Tập tin: `src/main.js` (2,809 dòng)
 
 ```javascript
 import * as THREE from "three";
@@ -1268,7 +1299,7 @@ import { createShadowPresence } from "./world/entity.js";
 // Game logic & director modules
 import { createGameState } from "./game/state.js";
 import { createTimerManager } from "./game/timerManager.js";
-import { loadSavedRun } from "./game/saveManager.js";
+import { loadSavedRun, clearSavedRun } from "./game/saveManager.js";
 import {
   computeStereoPan,
   createShadowEventState,
@@ -1530,7 +1561,18 @@ function initGame() {
   const paperBody = document.getElementById("paper-body");
   const paperNoteWrap = document.getElementById("paper-note-wrap");
   const paperNote = document.getElementById("paper-note");
+  const paperTiltWrap = document.getElementById("paper-tilt-wrap");
+  const paperCard3d = document.getElementById("paper-card-3d");
+  const paperSheetBack = document.getElementById("paper-sheet-back");
+  const paperBackHeader = document.getElementById("paper-back-header");
+  const paperBackClue = document.getElementById("paper-back-clue");
+  const paperBackSwatch = document.getElementById("paper-back-swatch");
+  const paperBackDigit = document.getElementById("paper-back-digit");
+  const paperBackBody = document.getElementById("paper-back-body");
+  const btnFlipPaper = document.getElementById("btn-flip-paper");
+  const btnFlipPaperBack = document.getElementById("btn-flip-paper-back");
   const btnClosePaper = document.getElementById("btn-close-paper");
+  const btnClosePaperBack = document.getElementById("btn-close-paper-back");
   const subtitleBox = document.getElementById("subtitle-box");
   const subtitleSpeaker = document.getElementById("subtitle-speaker");
   const subtitleText = document.getElementById("subtitle-text");
@@ -1578,7 +1620,21 @@ function initGame() {
   const settingsScreen = document.getElementById("settings-screen");
   const gfxDescEl = document.getElementById("gfx-desc");
   const toggleShowFps = document.getElementById("toggle-show-fps");
+  const toggleFilmGrain = document.getElementById("toggle-film-grain");
+  const toggleSubtitles = document.getElementById("toggle-subtitles");
+  const toggleInvertY = document.getElementById("toggle-invert-y");
+  const toggleHeadBob = document.getElementById("toggle-head-bob");
   const toggleCamSmooth = document.getElementById("toggle-cam-smooth");
+  const sliderGamma = document.getElementById("slider-gamma");
+  const gammaDisplay = document.getElementById("gamma-display");
+  const sliderFov = document.getElementById("slider-fov");
+  const fovDisplay = document.getElementById("fov-display");
+  const sliderMasterVol = document.getElementById("slider-master-vol");
+  const masterVolDisplay = document.getElementById("master-vol-display");
+  const sliderAmbienceVol = document.getElementById("slider-ambience-vol");
+  const ambienceVolDisplay = document.getElementById("ambience-vol-display");
+  const sliderSfxVol = document.getElementById("slider-sfx-vol");
+  const sfxVolDisplay = document.getElementById("sfx-vol-display");
   const sliderSens = document.getElementById("slider-sens");
   const sensDisplay = document.getElementById("sens-display");
   const keypadScreen = document.getElementById("keypad-screen");
@@ -1856,7 +1912,7 @@ function initGame() {
     },
   );
 
-  // Wire Settings Controller
+  // Wire Settings Controller (v1.9.0 3-tab horror settings)
   settingsController = createSettingsController(
     {
       container,
@@ -1864,8 +1920,22 @@ function initGame() {
       journalScreen,
       fpsBadge,
       gfxDescEl,
+      toggleFilmGrain,
       toggleShowFps,
+      toggleSubtitles,
+      toggleInvertY,
+      toggleHeadBob,
       toggleCamSmooth,
+      sliderGamma,
+      gammaDisplay,
+      sliderFov,
+      fovDisplay,
+      sliderMasterVol,
+      masterVolDisplay,
+      sliderAmbienceVol,
+      ambienceVolDisplay,
+      sliderSfxVol,
+      sfxVolDisplay,
       sliderSens,
       sensDisplay,
     },
@@ -1873,7 +1943,10 @@ function initGame() {
     GFX_PRESETS,
     renderer,
     scene,
+    camera,
+    audio,
     {
+      nightHemi: house.lights.nightHemi,
       matchLight: matchSystem.matchLight,
       bedroomLampLight: house.lights.bedroomLampLight,
     },
@@ -1883,6 +1956,10 @@ function initGame() {
     state,
     {
       clearKeys,
+      onClearSave: () => {
+        clearSavedRun();
+        refreshContinueButton();
+      },
       onReset: () => {
         Object.assign(settings, DEFAULT_SETTINGS);
         saveSettings(settings);
@@ -1895,14 +1972,24 @@ function initGame() {
   // =========================================================
   // 4. HELD PAPER & CLUE INSPECTION (CRISP 2D DOM READER)
   // =========================================================
+  function flipHeldPaper() {
+    if (!state.holdingPaper || !paperCard3d) return;
+    state.paperFlipped = !state.paperFlipped;
+    paperCard3d.classList.toggle("is-flipped", state.paperFlipped);
+    audio.playFloorCreak();
+  }
+
   function openHeldPaperUI(kind, loopNum) {
-    const content = getHeldPaperContent(kind, loopNum);
+    const content = getHeldPaperContent(kind, loopNum, state);
     if (materials.heldPaperMat.map) materials.heldPaperMat.map.dispose();
     materials.heldPaperMat.map = makeHeldPaperTexture(kind, loopNum);
     materials.heldPaperMat.needsUpdate = true;
 
     state.holdingPaper = true;
     state.holdingPaperSource = kind;
+    state.paperFlipped = false;
+    state.paperTiltX = 0;
+    state.paperTiltY = 0;
     state.paperAnim = 0;
     heldPaperSystem.heldPaperGroup.visible = false;
     matchSystem.matchGroup.visible = false;
@@ -1911,8 +1998,15 @@ function initGame() {
     clearInteractUI(hudCache, { crosshair, interactPrompt });
     clearKeys();
 
+    if (paperCard3d) paperCard3d.classList.remove("is-flipped");
+    if (paperTiltWrap) paperTiltWrap.style.transform = "rotateX(0deg) rotateY(0deg)";
+
     if (paperOverlay && paperSheet && content) {
-      paperSheet.className = `paper-sheet theme-${content.theme || "calendar"}`;
+      const themeCls = `theme-${content.theme || "calendar"}`;
+      paperSheet.className = `paper-sheet paper-face paper-face-front ${themeCls}`;
+      if (paperSheetBack) {
+        paperSheetBack.className = `paper-sheet paper-face paper-face-back ${themeCls}`;
+      }
       if (paperHeader) paperHeader.textContent = content.header || "";
       if (paperSubHeader) {
         if (content.subHeader) {
@@ -1933,6 +2027,30 @@ function initGame() {
           paperNoteWrap.classList.add("hidden");
         }
       }
+
+      if (paperBackHeader) paperBackHeader.textContent = content.backHeader || "MẶT SAU TỜ GIẤY";
+      if (paperBackBody) {
+        paperBackBody.textContent = content.backBody || "Mặt sau tờ giấy chỉ có vài vết ố ẩm cũ kỹ.";
+      }
+      if (paperBackClue && paperBackSwatch && paperBackDigit) {
+        if (content.backClue) {
+          paperBackSwatch.style.background = content.backClue.hex;
+          paperBackDigit.textContent = String(content.backClue.digit);
+          paperBackDigit.style.color = content.backClue.hex;
+          paperBackClue.classList.remove("hidden");
+          const clueTitle = `Vòng 5 · Mã màu ${content.backClue.name}`;
+          if (!state.journalNotes.some((n) => n.title === clueTitle)) {
+            state.journalNotes.push({
+              title: clueTitle,
+              text: `Tìm thấy ở mặt sau giấy (${kind === "fridge_note" ? "Tủ lạnh" : "Quầy bếp"}): Màu ${content.backClue.name} = số ${content.backClue.digit}.`,
+            });
+            renderJournal(state, { journalList, journalTimeline, journalChoices });
+          }
+        } else {
+          paperBackClue.classList.add("hidden");
+        }
+      }
+
       paperOverlay.classList.remove("hidden");
     }
 
@@ -2218,30 +2336,30 @@ function initGame() {
       if (state.loop === 1) {
         showSubtitle(
           "Điện thoại trên bàn",
-          "Màn hình tối om, đồng hồ đứng ở 02:14 và báo Không có dịch vụ. Lạ thật, sao Alice không nhắn gì cả?",
-          5600,
+          "02:14 · Không có dịch vụ. Màn hình khóa cài ảnh hai người — không có mặt mình.",
+          5400,
         );
       } else if (state.loop === 2) {
         showSubtitle(
           "Điện thoại trên bàn",
-          "Vẫn là 02:14 không thông báo... nhưng góc máy có biểu tượng chuông gạch chéo. Mình bật Im lặng từ lúc nào?",
-          5600,
+          "Vẫn đứng ở 02:14. Chiếc máy này dùng mật khẩu mình không hề biết.",
+          5400,
         );
       } else if (state.loop === 3) {
         state.phoneCheckedLoop3 = true;
         if (state.anomaliesFound + 1 >= state.anomaliesRequired) {
-          objectiveText.textContent = "Đã xem nhật ký cuộc gọi → vào phòng làm việc kiểm tra tờ lịch";
+          objectiveText.textContent = "Đã xem lịch sử cuộc gọi → vào phòng làm việc kiểm tra tờ lịch";
         }
         showSubtitle(
-          "Màn hình sáng đỏ · 02:08",
-          "4 cuộc gọi nhỡ từ Alice lúc 02:08 ngày 14/11 — khi máy đang bật Im lặng! Khoan đã... hôm nay thật sự là ngày mấy?",
-          6000,
+          "Lịch sử cuộc gọi · 02:08",
+          "Cuộc gọi đi gần nhất: 113 (02:08 · 41 giây). Tin nhắn nháp gửi David: “Có ai đó đang ở trong...”",
+          6200,
           true,
         );
       } else {
         showSubtitle(
-          "Tin nhắn thoại · 02:09",
-          "Màn hình hiện 1 tin nhắn thoại dài 34 giây từ Alice gửi lúc 02:09, ngay sau khi cô ấy gõ cửa mà không ai mở.",
+          "Tin nhắn chưa gửi · 02:09",
+          "Gửi David: “Em khóa cửa phòng ngủ rồi nhưng nghe tiếng thở ngay ngoài hành lang...”",
           6000,
         );
       }
@@ -2270,9 +2388,24 @@ function initGame() {
     } else if (currentTarget.type === "scrawl_anomaly") {
       currentTarget.checkedInLoop = state.loop;
       audio.playWoodScratch(3);
-      const info =
-        LOOP_STORY.anomalyScrawl[state.loop] || LOOP_STORY.anomalyScrawl[2];
-      showSubtitle(info.speaker, info.text, 5400, true);
+      if (state.loop === 5 && state.puzzleColorOrder.length === 4) {
+        const seqStr = state.puzzleColorOrder.map((c) => c.name).join(" → ");
+        showSubtitle(
+          "Thứ tự 4 màu trên tường",
+          `Thứ tự nhập mật mã hộp hồ sơ: ${seqStr}. Hãy tìm 4 chữ số màu ở mặt sau giấy bếp, tủ lạnh, tủ quần áo và gương phòng tắm!`,
+          7000,
+          false,
+        );
+        const t = "Vòng 5 · Thứ tự màu mật mã";
+        if (!state.journalNotes.some((n) => n.title === t)) {
+          state.journalNotes.push({ title: t, text: `Thứ tự màu trên tường phòng khách: ${seqStr}.` });
+          renderJournal(state, { journalList, journalTimeline, journalChoices });
+        }
+      } else {
+        const info =
+          LOOP_STORY.anomalyScrawl[state.loop] || LOOP_STORY.anomalyScrawl[2];
+        showSubtitle(info.speaker, info.text, 5400, true);
+      }
       ctx.recordAnomalyFound();
     } else if (
       currentTarget.type === "study_key" &&
@@ -2327,6 +2460,19 @@ function initGame() {
           materials.bathMirrorMat.map = materials.bathMirrorFogTex;
           materials.bathMirrorMat.needsUpdate = true;
         }, 650);
+      } else if (state.loop === 5 && state.puzzleClues && state.puzzleClues.bath) {
+        const bc = state.puzzleClues.bath;
+        audio.playHeavyBreath(0.24);
+        showSubtitle(
+          "Gương phòng tắm · Mảnh mã màu",
+          `Trên mặt gương nứt hiện vòng tròn màu ${bc.name} với chữ số ${bc.digit}.`,
+          6000,
+        );
+        const t = `Vòng 5 · Mã màu ${bc.name}`;
+        if (!state.journalNotes.some((n) => n.title === t)) {
+          state.journalNotes.push({ title: t, text: `Tìm thấy trên gương phòng tắm: Màu ${bc.name} = số ${bc.digit}.` });
+          renderJournal(state, { journalList, journalTimeline, journalChoices });
+        }
       } else {
         audio.playHeavyBreath(0.24);
         showSubtitle(
@@ -2450,6 +2596,21 @@ function initGame() {
           5800,
           true,
         );
+      } else if (state.loop === 5 && state.puzzleClues && state.puzzleClues.wardrobe) {
+        const wc = state.puzzleClues.wardrobe;
+        audio.playWoodScratch(4);
+        house.objects.wardrobeObj.targetAngle = -1.45;
+        house.objects.wardrobeObj.targetAngle2 = 1.35;
+        showSubtitle(
+          "Vách sau tủ quần áo · Mảnh mã màu",
+          `Bên trong vách gỗ khắc vòng tròn màu ${wc.name} với chữ số ${wc.digit}.`,
+          6000,
+        );
+        const t = `Vòng 5 · Mã màu ${wc.name}`;
+        if (!state.journalNotes.some((n) => n.title === t)) {
+          state.journalNotes.push({ title: t, text: `Tìm thấy trong tủ quần áo: Màu ${wc.name} = số ${wc.digit}.` });
+          renderJournal(state, { journalList, journalTimeline, journalChoices });
+        }
       } else {
         audio.playWoodScratch(4);
         audio.playHeavyBreath(0.32);
@@ -2475,11 +2636,11 @@ function initGame() {
         true,
       );
       state.journalNotes.push({
-        title: `Vòng ${state.loop} — Cuộc gọi từ điện thoại bàn`,
+        title: `Vòng ${state.loop} — Băng ghi âm điện thoại bàn`,
         text:
           state.loop === 2
-            ? "Điện thoại bàn tự đổ chuông dù dây đã rút. Đầu dây bên kia là giọng Alice giữa tiếng mưa lớn ở đầu hẻm lúc 02:14..."
-            : "Vòng 4: Điện thoại lại réo vang giữa đêm. Giọng Alice đứt quãng giữa tiếng nhiễu rè, trách mình vì sao khóa cửa không nghe máy.",
+            ? "Điện thoại bàn tự reo dù dây đã rút. Đầu dây bên kia vang lên giọng phụ nữ hoảng loạn gọi 113 lúc 02:08."
+            : "Vòng 4: Băng ghi âm tổng đài 113 phát lại rõ mồn một — “Hắn không đứng ngoài cửa nữa, hắn đang ở trong nhà tôi...”",
       });
       renderJournal(state, { journalList, journalTimeline, journalChoices });
       ctx.recordAnomalyFound();
@@ -2773,6 +2934,11 @@ function initGame() {
       advanceVoicemailSequence(ctx);
       return;
     }
+    if (state.holdingPaper && (e.code === "KeyR" || e.code === "Space")) {
+      e.preventDefault();
+      flipHeldPaper();
+      return;
+    }
     if (e.code === "KeyE") triggerInteract();
     if (e.code === "KeyJ")
       toggleJournal(
@@ -2796,6 +2962,21 @@ function initGame() {
   let isDragging = false;
   let lastX = 0;
   let lastY = 0;
+  let pointerLockIgnoreUntil = 0;
+
+  function requestSafePointerLock() {
+    if (!container.requestPointerLock) return;
+    try {
+      const p = container.requestPointerLock({ unadjustedMovement: true });
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          try { container.requestPointerLock(); } catch (_) {}
+        });
+      }
+    } catch (_) {
+      try { container.requestPointerLock(); } catch (_) {}
+    }
+  }
 
   subtitleBox.addEventListener("click", () => {
     if (shadowEvent.voicemailHold) advanceVoicemailSequence(ctx);
@@ -2814,21 +2995,20 @@ function initGame() {
 
     if (e.button === 2) return;
 
-    isDragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-
-    // First click while unlocked acquires Pointer Lock only (avoids accidental HPL grab/throw)
+    // First click while unlocked acquires Pointer Lock cleanly without starting drag fallback
     if (
       e.button === 0 &&
       container.requestPointerLock &&
       document.pointerLockElement !== container
     ) {
-      try {
-        container.requestPointerLock();
-      } catch (_) {}
+      isDragging = false;
+      requestSafePointerLock();
       return;
     }
+
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
 
     // All doors, drawers & breaker use crisp [E] interaction
   });
@@ -2840,6 +3020,23 @@ function initGame() {
   });
 
   window.addEventListener("mousemove", (e) => {
+    if (state.holdingPaper && paperTiltWrap) {
+      if (document.pointerLockElement === container) {
+        if (performance.now() < pointerLockIgnoreUntil) return;
+        const pmx = e.movementX || 0;
+        const pmy = e.movementY || 0;
+        if (Math.abs(pmx) > 160 || Math.abs(pmy) > 160) return;
+        state.paperTiltY = Math.max(-22, Math.min(22, state.paperTiltY + pmx * 0.08));
+        state.paperTiltX = Math.max(-16, Math.min(16, state.paperTiltX - pmy * 0.08));
+      } else {
+        const nx = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1;
+        const ny = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
+        state.paperTiltY = nx * 16;
+        state.paperTiltX = -ny * 12;
+      }
+      paperTiltWrap.style.transform = `rotateX(${state.paperTiltX.toFixed(1)}deg) rotateY(${state.paperTiltY.toFixed(1)}deg)`;
+      return;
+    }
     if (!state.running || state.paused || state.ended || state.wakingTimer > 0)
       return;
     const sens = settings.sensitivity;
@@ -2847,22 +3044,29 @@ function initGame() {
     let dy = 0;
 
     if (document.pointerLockElement === container) {
-      dx = e.movementX;
-      dy = e.movementY;
+      if (performance.now() < pointerLockIgnoreUntil) return;
+      dx = e.movementX || 0;
+      dy = e.movementY || 0;
+      // Drop corrupt Chromium/Windows Pointer Lock cursor-recenter spike events (>160px in 1 frame)
+      if (Math.abs(dx) > 160 || Math.abs(dy) > 160) return;
+      dx = Math.max(-90, Math.min(90, dx));
+      dy = Math.max(-90, Math.min(90, dy));
     } else if (isDragging) {
       dx = e.clientX - lastX;
       dy = e.clientY - lastY;
       lastX = e.clientX;
       lastY = e.clientY;
+      if (Math.abs(dx) > 160 || Math.abs(dy) > 160) return;
     } else {
       return;
     }
 
     const mult = document.pointerLockElement === container ? 0.0022 : 0.0045;
+    const ySign = settings.invertY ? -1 : 1;
     state.targetYaw -= dx * mult * sens;
     state.targetPitch = Math.max(
       -1.15,
-      Math.min(1.15, state.targetPitch - dy * mult * sens),
+      Math.min(1.15, state.targetPitch - dy * mult * sens * ySign),
     );
     if (!settings.camSmooth) {
       state.yaw = state.targetYaw;
@@ -3030,6 +3234,9 @@ function initGame() {
   let wasPointerLocked = false;
   document.addEventListener("pointerlockchange", () => {
     const locked = document.pointerLockElement === container;
+    if (locked && !wasPointerLocked) {
+      pointerLockIgnoreUntil = performance.now() + 80;
+    }
     if (
       wasPointerLocked &&
       !locked &&
@@ -3283,8 +3490,17 @@ function initGame() {
   document
     .getElementById("btn-interact")
     .addEventListener("click", triggerInteract);
+  if (btnFlipPaper) {
+    btnFlipPaper.addEventListener("click", () => flipHeldPaper());
+  }
+  if (btnFlipPaperBack) {
+    btnFlipPaperBack.addEventListener("click", () => flipHeldPaper());
+  }
   if (btnClosePaper) {
     btnClosePaper.addEventListener("click", () => lowerHeldPaperUI());
+  }
+  if (btnClosePaperBack) {
+    btnClosePaperBack.addEventListener("click", () => lowerHeldPaperUI());
   }
   if (paperOverlay) {
     paperOverlay.addEventListener("click", (ev) => {
@@ -3792,23 +4008,25 @@ function initGame() {
       }
       state.wasMoving = isMoving;
 
-      // 9. Camera positioning, head bob & trauma shake
+      // 9. Camera positioning, head bob & trauma shake (respects anti-motion-sickness headBob setting)
+      const motionMult = settings.headBob ? 1.0 : 0.0;
       let shakeX = 0;
       let shakeY = 0;
       if (state.shakeTime > 0) {
         state.shakeTime = Math.max(0, state.shakeTime - dt);
-        const shakeAmp = state.panicTimer > 0 ? 0.12 : 0.08;
+        const shakeAmp = (state.panicTimer > 0 ? 0.12 : 0.08) * (settings.headBob ? 1.0 : 0.2);
         shakeX = (Math.random() - 0.5) * shakeAmp;
         shakeY = (Math.random() - 0.5) * shakeAmp;
       }
 
-      const bob = Math.sin(state.bobPhase) * 0.032 * state.bobBlend;
-      const panicRoll = state.panicTimer > 0 ? Math.sin(tSec * 9.5) * 0.055 : 0;
+      const bob = Math.sin(state.bobPhase) * 0.032 * state.bobBlend * motionMult;
+      const panicRoll = state.panicTimer > 0 ? Math.sin(tSec * 9.5) * 0.055 * motionMult : 0;
       const sway =
-        Math.max(state.fear / 100, shadowTension) *
+        (Math.max(state.fear / 100, shadowTension) *
           Math.sin(tSec * 2.6) *
           0.032 +
-        panicRoll;
+          panicRoll) *
+        motionMult;
       camera.position.set(
         state.pos.x + shakeX,
         state.pos.y + bob + shakeY,
@@ -3866,7 +4084,7 @@ if (
 ---
 
 <a id="src-style-css"></a>
-## Tập tin: `src/style.css` (2,342 dòng)
+## Tập tin: `src/style.css` (2,684 dòng)
 
 ```css
 :root {
@@ -6210,6 +6428,348 @@ body.pre-start #foley-panel {
 
 #hpl-hint {
   display: none;
+}
+
+/* === v1.7.1: AGED DIM-LIT HORROR PAPER THEMES (NO EYE STRAIN IN DARK ROOMS) === */
+#paper-overlay {
+  background: rgba(2, 2, 3, 0.80);
+  backdrop-filter: blur(3px);
+}
+
+.paper-sheet {
+  border-radius: 1px;
+  padding: 32px 34px 22px;
+  color: #191511;
+  border: 1px solid rgba(28, 22, 16, 0.55);
+  box-shadow:
+    0 28px 85px rgba(0, 0, 0, 0.92),
+    inset 0 0 72px rgba(18, 13, 8, 0.42),
+    inset 0 0 18px rgba(10, 8, 5, 0.28);
+}
+
+/* Muted, dim-lit paper palettes matching matchlight & nocturnal horror rooms */
+.paper-sheet.theme-calendar {
+  background: linear-gradient(160deg, #b1a792 0%, #8f846f 100%);
+}
+.paper-sheet.theme-sticky {
+  background: linear-gradient(160deg, #b5a782 0%, #8d7f5e 100%);
+}
+.paper-sheet.theme-wet {
+  background: linear-gradient(160deg, #9fa6a2 0%, #7d8581 100%);
+}
+.paper-sheet.theme-frost {
+  background: linear-gradient(160deg, #9eb2bd 0%, #7a909c 100%);
+}
+.paper-sheet.theme-scrawl {
+  background: linear-gradient(160deg, #a39a8d 0%, #7e766a 100%);
+}
+.paper-sheet.theme-report {
+  background: linear-gradient(160deg, #aba394 0%, #888071 100%);
+}
+.paper-sheet.theme-certificate {
+  background: linear-gradient(160deg, #a7a298 0%, #847f76 100%);
+  border: 1px solid rgba(28, 24, 20, 0.72);
+}
+
+.paper-top-rule {
+  height: 2px;
+  border-radius: 0;
+  margin-bottom: 14px;
+  opacity: 0.72;
+}
+.paper-sheet.theme-calendar .paper-top-rule { background: #5e1d18; }
+.paper-sheet.theme-sticky .paper-top-rule { background: #594418; }
+.paper-sheet.theme-frost .paper-top-rule { background: #1d3c4d; }
+.paper-sheet.theme-wet .paper-top-rule,
+.paper-sheet.theme-report .paper-top-rule,
+.paper-sheet.theme-certificate .paper-top-rule { background: #26221d; }
+.paper-sheet.theme-scrawl .paper-top-rule { background: #541410; }
+
+.paper-header {
+  color: #1c1611;
+  letter-spacing: 0.06em;
+}
+.paper-sheet.theme-calendar .paper-header { color: #521813; }
+.paper-sheet.theme-sticky .paper-header { color: #473612; }
+.paper-sheet.theme-frost .paper-header { color: #16303d; }
+.paper-sheet.theme-scrawl .paper-header { color: #4a100c; }
+
+.paper-divider,
+.paper-note-divider {
+  background: rgba(28, 22, 16, 0.28);
+}
+
+.paper-body {
+  color: #15110d;
+}
+.paper-sheet.theme-scrawl .paper-body {
+  color: #4a0e0a;
+}
+
+.paper-note {
+  color: #2c231b;
+}
+
+.paper-footer {
+  margin-top: 22px;
+}
+.paper-close-btn {
+  padding: 6px 14px;
+  border-radius: 1px;
+  border: 1px solid rgba(26, 20, 14, 0.34);
+  background: rgba(20, 15, 10, 0.12);
+  color: #1f1913;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.paper-close-btn:hover {
+  background: rgba(20, 15, 10, 0.24);
+  border-color: rgba(26, 20, 14, 0.65);
+}
+
+/* === v1.8.0: 3D PAPER TILT & FLIP INSPECTION + COLORED CIPHER CLUE === */
+.paper-stage {
+  perspective: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(560px, 92vw);
+}
+
+.paper-tilt-wrap {
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.08s ease-out;
+  will-change: transform;
+}
+
+.paper-card-3d {
+  position: relative;
+  width: 100%;
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.paper-card-3d.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.paper-face {
+  grid-area: 1 / 1;
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.paper-face-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.paper-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paper-back-clue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 18px 0 14px;
+  padding: 16px 20px;
+  background: rgba(16, 12, 8, 0.14);
+  border: 1px dashed rgba(26, 20, 14, 0.38);
+}
+
+.paper-back-clue.hidden {
+  display: none;
+}
+
+.paper-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(20, 16, 12, 0.55);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.paper-back-digit {
+  font-family: monospace;
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.paper-back-body {
+  font-size: 16px;
+  text-align: center;
+  margin: 12px 0;
+  opacity: 0.9;
+}
+
+.paper-controls-tip {
+  font-family: monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: rgba(214, 208, 198, 0.65);
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+
+/* === v1.8.1: TITLE SCREEN PHOTO BACKGROUND + LEFT BLACK SCRIM === */
+#start-screen {
+  background: #000000;
+  overflow: hidden;
+}
+
+.title-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 64% center;
+  z-index: 0;
+  pointer-events: none;
+  filter: contrast(1.04) brightness(0.92);
+}
+
+.title-bg-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #000000 0%,
+    rgba(2, 2, 3, 0.96) 24%,
+    rgba(2, 2, 3, 0.78) 42%,
+    rgba(2, 2, 3, 0.22) 66%,
+    rgba(2, 2, 3, 0.35) 100%
+  );
+}
+
+.title-fullscreen {
+  position: relative;
+  z-index: 2;
+}
+
+#start-screen .title-sub {
+  margin: 8px 0 32px;
+}
+
+#start-screen .title-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  line-height: 1.5;
+  color: #7c776f;
+}
+
+/* === v1.8.2: UNDUPLICATED TITLE HIERARCHY (LEFT TEXT + RIGHT 02:14 CLOCK) === */
+#start-screen .title-main.title-main-vi {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #e6e1d7;
+  margin: 2px 0 12px;
+}
+
+.title-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.title-sub-row .demo-tag {
+  margin-left: 0;
+}
+
+/* === v1.9.0: 3-TAB HORROR SETTINGS MENU === */
+.settings-modal-card {
+  width: min(580px, 100%);
+}
+
+.settings-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0 0 16px;
+  border-bottom: 1px solid rgba(214, 208, 198, 0.14);
+  padding-bottom: 10px;
+}
+
+.settings-tab {
+  padding: 9px 10px;
+  background: transparent;
+  border: 1px solid rgba(214, 208, 198, 0.12);
+  border-radius: 2px;
+  color: #88837a;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.settings-tab:hover {
+  color: #e6e1d7;
+  border-color: rgba(168, 51, 43, 0.55);
+}
+
+.settings-tab.active {
+  color: #f4efe6;
+  background: rgba(168, 51, 43, 0.24);
+  border-color: #b83b33;
+}
+
+.settings-tab-panel.hidden {
+  display: none;
+}
+
+body.no-film-grain #film-grain {
+  display: none;
+}
+
+body.subtitles-off #subtitle-box {
+  display: none;
+}
+
+/* === v1.9.2: LIVE GAMMA CALIBRATION BAR & REAL-TIME PREVIEW === */
+.gamma-preview-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #060608;
+  border: 1px solid rgba(214, 208, 198, 0.12);
+  text-align: center;
+}
+.gamma-preview-text {
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #363432;
+}
+body:not(.pre-start) #settings-screen {
+  background: rgba(3, 3, 4, 0.62);
+  backdrop-filter: blur(2px);
 }
 ```
 

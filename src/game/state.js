@@ -20,6 +20,7 @@ export function createGameState() {
     velZ: 0,
     bobPhase: 0,
     bobBlend: 0,
+    crouching: false,
     fear: 0,
     matchesLeft: 10,
     matchTimer: 0,
