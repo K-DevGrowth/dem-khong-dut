@@ -1,748 +1,455 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>02:14 — Đêm Không Dứt (DEMO)</title>
-    <meta
-      name="description"
-      content="02:14 — Đêm Không Dứt (DEMO): Phiên bản thử nghiệm nội bộ trò chơi kinh dị tâm lý góc nhìn thứ nhất 3D."
-    />
-    <meta name="robots" content="noindex, nofollow" />
-    <script>
-      window.va =
-        window.va ||
-        function () {
-          (window.vaq = window.vaq || []).push(arguments);
-        };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,500;0,600;1,400;1,500&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="pre-start auth-locked">
-    <!-- FULLSCREEN BLACK ACCESS GATE (VITE_DEMO_PASSWORD || testdemo) -->
-    <div
-      id="auth-gate"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="auth-title"
-    >
-      <div class="auth-card">
-        <div class="demo-pill-badge">BẢN DEMO NỘI BỘ</div>
-        <h1 id="auth-title" class="auth-title">
-          02:14 — Đêm Không Dứt <span class="demo-tag">DEMO</span>
-        </h1>
-        <p class="auth-sub">Nhập mật khẩu thử nghiệm để truy cập bản build.</p>
-        <form id="auth-form" class="auth-form" autocomplete="off">
-          <input
-            id="auth-input"
-            class="auth-input"
-            type="password"
-            placeholder="Nhập mật khẩu..."
-            autocomplete="current-password"
-            autofocus
-          />
-          <button id="auth-submit" class="wake-btn auth-btn" type="submit">
-            Xác nhận
-          </button>
-        </form>
-        <p id="auth-error" class="auth-error" aria-live="polite"></p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>02:14 — Đêm Không Dứt (DEMO)</title>
+  <meta name="description" content="02:14 — Đêm Không Dứt (DEMO): Phiên bản thử nghiệm nội bộ trò chơi kinh dị tâm lý góc nhìn thứ nhất 3D." />
+  <meta name="robots" content="noindex, nofollow" />
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+</head>
+<body class="pre-start auth-locked">
+  <!-- FULLSCREEN BLACK ACCESS GATE (VITE_DEMO_PASSWORD || testdemo) -->
+  <div id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <div class="demo-pill-badge">BẢN DEMO NỘI BỘ</div>
+      <h1 id="auth-title" class="auth-title">02:14 — Đêm Không Dứt <span class="demo-tag">DEMO</span></h1>
+      <p class="auth-sub">Nhập mật khẩu thử nghiệm để truy cập bản build.</p>
+      <form id="auth-form" class="auth-form" autocomplete="off">
+        <input
+          id="auth-input"
+          class="auth-input"
+          type="password"
+          placeholder="Nhập mật khẩu..."
+          autocomplete="current-password"
+          autofocus
+        />
+        <button id="auth-submit" class="wake-btn auth-btn" type="submit">Xác nhận</button>
+      </form>
+      <p id="auth-error" class="auth-error" aria-live="polite"></p>
+    </div>
+  </div>
+  <div id="canvas-container"></div>
+  <div id="film-grain"></div>
+  <div id="fear-vignette"></div>
+  <div id="danger-pulse"></div>
+  <div id="panic-overlay"></div>
+  <div id="light-whiteout"></div>
+  <div id="blink-overlay">
+    <div id="blink-clock">02:14</div>
+    <div id="blink-sub">Đêm mưa · 02:14</div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="interact-prompt">Nhấn [E] tương tác</div>
+  <div id="hpl-hint"></div>
+  <div id="chase-banner">
+    <div class="chase-main">RA KHỎI ĐÂY</div>
+    <div class="chase-sub">CHẠY THẲNG RA CỬA CHÍNH</div>
+  </div>
+
+  <!-- TOP HUD (Minimal Horror Layout) -->
+  <div id="hud-top">
+    <div class="hud-minimal-left">
+      <div class="hud-status-line">
+        <span id="loop-label" class="hud-clock">Vòng 1/5 · 02:14</span>
+        <span class="hud-dot">·</span>
+        <span id="anomaly-pill" class="hud-anomaly"><span id="anomaly-label">Dấu vết: 0/2</span></span>
+        <span class="hud-dot">·</span>
+        <span class="hud-match-wrap">
+          Diêm <strong id="match-count">10</strong>
+          <span class="bar-track match-track"><span id="match-bar" class="bar-fill"></span></span>
+        </span>
+        <span id="fps-badge" class="hud-fps hidden">FPS: --</span>
+        <span class="sr-only" aria-hidden="true"><span id="fear-bar"></span><span id="fear-pct">0%</span></span>
+      </div>
+      <div id="objective-toast" class="objective-toast">
+        <span id="objective-text">Kiểm tra trong nhà &amp; tìm chìa khóa phòng làm việc</span>
       </div>
     </div>
-    <div id="canvas-container"></div>
-    <div id="film-grain"></div>
-    <div id="fear-vignette"></div>
-    <div id="danger-pulse"></div>
-    <div id="panic-overlay"></div>
-    <div id="light-whiteout"></div>
-    <div id="blink-overlay">
-      <div id="blink-clock">02:14</div>
-      <div id="blink-sub">Đêm mưa · 02:14</div>
+    <div class="hud-minimal-right">
+      <button id="btn-journal" class="hud-ghost-btn" type="button" title="Ghi chép (J)">Ghi chép (J)</button>
+      <button id="btn-settings" class="hud-ghost-btn" type="button" title="Cài đặt (O)">Cài đặt (O)</button>
     </div>
-    <div id="crosshair"></div>
-    <div id="interact-prompt">Nhấn [E] tương tác</div>
-    <div id="hpl-hint"></div>
-    <div id="chase-banner">
-      <div class="chase-main">RA KHỎI ĐÂY</div>
-      <div class="chase-sub">CHẠY THẲNG RA CỬA CHÍNH</div>
-    </div>
+  </div>
 
-    <!-- TOP HUD (Minimal Horror Layout) -->
-    <div id="hud-top">
-      <div class="hud-minimal-left">
-        <div class="hud-status-line">
-          <span id="loop-label" class="hud-clock">Vòng 1/5 · 02:14</span>
-          <span class="hud-dot">·</span>
-          <span id="anomaly-pill" class="hud-anomaly"
-            ><span id="anomaly-label">Dấu vết: 0/2</span></span
-          >
-          <span class="hud-dot">·</span>
-          <span class="hud-match-wrap">
-            Diêm <strong id="match-count">10</strong>
-            <span class="bar-track match-track"
-              ><span id="match-bar" class="bar-fill"></span
-            ></span>
-          </span>
-          <span id="fps-badge" class="hud-fps hidden">FPS: --</span>
-          <span class="sr-only" aria-hidden="true"
-            ><span id="fear-bar"></span><span id="fear-pct">0%</span></span
-          >
-        </div>
-        <div id="objective-toast" class="objective-toast">
-          <span id="objective-text"
-            >Kiểm tra trong nhà &amp; tìm chìa khóa phòng làm việc</span
-          >
-        </div>
-      </div>
-      <div class="hud-minimal-right">
-        <button
-          id="btn-journal"
-          class="hud-ghost-btn"
-          type="button"
-          title="Ghi chép (J)"
-        >
-          Ghi chép (J)
-        </button>
-        <button
-          id="btn-settings"
-          class="hud-ghost-btn"
-          type="button"
-          title="Cài đặt (O)"
-        >
-          Cài đặt (O)
-        </button>
-      </div>
+  <!-- FOLEY SOUND TEST DRAWER -->
+  <div id="foley-panel" class="foley-panel hidden">
+    <div class="foley-header">
+      <span id="foley-status">Âm thanh thu âm thật (Mixkit / Wikimedia)</span>
+      <button id="btn-close-foley" class="foley-close" type="button" aria-label="Đóng">✕</button>
+    </div>
+    <div class="foley-grid">
+      <button class="foley-btn" data-sfx="door_open" type="button">Kéo cửa mở</button>
+      <button class="foley-btn" data-sfx="door_close" type="button">Đóng cửa</button>
+      <button class="foley-btn" data-sfx="wardrobe_open" type="button">Kéo tủ áo</button>
+      <button class="foley-btn" data-sfx="wardrobe_slam" type="button">Sập tủ áo</button>
+      <button class="foley-btn" data-sfx="portrait_fall" type="button">Rớt khung ảnh</button>
+      <button class="foley-btn" data-sfx="wood_scratch" type="button">Tiếng cào gỗ</button>
+      <button class="foley-btn" data-sfx="fox_cry" type="button">Tiếng đêm ngoài hẻm</button>
+      <button class="foley-btn" data-sfx="door_knock" type="button">Gõ cửa gỗ</button>
+      <button class="foley-btn" data-sfx="scare_sting" type="button">Ám ảnh / Giật mình</button>
+    </div>
+  </div>
+
+  <!-- SUBTITLES -->
+  <div id="subtitle-box">
+    <div id="subtitle-speaker">Ý nghĩ</div>
+    <div id="subtitle-text"></div>
+    <div id="subtitle-continue">Nhấn [E] hoặc click để tiếp tục</div>
+  </div>
+
+  <!-- BOTTOM HUD -->
+  <div id="hud-bottom">
+    <div id="touch-pad">
+      <div></div>
+      <button class="pad-btn" data-key="KeyW" type="button" aria-label="Tiến">▲</button>
+      <div></div>
+      <button class="pad-btn" data-key="KeyA" type="button" aria-label="Trái">◀</button>
+      <button class="pad-btn" data-key="KeyS" type="button" aria-label="Lùi">▼</button>
+      <button class="pad-btn" data-key="KeyD" type="button" aria-label="Phải">▶</button>
     </div>
 
-    <!-- FOLEY SOUND TEST DRAWER -->
-    <div id="foley-panel" class="foley-panel hidden">
-      <div class="foley-header">
-        <span id="foley-status">Âm thanh thu âm thật (Mixkit / Wikimedia)</span>
-        <button
-          id="btn-close-foley"
-          class="foley-close"
-          type="button"
-          aria-label="Đóng"
-        >
-          ✕
-        </button>
-      </div>
-      <div class="foley-grid">
-        <button class="foley-btn" data-sfx="door_open" type="button">
-          Kéo cửa mở
-        </button>
-        <button class="foley-btn" data-sfx="door_close" type="button">
-          Đóng cửa
-        </button>
-        <button class="foley-btn" data-sfx="wardrobe_open" type="button">
-          Kéo tủ áo
-        </button>
-        <button class="foley-btn" data-sfx="wardrobe_slam" type="button">
-          Sập tủ áo
-        </button>
-        <button class="foley-btn" data-sfx="portrait_fall" type="button">
-          Rớt khung ảnh
-        </button>
-        <button class="foley-btn" data-sfx="wood_scratch" type="button">
-          Tiếng cào gỗ
-        </button>
-        <button class="foley-btn" data-sfx="fox_cry" type="button">
-          Tiếng đêm ngoài hẻm
-        </button>
-        <button class="foley-btn" data-sfx="door_knock" type="button">
-          Gõ cửa gỗ
-        </button>
-        <button class="foley-btn" data-sfx="scare_sting" type="button">
-          Ám ảnh / Giật mình
-        </button>
-      </div>
+    <div class="controls-hint">
+      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Di chuyển ·
+      Click/Kéo chuột xoay nhìn ·
+      <kbd>F</kbd> Quẹt / Dập diêm ·
+      <kbd>E</kbd> Tương tác ·
+      
+      <kbd>Shift</kbd> Chạy ·
+      <kbd>O</kbd> Cài đặt
     </div>
 
-    <!-- SUBTITLES -->
-    <div id="subtitle-box">
-      <div id="subtitle-speaker">Ý nghĩ</div>
-      <div id="subtitle-text"></div>
-      <div id="subtitle-continue">Nhấn [E] hoặc click để tiếp tục</div>
+    <div class="action-buttons">
+      <button id="btn-match" class="action-btn" type="button">Quẹt / Dập diêm (F)</button>
+      <button id="btn-interact" class="action-btn" type="button">Tương tác (E)</button>
     </div>
+  </div>
 
-    <!-- BOTTOM HUD -->
-    <div id="hud-bottom">
-      <div id="touch-pad">
-        <div></div>
-        <button class="pad-btn" data-key="KeyW" type="button" aria-label="Tiến">
-          ▲
+  <!-- EYELID OVERLAY FOR WAKE-UP -->
+  <div id="eye-haze"></div>
+  <div id="eyelid-top"></div>
+  <div id="eyelid-bottom"></div>
+
+  <!-- FULLSCREEN CLASSIC HORROR TITLE SCREEN -->
+  <div id="start-screen">
+    <div class="title-fullscreen">
+      <div class="title-kicker">14/11 · ĐÊM MƯA · BẢN THỬ NGHIỆM</div>
+      <h1 class="title-main">02:14</h1>
+      <div class="title-sub">Đêm Không Dứt <span class="demo-tag">DEMO</span></div>
+      <p class="title-desc">Mưa vẫn gõ đều ngoài cửa sổ. Chiếc giường bên cạnh đã lạnh, đồng hồ đầu giường cứ dừng ở 02:14 — và có tiếng gõ trầm đục vang lên sau cánh cửa chính.</p>
+      <nav class="title-menu" aria-label="Menu chính">
+        <button id="btn-continue" class="menu-btn hidden" type="button">Tiếp tục</button>
+        <button id="btn-start" class="menu-btn" type="button">Chơi mới</button>
+        <button id="btn-title-settings" class="menu-btn" type="button">Cài đặt</button>
+        <button id="btn-title-exit" class="menu-btn menu-btn-exit" type="button">Thoát</button>
+      </nav>
+      <div class="title-hint">↑↓ / Chuột chọn mục · WASD di chuyển · E tương tác · F quẹt diêm · J ghi chép</div>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN BLACK CONTENT WARNING SCREEN (AAA Horror Style) -->
+  <div id="warning-screen" class="cw-screen hidden" role="dialog" aria-modal="true" aria-labelledby="warning-title">
+    <div class="cw-inner">
+      <div class="cw-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 56" width="54" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 3L61 52H3L32 3Z" fill="#e64526" stroke="#ff5e3a" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="29.5" y="18" width="5" height="19" rx="1.5" fill="#090808"/>
+          <circle cx="32" cy="43.5" r="3" fill="#090808"/>
+        </svg>
+      </div>
+      <h2 id="warning-title" class="cw-title">Cảnh Báo Nội Dung</h2>
+      <div class="cw-paragraphs">
+        <p>Trò chơi này có chứa yếu tố kinh dị tâm lý, hình ảnh nhấp nháy, âm thanh đột ngột, không gian tối và đề cập đến mất mát tinh thần.</p>
+        <p>Mọi nhân vật, bối cảnh và tình tiết trong trò chơi đều là sản phẩm hư cấu. Đề xuất đeo tai nghe ở mức âm lượng vừa phải để có trải nghiệm tốt nhất.</p>
+        <p>Nếu bạn cảm thấy không thoải mái hoặc nhạy cảm với ánh sáng nhấp nháy trong quá trình chơi, vui lòng tạm dừng và nghỉ ngơi.</p>
+      </div>
+      <div class="cw-actions">
+        <button id="btn-warning-accept" class="cw-continue-btn" type="button">Tiếp tục</button>
+        <button id="btn-warning-back" class="cw-back-btn" type="button">Quay lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THIRD-PARTY LICENSES & CREDITS MODAL -->
+  <div id="licenses-screen" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="licenses-title">
+    <div class="modal-card licenses-card">
+      <div class="modal-kicker">Thông tin pháp lý &amp; Mã nguồn mở</div>
+      <h2 id="licenses-title">Bản quyền &amp; Giấy phép bên thứ ba</h2>
+      <p style="font-size:13.5px;">Phiên bản DEMO thử nghiệm nội bộ này sử dụng các thư viện mã nguồn mở và tài nguyên miễn phí sau:</p>
+      <div class="license-list">
+        <div class="license-item">
+          <strong>Three.js</strong> — <span>MIT License</span>
+          <p>Thư viện đồ họa WebGL 3D (© Three.js Authors).</p>
+        </div>
+        <div class="license-item">
+          <strong>Vite</strong> — <span>MIT License</span>
+          <p>Công cụ build và máy chủ phát triển frontend (© Evan You &amp; Vite Contributors).</p>
+        </div>
+        <div class="license-item">
+          <strong>Google Fonts (Be Vietnam Pro &amp; Lora)</strong> — <span>SIL Open Font License 1.1 (OFL-1.1)</span>
+          <p>Bộ phông chữ hiển thị giao diện và văn bản tiếng Việt.</p>
+        </div>
+        <div class="license-item">
+          <strong>Mixkit Free Sound Effects</strong> — <span>Mixkit Sound Effects Free License</span>
+          <p>Hiệu ứng âm thanh Foley/Ambience miễn phí bản quyền (khi dùng các tệp .wav/.mp3 từ Mixkit trong <code>public/audio/</code>).</p>
+        </div>
+        <div class="license-item">
+          <strong>Vercel Web Analytics</strong> — <span>Vercel Terms of Service (Free Tier)</span>
+          <p>Thống kê lượt truy cập ẩn danh không cookie nhằm giám sát bảo mật link thử nghiệm nội bộ.</p>
+        </div>
+        <div class="license-item">
+          <strong>Web Audio API &amp; Web Speech API</strong> — <span>W3C Web Standards</span>
+          <p>API âm thanh không gian và tổng hợp giọng nói tích hợp sẵn trên trình duyệt.</p>
+        </div>
+      </div>
+      <div style="margin-top:18px; text-align:right;">
+        <button id="btn-close-licenses" class="primary-btn" type="button">Đóng lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIXED BOTTOM DEMO NOTICE FOOTER -->
+  <footer id="demo-footer">
+    <span>Phiên bản cho nhóm phát triển thử nghiệm · Không thương mại hóa · Không chia sẻ công khai lên mạng xã hội</span>
+    <span class="footer-sep">·</span>
+    <button id="btn-open-licenses" class="footer-link-btn" type="button">Bản quyền &amp; Giấy phép</button>
+  </footer>
+
+  <!-- BLACK-AND-WHITE INTRO OVERLAY (Option A: Unreliable Narrator) -->
+  <div id="intro-screen">
+    <div class="intro-content">
+      <p id="intro-line-1" class="intro-line">Tiếng mưa khuya đập đều lên khung cửa kính.</p>
+      <p id="intro-line-2" class="intro-line">Alice chưa về, hay đang ở phòng bên cạnh? Ngoài cửa chính vừa vang lên ba nhịp gõ rất khẽ.</p>
+      <p id="intro-line-3" class="intro-line intro-date">02:14 · Ai đó đang đứng ngoài cửa</p>
+    </div>
+    <button id="intro-skip" type="button">Nhấn phím bất kỳ hoặc click để tiếp tục</button>
+  </div>
+
+  <!-- MORAL CHOICE OVERLAY (Option C: 1 key decision at end of Loops 1–4) -->
+  <div id="choice-screen" class="overlay-screen hidden">
+    <div class="modal-card choice-card">
+      <div id="choice-kicker" class="modal-kicker">Quyết định · Cuối Vòng 1</div>
+      <h2 id="choice-title">Tiếng gõ sau cánh cửa</h2>
+      <p id="choice-prompt" class="choice-prompt"></p>
+      <div class="choice-options">
+        <button id="btn-choice-a" class="choice-btn" type="button">
+          <span id="choice-a-label" class="choice-label"></span>
+          <span id="choice-a-sub" class="choice-sub"></span>
         </button>
-        <div></div>
-        <button class="pad-btn" data-key="KeyA" type="button" aria-label="Trái">
-          ◀
-        </button>
-        <button class="pad-btn" data-key="KeyS" type="button" aria-label="Lùi">
-          ▼
-        </button>
-        <button class="pad-btn" data-key="KeyD" type="button" aria-label="Phải">
-          ▶
-        </button>
-      </div>
-
-      <div class="controls-hint">
-        <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Di chuyển · Click/Kéo
-        chuột xoay nhìn · <kbd>F</kbd> Quẹt / Dập diêm · <kbd>E</kbd> Tương tác
-        ·
-
-        <kbd>Shift</kbd> Chạy · <kbd>O</kbd> Cài đặt
-      </div>
-
-      <div class="action-buttons">
-        <button id="btn-match" class="action-btn" type="button">
-          Quẹt / Dập diêm (F)
-        </button>
-        <button id="btn-interact" class="action-btn" type="button">
-          Tương tác (E)
-        </button>
-      </div>
-    </div>
-
-    <!-- EYELID OVERLAY FOR WAKE-UP -->
-    <div id="eye-haze"></div>
-    <div id="eyelid-top"></div>
-    <div id="eyelid-bottom"></div>
-
-    <!-- FULLSCREEN CLASSIC HORROR TITLE SCREEN -->
-    <div id="start-screen">
-      <div class="title-fullscreen">
-        <div class="title-kicker">14/11 · ĐÊM MƯA · BẢN THỬ NGHIỆM</div>
-        <h1 class="title-main">02:14</h1>
-        <div class="title-sub">
-          Đêm Không Dứt <span class="demo-tag">DEMO</span>
-        </div>
-        <p class="title-desc">
-          Mưa vẫn gõ đều ngoài cửa sổ. Chiếc giường bên cạnh đã lạnh, đồng hồ
-          đầu giường cứ dừng ở 02:14 — và có tiếng gõ trầm đục vang lên sau cánh
-          cửa chính.
-        </p>
-        <nav class="title-menu" aria-label="Menu chính">
-          <button id="btn-continue" class="menu-btn hidden" type="button">
-            Tiếp tục
-          </button>
-          <button id="btn-start" class="menu-btn" type="button">
-            Chơi mới
-          </button>
-          <button id="btn-title-settings" class="menu-btn" type="button">
-            Cài đặt
-          </button>
-          <button
-            id="btn-title-exit"
-            class="menu-btn menu-btn-exit"
-            type="button"
-          >
-            Thoát
-          </button>
-        </nav>
-        <div class="title-hint">
-          ↑↓ / Chuột chọn mục · WASD di chuyển · E tương tác · F quẹt diêm · J
-          ghi chép
-        </div>
-      </div>
-    </div>
-
-    <!-- FULLSCREEN BLACK CONTENT WARNING SCREEN (AAA Horror Style) -->
-    <div
-      id="warning-screen"
-      class="cw-screen hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="warning-title"
-    >
-      <div class="cw-inner">
-        <div class="cw-icon" aria-hidden="true">
-          <svg
-            viewBox="0 0 64 56"
-            width="54"
-            height="48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M32 3L61 52H3L32 3Z"
-              fill="#e64526"
-              stroke="#ff5e3a"
-              stroke-width="2"
-              stroke-linejoin="round"
-            />
-            <rect
-              x="29.5"
-              y="18"
-              width="5"
-              height="19"
-              rx="1.5"
-              fill="#090808"
-            />
-            <circle cx="32" cy="43.5" r="3" fill="#090808" />
-          </svg>
-        </div>
-        <h2 id="warning-title" class="cw-title">Cảnh Báo Nội Dung</h2>
-        <div class="cw-paragraphs">
-          <p>
-            Trò chơi này có chứa yếu tố kinh dị tâm lý, hình ảnh nhấp nháy, âm
-            thanh đột ngột, không gian tối và đề cập đến mất mát tinh thần.
-          </p>
-          <p>
-            Mọi nhân vật, bối cảnh và tình tiết trong trò chơi đều là sản phẩm
-            hư cấu. Đề xuất đeo tai nghe ở mức âm lượng vừa phải để có trải
-            nghiệm tốt nhất.
-          </p>
-          <p>
-            Nếu bạn cảm thấy không thoải mái hoặc nhạy cảm với ánh sáng nhấp
-            nháy trong quá trình chơi, vui lòng tạm dừng và nghỉ ngơi.
-          </p>
-        </div>
-        <div class="cw-actions">
-          <button id="btn-warning-accept" class="cw-continue-btn" type="button">
-            Tiếp tục
-          </button>
-          <button id="btn-warning-back" class="cw-back-btn" type="button">
-            Quay lại
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- THIRD-PARTY LICENSES & CREDITS MODAL -->
-    <div
-      id="licenses-screen"
-      class="overlay-screen hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="licenses-title"
-    >
-      <div class="modal-card licenses-card">
-        <div class="modal-kicker">Thông tin pháp lý &amp; Mã nguồn mở</div>
-        <h2 id="licenses-title">Bản quyền &amp; Giấy phép bên thứ ba</h2>
-        <p style="font-size: 13.5px">
-          Phiên bản DEMO thử nghiệm nội bộ này sử dụng các thư viện mã nguồn mở
-          và tài nguyên miễn phí sau:
-        </p>
-        <div class="license-list">
-          <div class="license-item">
-            <strong>Three.js</strong> — <span>MIT License</span>
-            <p>Thư viện đồ họa WebGL 3D (© Three.js Authors).</p>
-          </div>
-          <div class="license-item">
-            <strong>Vite</strong> — <span>MIT License</span>
-            <p>
-              Công cụ build và máy chủ phát triển frontend (© Evan You &amp;
-              Vite Contributors).
-            </p>
-          </div>
-          <div class="license-item">
-            <strong>Google Fonts (Be Vietnam Pro &amp; Lora)</strong> —
-            <span>SIL Open Font License 1.1 (OFL-1.1)</span>
-            <p>Bộ phông chữ hiển thị giao diện và văn bản tiếng Việt.</p>
-          </div>
-          <div class="license-item">
-            <strong>Mixkit Free Sound Effects</strong> —
-            <span>Mixkit Sound Effects Free License</span>
-            <p>
-              Hiệu ứng âm thanh Foley/Ambience miễn phí bản quyền (khi dùng các
-              tệp .wav/.mp3 từ Mixkit trong <code>public/audio/</code>).
-            </p>
-          </div>
-          <div class="license-item">
-            <strong>Vercel Web Analytics</strong> —
-            <span>Vercel Terms of Service (Free Tier)</span>
-            <p>
-              Thống kê lượt truy cập ẩn danh không cookie nhằm giám sát bảo mật
-              link thử nghiệm nội bộ.
-            </p>
-          </div>
-          <div class="license-item">
-            <strong>Web Audio API &amp; Web Speech API</strong> —
-            <span>W3C Web Standards</span>
-            <p>
-              API âm thanh không gian và tổng hợp giọng nói tích hợp sẵn trên
-              trình duyệt.
-            </p>
-          </div>
-        </div>
-        <div style="margin-top: 18px; text-align: right">
-          <button id="btn-close-licenses" class="primary-btn" type="button">
-            Đóng lại
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- FIXED BOTTOM DEMO NOTICE FOOTER -->
-    <footer id="demo-footer">
-      <span
-        >Phiên bản cho nhóm phát triển thử nghiệm · Không thương mại hóa · Không
-        chia sẻ công khai lên mạng xã hội</span
-      >
-      <span class="footer-sep">·</span>
-      <button id="btn-open-licenses" class="footer-link-btn" type="button">
-        Bản quyền &amp; Giấy phép
-      </button>
-    </footer>
-
-    <!-- BLACK-AND-WHITE INTRO OVERLAY (Option A: Unreliable Narrator) -->
-    <div id="intro-screen">
-      <div class="intro-content">
-        <p id="intro-line-1" class="intro-line">
-          Tiếng mưa khuya đập đều lên khung cửa kính.
-        </p>
-        <p id="intro-line-2" class="intro-line">
-          Alice chưa về, hay đang ở phòng bên cạnh? Ngoài cửa chính vừa vang lên
-          ba nhịp gõ rất khẽ.
-        </p>
-        <p id="intro-line-3" class="intro-line intro-date">
-          02:14 · Ai đó đang đứng ngoài cửa
-        </p>
-      </div>
-      <button id="intro-skip" type="button">
-        Nhấn phím bất kỳ hoặc click để tiếp tục
-      </button>
-    </div>
-
-    <!-- MORAL CHOICE OVERLAY (Option C: 1 key decision at end of Loops 1–4) -->
-    <div id="choice-screen" class="overlay-screen hidden">
-      <div class="modal-card choice-card">
-        <div id="choice-kicker" class="modal-kicker">
-          Quyết định · Cuối Vòng 1
-        </div>
-        <h2 id="choice-title">Tiếng gõ sau cánh cửa</h2>
-        <p id="choice-prompt" class="choice-prompt"></p>
-        <div class="choice-options">
-          <button id="btn-choice-a" class="choice-btn" type="button">
-            <span id="choice-a-label" class="choice-label"></span>
-            <span id="choice-a-sub" class="choice-sub"></span>
-          </button>
-          <button id="btn-choice-b" class="choice-btn" type="button">
-            <span id="choice-b-label" class="choice-label"></span>
-            <span id="choice-b-sub" class="choice-sub"></span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- AUTO-PAUSE OVERLAY (Esc / Pointer Lock / Tab Switch) -->
-    <div id="pause-overlay" class="overlay-screen hidden">
-      <div class="modal-card pause-card">
-        <div class="modal-kicker">02:14 · Đêm Không Dứt</div>
-        <h2>Tạm dừng</h2>
-        <p class="pause-sub">
-          Trò chơi đã tạm dừng. Nhấn nút bên dưới để khóa chuột và tiếp tục.
-        </p>
-        <div class="pause-actions">
-          <button id="btn-resume" class="primary-btn" type="button">
-            Tiếp tục chơi
-          </button>
-          <button id="btn-pause-settings" class="secondary-btn" type="button">
-            Cài đặt
-          </button>
-          <button id="btn-pause-title" class="secondary-btn" type="button">
-            Về màn hình chính
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS OVERLAY -->
-    <div id="settings-screen" class="overlay-screen hidden">
-      <div class="modal-card">
-        <div class="modal-kicker">Tối ưu hiệu năng &amp; Trải nghiệm</div>
-        <h2>Cài đặt trò chơi</h2>
-
-        <!-- Chất lượng đồ họa -->
-        <div class="settings-section">
-          <div class="settings-label-row">
-            <span class="settings-label">Chất lượng đồ họa</span>
-          </div>
-          <div class="seg-group seg-3" id="gfx-preset-group">
-            <button type="button" class="seg-btn" data-gfx="low">Thấp</button>
-            <button type="button" class="seg-btn" data-gfx="medium">
-              Trung bình
-            </button>
-            <button type="button" class="seg-btn" data-gfx="high">Cao</button>
-          </div>
-          <p id="gfx-desc" class="settings-hint"></p>
-        </div>
-
-        <!-- Giới hạn FPS -->
-        <div class="settings-section">
-          <div class="settings-label-row">
-            <span class="settings-label">Giới hạn FPS</span>
-          </div>
-          <div class="seg-group seg-4" id="fps-limit-group">
-            <button type="button" class="seg-btn" data-fps="30">30 FPS</button>
-            <button type="button" class="seg-btn" data-fps="60">60 FPS</button>
-            <button type="button" class="seg-btn" data-fps="120">
-              120 FPS
-            </button>
-            <button type="button" class="seg-btn" data-fps="0">
-              Không giới hạn
-            </button>
-          </div>
-          <p class="settings-hint">
-            Giới hạn FPS giúp khung hình ổn định hơn, giảm nóng máy và tiết kiệm
-            pin/GPU.
-          </p>
-        </div>
-
-        <!-- Bộ đếm FPS & Độ mượt Camera -->
-        <div class="settings-section">
-          <div class="toggle-row">
-            <div>
-              <div class="settings-label">Hiển thị bộ đếm FPS</div>
-              <div class="settings-hint tight">
-                Hiện chỉ số khung hình trực tiếp ở góc trên màn hình.
-              </div>
-            </div>
-            <button
-              type="button"
-              id="toggle-show-fps"
-              class="toggle-switch"
-              aria-label="Hiển thị bộ đếm FPS"
-            ></button>
-          </div>
-          <div class="toggle-row">
-            <div>
-              <div class="settings-label">Mượt camera (Camera Smoothing)</div>
-              <div class="settings-hint tight">
-                Làm êm chuyển động xoay góc nhìn, giảm cảm giác giật khi di
-                chuột.
-              </div>
-            </div>
-            <button
-              type="button"
-              id="toggle-cam-smooth"
-              class="toggle-switch"
-              aria-label="Mượt camera"
-            ></button>
-          </div>
-        </div>
-
-        <!-- Độ nhạy chuột -->
-        <div class="settings-section">
-          <div class="settings-label-row">
-            <span class="settings-label">Độ nhạy chuột / cảm ứng</span>
-            <span id="sens-display" class="sens-value">1.0x</span>
-          </div>
-          <input
-            id="slider-sens"
-            class="range-slider"
-            type="range"
-            min="0.5"
-            max="2.0"
-            step="0.1"
-            value="1.0"
-          />
-        </div>
-
-        <!-- Âm thanh & Giọng kể -->
-        <div class="settings-section">
-          <div class="settings-label-row">
-            <span class="settings-label">Âm thanh &amp; Giọng kể</span>
-          </div>
-          <div class="settings-btn-row">
-            <button id="btn-mute" class="hud-btn" type="button">
-              Âm thanh: Bật
-            </button>
-            <button id="btn-voice" class="hud-btn" type="button">
-              Giọng kể: Tắt
-            </button>
-            <select
-              id="voice-select"
-              class="hud-select"
-              title="Chọn giọng đọc tiếng Việt"
-            ></select>
-          </div>
-        </div>
-
-        <!-- Tiện ích & Kiểm thử -->
-        <div class="settings-section">
-          <div class="settings-label-row">
-            <span class="settings-label">Tiện ích &amp; Kiểm thử</span>
-          </div>
-          <div class="settings-btn-row">
-            <button id="btn-pad-toggle" class="hud-btn" type="button">
-              Phím ảo
-            </button>
-            <button
-              id="btn-foley"
-              class="hud-btn"
-              type="button"
-              data-dev-only="true"
-            >
-              Thử âm thanh
-            </button>
-            <button
-              id="btn-test-ending"
-              class="hud-btn"
-              type="button"
-              data-dev-only="true"
-            >
-              Test kết thúc
-            </button>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button id="btn-reset-settings" class="secondary-btn" type="button">
-            Khôi phục mặc định
-          </button>
-          <button id="btn-close-settings" class="primary-btn" type="button">
-            Lưu &amp; Đóng
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4-DIGIT KEYPAD OVERLAY (LOOP 5) -->
-    <div id="keypad-screen" class="overlay-screen hidden">
-      <div class="modal-card keypad-card">
-        <div class="modal-kicker">Khóa mã hộp hồ sơ · Vòng 5</div>
-        <h2>Nhập mật mã 4 số</h2>
-        <p style="font-size: 13px; margin-bottom: 10px">
-          Bốn chữ số lặp lại trên đồng hồ đầu giường, gương phòng tắm và tờ lịch
-          bị xé dở.
-        </p>
-        <div id="keypad-display" class="keypad-display">----</div>
-        <p id="keypad-msg" class="keypad-msg">
-          Gõ phím số hoặc bấm trực tiếp bên dưới.
-        </p>
-        <div class="keypad-grid">
-          <button type="button" class="keypad-btn" data-digit="1">1</button>
-          <button type="button" class="keypad-btn" data-digit="2">2</button>
-          <button type="button" class="keypad-btn" data-digit="3">3</button>
-          <button type="button" class="keypad-btn" data-digit="4">4</button>
-          <button type="button" class="keypad-btn" data-digit="5">5</button>
-          <button type="button" class="keypad-btn" data-digit="6">6</button>
-          <button type="button" class="keypad-btn" data-digit="7">7</button>
-          <button type="button" class="keypad-btn" data-digit="8">8</button>
-          <button type="button" class="keypad-btn" data-digit="9">9</button>
-          <button type="button" class="keypad-btn action" id="btn-keypad-clear">
-            Xóa
-          </button>
-          <button type="button" class="keypad-btn" data-digit="0">0</button>
-          <button type="button" class="keypad-btn action" id="btn-keypad-enter">
-            Mở
-          </button>
-        </div>
-        <button
-          id="btn-close-keypad"
-          class="secondary-btn"
-          type="button"
-          style="width: 100%"
-        >
-          Đóng lại (Esc)
+        <button id="btn-choice-b" class="choice-btn" type="button">
+          <span id="choice-b-label" class="choice-label"></span>
+          <span id="choice-b-sub" class="choice-sub"></span>
         </button>
       </div>
     </div>
+  </div>
 
-    <!-- CRISP 2D PAPER READER OVERLAY -->
-    <div
-      id="paper-overlay"
-      class="overlay-screen hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="paper-header"
-    >
-      <div id="paper-sheet" class="paper-sheet theme-calendar">
-        <div class="paper-top-rule"></div>
-        <div id="paper-header" class="paper-header"></div>
-        <div id="paper-subheader" class="paper-subheader hidden"></div>
-        <div class="paper-divider"></div>
-        <div id="paper-body" class="paper-body"></div>
-        <div id="paper-note-wrap" class="paper-note-wrap hidden">
-          <div class="paper-note-divider"></div>
-          <p id="paper-note" class="paper-note"></p>
-        </div>
-        <div class="paper-footer">
-          <button id="btn-close-paper" class="paper-close-btn" type="button">
-            Hạ giấy xuống (E / Esc)
-          </button>
-        </div>
+
+  <!-- AUTO-PAUSE OVERLAY (Esc / Pointer Lock / Tab Switch) -->
+  <div id="pause-overlay" class="overlay-screen hidden">
+    <div class="modal-card pause-card">
+      <div class="modal-kicker">02:14 · Đêm Không Dứt</div>
+      <h2>Tạm dừng</h2>
+      <p class="pause-sub">Trò chơi đã tạm dừng. Nhấn nút bên dưới để khóa chuột và tiếp tục.</p>
+      <div class="pause-actions">
+        <button id="btn-resume" class="primary-btn" type="button">Tiếp tục chơi</button>
+        <button id="btn-pause-settings" class="secondary-btn" type="button">Cài đặt</button>
+        <button id="btn-pause-title" class="secondary-btn" type="button">Về màn hình chính</button>
       </div>
     </div>
+  </div>
 
-    <!-- JOURNAL OVERLAY -->
-    <div id="journal-screen" class="overlay-screen hidden">
-      <div class="modal-card">
-        <div class="modal-kicker">Sổ ghi chép · Mảnh ghép ký ức</div>
-        <h2>Những gì chưa khớp trong căn nhà</h2>
-        <div id="journal-timeline" class="timeline-strip"></div>
-        <div id="journal-choices" class="journal-choices"></div>
-        <div id="journal-list">
-          <p>Chưa có ghi chép nào.</p>
+  <!-- SETTINGS OVERLAY -->
+  <div id="settings-screen" class="overlay-screen hidden">
+    <div class="modal-card">
+      <div class="modal-kicker">Tối ưu hiệu năng &amp; Trải nghiệm</div>
+      <h2>Cài đặt trò chơi</h2>
+
+      <!-- Chất lượng đồ họa -->
+      <div class="settings-section">
+        <div class="settings-label-row">
+          <span class="settings-label">Chất lượng đồ họa</span>
         </div>
-        <div style="margin-top: 20px">
-          <button id="btn-close-journal" class="primary-btn" type="button">
-            Đóng lại
-          </button>
+        <div class="seg-group seg-3" id="gfx-preset-group">
+          <button type="button" class="seg-btn" data-gfx="low">Thấp</button>
+          <button type="button" class="seg-btn" data-gfx="medium">Trung bình</button>
+          <button type="button" class="seg-btn" data-gfx="high">Cao</button>
         </div>
+        <p id="gfx-desc" class="settings-hint"></p>
       </div>
-    </div>
 
-    <!-- ENDING OVERLAY -->
-    <div id="ending-screen" class="overlay-screen hidden">
-      <div class="the-end-wrap">
-        <div id="ending-badge" class="the-end-badge">Kết thúc Thật · 1/3</div>
-        <h2 id="ending-title" class="the-end-title">The End</h2>
-        <div id="ending-kicker" class="the-end-date">15 tháng 11 · 05:48</div>
-        <p id="ending-body" class="the-end-body"></p>
-        <div id="ending-choices-summary" class="ending-choices-summary"></div>
-        <div id="ending-phone" class="phone-cut">
-          <div class="phone-top">
-            <span id="ending-phone-time">05:48</span>
-            <div class="phone-notch"></div>
-            <span id="ending-phone-date">15/11</span>
+      <!-- Giới hạn FPS -->
+      <div class="settings-section">
+        <div class="settings-label-row">
+          <span class="settings-label">Giới hạn FPS</span>
+        </div>
+        <div class="seg-group seg-4" id="fps-limit-group">
+          <button type="button" class="seg-btn" data-fps="30">30 FPS</button>
+          <button type="button" class="seg-btn" data-fps="60">60 FPS</button>
+          <button type="button" class="seg-btn" data-fps="120">120 FPS</button>
+          <button type="button" class="seg-btn" data-fps="0">Không giới hạn</button>
+        </div>
+        <p class="settings-hint">Giới hạn FPS giúp khung hình ổn định hơn, giảm nóng máy và tiết kiệm pin/GPU.</p>
+      </div>
+
+      <!-- Bộ đếm FPS & Độ mượt Camera -->
+      <div class="settings-section">
+        <div class="toggle-row">
+          <div>
+            <div class="settings-label">Hiển thị bộ đếm FPS</div>
+            <div class="settings-hint tight">Hiện chỉ số khung hình trực tiếp ở góc trên màn hình.</div>
           </div>
-          <div class="phone-vm-row">
-            <div id="ending-phone-icon" class="phone-vm-icon">✓</div>
-            <div class="phone-vm-meta">
-              <div id="ending-phone-title" class="phone-vm-title">
-                Tin nhắn thoại · 02:09 · đã nghe
-              </div>
-              <div class="phone-vm-bar">
-                <div id="ending-phone-bar" class="phone-vm-bar-fill"></div>
-              </div>
-            </div>
+          <button type="button" id="toggle-show-fps" class="toggle-switch" aria-label="Hiển thị bộ đếm FPS"></button>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="settings-label">Mượt camera (Camera Smoothing)</div>
+            <div class="settings-hint tight">Làm êm chuyển động xoay góc nhìn, giảm cảm giác giật khi di chuột.</div>
           </div>
-        </div>
-        <div class="ending-switch-row">
-          <button type="button" class="ending-switch-btn" data-ending="true">
-            Xem Kết thúc Thật
-          </button>
-          <button type="button" class="ending-switch-btn" data-ending="normal">
-            Xem Kết thúc Thường
-          </button>
-          <button type="button" class="ending-switch-btn" data-ending="bad">
-            Xem Kết thúc Xấu
-          </button>
-        </div>
-        <div class="ending-action-row">
-          <button
-            id="btn-retry-loop"
-            class="the-end-btn retry-loop-btn hidden"
-            type="button"
-          >
-            Chơi lại ngay vòng này
-          </button>
-          <button id="btn-restart" class="the-end-btn" type="button">
-            Chơi lại từ đầu
-          </button>
+          <button type="button" id="toggle-cam-smooth" class="toggle-switch" aria-label="Mượt camera"></button>
         </div>
       </div>
-    </div>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+      <!-- Độ nhạy chuột -->
+      <div class="settings-section">
+        <div class="settings-label-row">
+          <span class="settings-label">Độ nhạy chuột / cảm ứng</span>
+          <span id="sens-display" class="sens-value">1.0x</span>
+        </div>
+        <input id="slider-sens" class="range-slider" type="range" min="0.5" max="2.0" step="0.1" value="1.0" />
+      </div>
+
+      <!-- Âm thanh & Giọng kể -->
+      <div class="settings-section">
+        <div class="settings-label-row">
+          <span class="settings-label">Âm thanh &amp; Giọng kể</span>
+        </div>
+        <div class="settings-btn-row">
+          <button id="btn-mute" class="hud-btn" type="button">Âm thanh: Bật</button>
+          <button id="btn-voice" class="hud-btn" type="button">Giọng kể: Tắt</button>
+          <select id="voice-select" class="hud-select" title="Chọn giọng đọc tiếng Việt"></select>
+        </div>
+      </div>
+
+      <!-- Tiện ích & Kiểm thử -->
+      <div class="settings-section">
+        <div class="settings-label-row">
+          <span class="settings-label">Tiện ích &amp; Kiểm thử</span>
+        </div>
+        <div class="settings-btn-row">
+          <button id="btn-pad-toggle" class="hud-btn" type="button">Phím ảo</button>
+          <button id="btn-foley" class="hud-btn" type="button" data-dev-only="true">Thử âm thanh</button>
+          <button id="btn-test-ending" class="hud-btn" type="button" data-dev-only="true">Test kết thúc</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-reset-settings" class="secondary-btn" type="button">Khôi phục mặc định</button>
+        <button id="btn-close-settings" class="primary-btn" type="button">Lưu &amp; Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4-DIGIT KEYPAD OVERLAY (LOOP 5) -->
+  <div id="keypad-screen" class="overlay-screen hidden">
+    <div class="modal-card keypad-card">
+      <div class="modal-kicker">Khóa mã hộp hồ sơ · Vòng 5</div>
+      <h2>Nhập mật mã 4 số</h2>
+      <p style="font-size:13px; margin-bottom:10px;">Bốn chữ số lặp lại trên đồng hồ đầu giường, gương phòng tắm và tờ lịch bị xé dở.</p>
+      <div id="keypad-display" class="keypad-display">----</div>
+      <p id="keypad-msg" class="keypad-msg">Gõ phím số hoặc bấm trực tiếp bên dưới.</p>
+      <div class="keypad-grid">
+        <button type="button" class="keypad-btn" data-digit="1">1</button>
+        <button type="button" class="keypad-btn" data-digit="2">2</button>
+        <button type="button" class="keypad-btn" data-digit="3">3</button>
+        <button type="button" class="keypad-btn" data-digit="4">4</button>
+        <button type="button" class="keypad-btn" data-digit="5">5</button>
+        <button type="button" class="keypad-btn" data-digit="6">6</button>
+        <button type="button" class="keypad-btn" data-digit="7">7</button>
+        <button type="button" class="keypad-btn" data-digit="8">8</button>
+        <button type="button" class="keypad-btn" data-digit="9">9</button>
+        <button type="button" class="keypad-btn action" id="btn-keypad-clear">Xóa</button>
+        <button type="button" class="keypad-btn" data-digit="0">0</button>
+        <button type="button" class="keypad-btn action" id="btn-keypad-enter">Mở</button>
+      </div>
+      <button id="btn-close-keypad" class="secondary-btn" type="button" style="width:100%;">Đóng lại (Esc)</button>
+    </div>
+  </div>
+
+  <!-- CRISP 2D PAPER READER OVERLAY -->
+  <div id="paper-overlay" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="paper-header">
+    <div id="paper-sheet" class="paper-sheet theme-calendar">
+      <div class="paper-top-rule"></div>
+      <div id="paper-header" class="paper-header"></div>
+      <div id="paper-subheader" class="paper-subheader hidden"></div>
+      <div class="paper-divider"></div>
+      <div id="paper-body" class="paper-body"></div>
+      <div id="paper-note-wrap" class="paper-note-wrap hidden">
+        <div class="paper-note-divider"></div>
+        <p id="paper-note" class="paper-note"></p>
+      </div>
+      <div class="paper-footer">
+        <button id="btn-close-paper" class="paper-close-btn" type="button">Hạ giấy xuống (E / Esc)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOURNAL OVERLAY -->
+  <div id="journal-screen" class="overlay-screen hidden">
+    <div class="modal-card">
+      <div class="modal-kicker">Sổ ghi chép · Mảnh ghép ký ức</div>
+      <h2>Những gì chưa khớp trong căn nhà</h2>
+      <div id="journal-timeline" class="timeline-strip"></div>
+      <div id="journal-choices" class="journal-choices"></div>
+      <div id="journal-list">
+        <p>Chưa có ghi chép nào.</p>
+      </div>
+      <div style="margin-top: 20px;">
+        <button id="btn-close-journal" class="primary-btn" type="button">Đóng lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENDING OVERLAY -->
+  <div id="ending-screen" class="overlay-screen hidden">
+    <div class="the-end-wrap">
+      <div id="ending-badge" class="the-end-badge">Kết thúc Thật · 1/3</div>
+      <h2 id="ending-title" class="the-end-title">The End</h2>
+      <div id="ending-kicker" class="the-end-date">15 tháng 11 · 05:48</div>
+      <p id="ending-body" class="the-end-body"></p>
+      <div id="ending-choices-summary" class="ending-choices-summary"></div>
+      <div id="ending-phone" class="phone-cut">
+        <div class="phone-top">
+          <span id="ending-phone-time">05:48</span>
+          <div class="phone-notch"></div>
+          <span id="ending-phone-date">15/11</span>
+        </div>
+        <div class="phone-vm-row">
+          <div id="ending-phone-icon" class="phone-vm-icon">✓</div>
+          <div class="phone-vm-meta">
+            <div id="ending-phone-title" class="phone-vm-title">Tin nhắn thoại · 02:09 · đã nghe</div>
+            <div class="phone-vm-bar"><div id="ending-phone-bar" class="phone-vm-bar-fill"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ending-switch-row">
+        <button type="button" class="ending-switch-btn" data-ending="true">Xem Kết thúc Thật</button>
+        <button type="button" class="ending-switch-btn" data-ending="normal">Xem Kết thúc Thường</button>
+        <button type="button" class="ending-switch-btn" data-ending="bad">Xem Kết thúc Xấu</button>
+      </div>
+      <div class="ending-action-row">
+        <button id="btn-retry-loop" class="the-end-btn retry-loop-btn hidden" type="button">Chơi lại ngay vòng này</button>
+        <button id="btn-restart" class="the-end-btn" type="button">Chơi lại từ đầu</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
 </html>

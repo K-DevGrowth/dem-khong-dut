@@ -2340,3 +2340,102 @@ body.pre-start #foley-panel {
 #hpl-hint {
   display: none;
 }
+
+/* === v1.7.1: AGED DIM-LIT HORROR PAPER THEMES (NO EYE STRAIN IN DARK ROOMS) === */
+#paper-overlay {
+  background: rgba(2, 2, 3, 0.80);
+  backdrop-filter: blur(3px);
+}
+
+.paper-sheet {
+  border-radius: 1px;
+  padding: 32px 34px 22px;
+  color: #191511;
+  border: 1px solid rgba(28, 22, 16, 0.55);
+  box-shadow:
+    0 28px 85px rgba(0, 0, 0, 0.92),
+    inset 0 0 72px rgba(18, 13, 8, 0.42),
+    inset 0 0 18px rgba(10, 8, 5, 0.28);
+}
+
+/* Muted, dim-lit paper palettes matching matchlight & nocturnal horror rooms */
+.paper-sheet.theme-calendar {
+  background: linear-gradient(160deg, #b1a792 0%, #8f846f 100%);
+}
+.paper-sheet.theme-sticky {
+  background: linear-gradient(160deg, #b5a782 0%, #8d7f5e 100%);
+}
+.paper-sheet.theme-wet {
+  background: linear-gradient(160deg, #9fa6a2 0%, #7d8581 100%);
+}
+.paper-sheet.theme-frost {
+  background: linear-gradient(160deg, #9eb2bd 0%, #7a909c 100%);
+}
+.paper-sheet.theme-scrawl {
+  background: linear-gradient(160deg, #a39a8d 0%, #7e766a 100%);
+}
+.paper-sheet.theme-report {
+  background: linear-gradient(160deg, #aba394 0%, #888071 100%);
+}
+.paper-sheet.theme-certificate {
+  background: linear-gradient(160deg, #a7a298 0%, #847f76 100%);
+  border: 1px solid rgba(28, 24, 20, 0.72);
+}
+
+.paper-top-rule {
+  height: 2px;
+  border-radius: 0;
+  margin-bottom: 14px;
+  opacity: 0.72;
+}
+.paper-sheet.theme-calendar .paper-top-rule { background: #5e1d18; }
+.paper-sheet.theme-sticky .paper-top-rule { background: #594418; }
+.paper-sheet.theme-frost .paper-top-rule { background: #1d3c4d; }
+.paper-sheet.theme-wet .paper-top-rule,
+.paper-sheet.theme-report .paper-top-rule,
+.paper-sheet.theme-certificate .paper-top-rule { background: #26221d; }
+.paper-sheet.theme-scrawl .paper-top-rule { background: #541410; }
+
+.paper-header {
+  color: #1c1611;
+  letter-spacing: 0.06em;
+}
+.paper-sheet.theme-calendar .paper-header { color: #521813; }
+.paper-sheet.theme-sticky .paper-header { color: #473612; }
+.paper-sheet.theme-frost .paper-header { color: #16303d; }
+.paper-sheet.theme-scrawl .paper-header { color: #4a100c; }
+
+.paper-divider,
+.paper-note-divider {
+  background: rgba(28, 22, 16, 0.28);
+}
+
+.paper-body {
+  color: #15110d;
+}
+.paper-sheet.theme-scrawl .paper-body {
+  color: #4a0e0a;
+}
+
+.paper-note {
+  color: #2c231b;
+}
+
+.paper-footer {
+  margin-top: 22px;
+}
+.paper-close-btn {
+  padding: 6px 14px;
+  border-radius: 1px;
+  border: 1px solid rgba(26, 20, 14, 0.34);
+  background: rgba(20, 15, 10, 0.12);
+  color: #1f1913;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.paper-close-btn:hover {
+  background: rgba(20, 15, 10, 0.24);
+  border-color: rgba(26, 20, 14, 0.65);
+}
