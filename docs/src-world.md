@@ -6,21 +6,21 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Các mô-đun trong thư mục `src/world/`  
-> **Số tập tin:** 6 | **Tổng số dòng:** 2,652 | **Dung lượng:** 100.7 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 2,665 | **Dung lượng:** 101.6 KB
 
 ## Mục lục tập tin
 
-- [`src/world/doors.js`](#src-world-doors-js) (80 dòng · 2.6 KB)
+- [`src/world/doors.js`](#src-world-doors-js) (86 dòng · 2.9 KB)
 - [`src/world/entity.js`](#src-world-entity-js) (348 dòng · 11.8 KB)
-- [`src/world/house.js`](#src-world-house-js) (1,140 dòng · 44.4 KB)
+- [`src/world/house.js`](#src-world-house-js) (1,144 dòng · 44.6 KB)
 - [`src/world/materials.js`](#src-world-materials-js) (142 dòng · 5.5 KB)
-- [`src/world/puzzles.js`](#src-world-puzzles-js) (420 dòng · 15.1 KB)
+- [`src/world/puzzles.js`](#src-world-puzzles-js) (423 dòng · 15.5 KB)
 - [`src/world/textures.js`](#src-world-textures-js) (522 dòng · 21.4 KB)
 
 ---
 
 <a id="src-world-doors-js"></a>
-## Tập tin: `src/world/doors.js` (80 dòng)
+## Tập tin: `src/world/doors.js` (86 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -86,6 +86,12 @@ export function createDoorsSystem(scene, materials, colliders, interactables, ge
         }
         if (d.id === 'door_study' && state.loop === 1 && !state.studyKeyFound) {
           return 'Cửa phòng làm việc (Khóa — tìm chìa khóa trước)';
+        }
+        if (d.id === 'door_bathroom' && state.loop === 3 && !state.bathEscaped) {
+          return 'Cửa phòng tắm bị kẹt (Khóa vòi nước & soi gương trước)';
+        }
+        if (d.id === 'door_study' && state.loop === 4 && !state.tvTurnedOff) {
+          return 'Cửa phòng làm việc bị kẹt (Tắt TV nhiễu hạt trước)';
         }
         return d.isOpen ? 'Nhấn [E] đóng cửa' : 'Nhấn [E] mở cửa';
       }
@@ -263,7 +269,7 @@ export function createShadowPresence(scene, materials) {
     roughness: 0.62,
     metalness: 0.04,
     emissive: 0x262e36,
-    emissiveIntensity: 0.52
+    emissiveIntensity: 0.58
   });
 
   const faceTex = makePaleApparitionFaceTex();
@@ -273,7 +279,7 @@ export function createShadowPresence(scene, materials) {
     metalness: 0.04,
     emissive: 0x2a333c,
     emissiveMap: faceTex,
-    emissiveIntensity: 0.42
+    emissiveIntensity: 0.56
   });
 
   const wetHairMat = new THREE.MeshStandardMaterial({
@@ -464,7 +470,7 @@ export function createShadowPresence(scene, materials) {
 ---
 
 <a id="src-world-house-js"></a>
-## Tập tin: `src/world/house.js` (1,140 dòng)
+## Tập tin: `src/world/house.js` (1,144 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -920,9 +926,13 @@ export function createHouse(scene, materials, colliders, interactables, getState
     type: 'tv',
     worldPos: new THREE.Vector3(-3.2, 0.94, -8.3),
     checkedInLoop: 0,
-    label: () => (getState().loop >= 2 && tvObj.checkedInLoop !== getState().loop)
-      ? 'Nhấn [E] kiểm tra màn hình TV nhiễu hạt'
-      : ''
+    label: () => {
+      const s = getState();
+      if (s.loop === 4 && !s.tvTurnedOff) return 'Nhấn [E] tắt màn hình TV nhiễu hạt';
+      return (s.loop >= 2 && tvObj.checkedInLoop !== s.loop)
+        ? 'Nhấn [E] kiểm tra màn hình TV nhiễu hạt'
+        : '';
+    }
   };
   interactables.push(tvObj);
 
@@ -1686,10 +1696,10 @@ export function createMaterials() {
   const bathMirrorCrackedTex = makeBathMirrorTex('cracked');
   const bathMirrorMat = new THREE.MeshStandardMaterial({ map: bathMirrorCleanTex, roughness: 0.14, metalness: 0.78 });
 
-  const scrawlTex2 = makeWallScrawl('SAO ANH KHÔNG MỞ?', 'Ngoài này lạnh quá...');
-  const scrawlTex3 = makeWallScrawl('ĐÃ 3 TUẦN TỪ 14/11', 'Không phải kẻ lạ đâu');
-  const scrawlTex4 = makeWallScrawl('NGƯỜI GÕ CỬA LÀ ALICE', 'Chính anh đã chốt khóa');
-  const scrawlTex5 = makeWallScrawl('MỞ CHỐT KHÓA RA', 'Bước khỏi đêm 14/11');
+  const scrawlTex2 = makeWallScrawl('LẠNH QUÁ...', 'sao anh không mở?');
+  const scrawlTex3 = makeWallScrawl('02:08 · IM LẶNG', '4 cuộc gọi không ai nghe');
+  const scrawlTex4 = makeWallScrawl('CHỐT KHÓA Ở BÊN TRONG', 'anh đâu có ngủ quên...');
+  const scrawlTex5 = makeWallScrawl('14/11 · 02:14', 'mở cửa ra đi, Steve.');
   const wallScrawlMat = new THREE.MeshStandardMaterial({ map: scrawlTex2, transparent: true, roughness: 0.9 });
 
   const heldPaperMat = new THREE.MeshBasicMaterial({ map: makeHeldPaperTexture('clue', 1), depthTest: false, toneMapped: false });
@@ -1762,7 +1772,7 @@ export function createMaterials() {
 ---
 
 <a id="src-world-puzzles-js"></a>
-## Tập tin: `src/world/puzzles.js` (420 dòng)
+## Tập tin: `src/world/puzzles.js` (423 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -2127,6 +2137,9 @@ export function createPuzzlesSystem(scene, materials, interactables, getState) {
         return `Hồ sơ trên bàn (Kiểm tra thêm ${state.anomaliesRequired - state.anomaliesFound} điểm bất thường trước)`;
       }
       if (state.loop === 2 && !state.breakerFixed) return 'Hồ sơ trên bàn (Tối om — cần bật cầu dao trong Nhà bếp)';
+      if (state.loop === 2 && !state.fridgeChecked) return 'Hồ sơ trên bàn (Hãy kiểm tra tủ lạnh hở sáng trong Nhà bếp trước)';
+      if (state.loop === 3 && !state.phoneCheckedLoop3) return 'Hồ sơ trên bàn (Kiểm tra màn hình điện thoại sáng đỏ ngoài phòng khách trước)';
+      if (state.loop === 4 && !state.tvTurnedOff) return 'Hồ sơ trên bàn (Tắt màn hình TV nhiễu hạt ngoài phòng khách trước)';
       if (state.loop === TOTAL_LOOPS && !state.codeUnlocked) return 'Nhấn [E] mở khóa mã 4 số hộp hồ sơ';
       return `Nhấn [E] xem: ${LOOP_STORY[state.loop].clueTitle}`;
     }

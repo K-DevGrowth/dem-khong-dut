@@ -192,6 +192,49 @@ function createSafeWebGLRenderer(initialPreset, initWidth, initHeight) {
 
 function initGame() {
   const isDevBuild = Boolean(import.meta.env && import.meta.env.DEV);
+
+  // =========================================================
+  // 0. DEMO ACCESS GATE (Uses Vercel env VITE_DEMO_PASSWORD, default: testdemo)
+  // =========================================================
+  const DEMO_PASS = String((import.meta.env && import.meta.env.VITE_DEMO_PASSWORD) || "testdemo").trim();
+  const AUTH_SESSION_KEY = "dem_khong_dut_demo_auth_v1";
+  const authGate = document.getElementById("auth-gate");
+  const authForm = document.getElementById("auth-form");
+  const authInput = document.getElementById("auth-input");
+  const authError = document.getElementById("auth-error");
+
+  function unlockDemoGate() {
+    document.body.classList.remove("auth-locked");
+    if (authGate) authGate.classList.add("hidden");
+  }
+
+  try {
+    if (sessionStorage.getItem(AUTH_SESSION_KEY) === DEMO_PASS) {
+      unlockDemoGate();
+    }
+  } catch (_) {}
+
+  if (authForm && authInput) {
+    authForm.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const val = authInput.value.trim();
+      if (val === DEMO_PASS) {
+        try {
+          sessionStorage.setItem(AUTH_SESSION_KEY, DEMO_PASS);
+        } catch (_) {}
+        if (authError) authError.textContent = "";
+        authInput.classList.remove("error");
+        unlockDemoGate();
+      } else {
+        authInput.classList.remove("error");
+        void authInput.offsetWidth;
+        authInput.classList.add("error");
+        if (authError) authError.textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+        authInput.value = "";
+        authInput.focus();
+      }
+    });
+  }
   if (!isDevBuild) {
     document.querySelectorAll('[data-dev-only="true"]').forEach((el) => {
       el.style.display = "none";
@@ -300,6 +343,12 @@ function initGame() {
   const keypadScreen = document.getElementById("keypad-screen");
   const keypadDisplay = document.getElementById("keypad-display");
   const keypadMsg = document.getElementById("keypad-msg");
+  const warningScreen = document.getElementById("warning-screen");
+  const btnWarningAccept = document.getElementById("btn-warning-accept");
+  const btnWarningBack = document.getElementById("btn-warning-back");
+  const licensesScreen = document.getElementById("licenses-screen");
+  const btnOpenLicenses = document.getElementById("btn-open-licenses");
+  const btnCloseLicenses = document.getElementById("btn-close-licenses");
 
   // =========================================================
   // 2. THREE.JS SCENE, CAMERA, RENDERER & AUDIO INITIALIZATION
@@ -1369,6 +1418,15 @@ function initGame() {
   // 6. INPUT EVENT LISTENERS (KEYBOARD, MOUSE, TOUCH)
   // =========================================================
   window.addEventListener("keydown", (e) => {
+    if (document.body.classList.contains("auth-locked")) return;
+    if (licensesScreen && !licensesScreen.classList.contains("hidden")) {
+      if (e.code === "Escape") licensesScreen.classList.add("hidden");
+      return;
+    }
+    if (warningScreen && !warningScreen.classList.contains("hidden")) {
+      if (e.code === "Escape") warningScreen.classList.add("hidden");
+      return;
+    }
     if (state.inIntro) {
       beginLoop1AfterIntro(ctx);
       return;
@@ -1643,7 +1701,9 @@ function initGame() {
       !keypadScreen.classList.contains("hidden") ||
       !choiceScreen.classList.contains("hidden") ||
       !endingScreen.classList.contains("hidden") ||
-      (paperOverlay && !paperOverlay.classList.contains("hidden"))
+      (paperOverlay && !paperOverlay.classList.contains("hidden")) ||
+      (warningScreen && !warningScreen.classList.contains("hidden")) ||
+      (licensesScreen && !licensesScreen.classList.contains("hidden"))
     );
   }
 
@@ -1789,11 +1849,47 @@ function initGame() {
 
   refreshContinueButton();
 
-  // UI Button Bindings
+  // UI Button Bindings (Start opens Horror & Photosensitivity Warning first)
   document.getElementById("btn-start").addEventListener("click", () => {
     audio.init();
-    startNewGame(true, ctx);
+    if (warningScreen) {
+      warningScreen.classList.remove("hidden");
+    } else {
+      startNewGame(true, ctx);
+    }
   });
+  if (btnWarningAccept) {
+    btnWarningAccept.addEventListener("click", () => {
+      audio.init();
+      if (warningScreen) warningScreen.classList.add("hidden");
+      startNewGame(true, ctx);
+    });
+  }
+  if (btnWarningBack) {
+    btnWarningBack.addEventListener("click", () => {
+      if (warningScreen) warningScreen.classList.add("hidden");
+    });
+  }
+  if (btnOpenLicenses && licensesScreen) {
+    btnOpenLicenses.addEventListener("click", () => {
+      if (state.running && !state.ended) {
+        state.paused = true;
+        clearKeys();
+        if (document.pointerLockElement) {
+          try { document.exitPointerLock(); } catch (_) {}
+        }
+      }
+      licensesScreen.classList.remove("hidden");
+    });
+  }
+  if (btnCloseLicenses && licensesScreen) {
+    btnCloseLicenses.addEventListener("click", () => {
+      licensesScreen.classList.add("hidden");
+      if (state.running && !state.ended && !isAnyModalOpen() && (!pauseOverlay || pauseOverlay.classList.contains("hidden"))) {
+        state.paused = false;
+      }
+    });
+  }
   const btnTestEnding = document.getElementById("btn-test-ending");
   if (btnTestEnding && isDevBuild) {
     btnTestEnding.addEventListener("click", () => startQuickEndingTest(ctx));

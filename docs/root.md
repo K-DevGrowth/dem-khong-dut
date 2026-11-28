@@ -6,14 +6,15 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Cấu hình dự án, HTML entry point và tài liệu gốc  
-> **Số tập tin:** 5 | **Tổng số dòng:** 514 | **Dung lượng:** 25.0 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 619 | **Dung lượng:** 31.4 KB
 
 ## Mục lục tập tin
 
 - [`.gitignore`](#gitignore) (6 dòng · 0.1 KB)
-- [`index.html`](#index-html) (360 dòng · 17.4 KB)
+- [`index.html`](#index-html) (453 dòng · 22.7 KB)
 - [`package.json`](#package-json) (18 dòng · 0.3 KB)
 - [`README.md`](#readme-md) (110 dòng · 6.9 KB)
+- [`THIRD_PARTY_LICENSES.md`](#third-party-licenses-md) (12 dòng · 1.1 KB)
 - [`vite.config.js`](#vite-config-js) (20 dòng · 0.3 KB)
 
 ---
@@ -33,7 +34,7 @@ Thumbs.db
 ---
 
 <a id="index-html"></a>
-## Tập tin: `index.html` (360 dòng)
+## Tập tin: `index.html` (453 dòng)
 
 ```html
 <!DOCTYPE html>
@@ -41,13 +42,38 @@ Thumbs.db
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>02:14 — Đêm Không Dứt</title>
-  <meta name="description" content="02:14 — Đêm Không Dứt: Trò chơi kinh dị tâm lý góc nhìn thứ nhất 3D trên trình duyệt." />
+  <title>02:14 — Đêm Không Dứt (DEMO)</title>
+  <meta name="description" content="02:14 — Đêm Không Dứt (DEMO): Phiên bản thử nghiệm nội bộ trò chơi kinh dị tâm lý góc nhìn thứ nhất 3D." />
+  <meta name="robots" content="noindex, nofollow" />
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lora:ital,wght@0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
 </head>
-<body class="pre-start">
+<body class="pre-start auth-locked">
+  <!-- FULLSCREEN BLACK ACCESS GATE (VITE_DEMO_PASSWORD || testdemo) -->
+  <div id="auth-gate" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <div class="demo-pill-badge">BẢN DEMO NỘI BỘ</div>
+      <h1 id="auth-title" class="auth-title">02:14 — Đêm Không Dứt <span class="demo-tag">DEMO</span></h1>
+      <p class="auth-sub">Nhập mật khẩu thử nghiệm để truy cập bản build.</p>
+      <form id="auth-form" class="auth-form" autocomplete="off">
+        <input
+          id="auth-input"
+          class="auth-input"
+          type="password"
+          placeholder="Nhập mật khẩu..."
+          autocomplete="current-password"
+          autofocus
+        />
+        <button id="auth-submit" class="wake-btn auth-btn" type="submit">Xác nhận</button>
+      </form>
+      <p id="auth-error" class="auth-error" aria-live="polite"></p>
+    </div>
+  </div>
   <div id="canvas-container"></div>
   <div id="film-grain"></div>
   <div id="fear-vignette"></div>
@@ -152,9 +178,9 @@ Thumbs.db
   <!-- MAIN TITLE SCREEN (Option A: No early spoilers) -->
   <div id="start-screen">
     <div class="title-wrap">
-      <div class="title-kicker">Đêm Mưa · Phòng Ngủ</div>
+      <div class="title-kicker">Đêm Mưa · Phòng Ngủ · <span class="demo-tag-inline">DEMO</span></div>
       <h1 class="title-main">02:14</h1>
-      <div class="title-sub">Đêm Không Dứt</div>
+      <div class="title-sub">Đêm Không Dứt <span class="demo-tag">DEMO</span></div>
       <p class="title-desc">Mưa vẫn gõ đều ngoài cửa sổ. Chiếc giường bên cạnh đã lạnh, đồng hồ đầu giường cứ dừng ở 02:14 — và có tiếng gõ trầm đục vang lên sau cánh cửa chính.</p>
       <div class="start-btn-row">
         <button id="btn-continue" class="wake-btn continue-btn hidden" type="button">Tiếp tục</button>
@@ -163,6 +189,74 @@ Thumbs.db
       <div class="title-hint">WASD di chuyển · Chuột xoay nhìn · E tương tác · F quẹt diêm · Shift chạy · J ghi chép · O cài đặt</div>
     </div>
   </div>
+
+  <!-- HORROR & PHOTOSENSITIVITY WARNING MODAL (Shown on Start) -->
+  <div id="warning-screen" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="warning-title">
+    <div class="modal-card warning-card">
+      <div class="modal-kicker warning-kicker">Cảnh báo nội dung · Content Warning</div>
+      <h2 id="warning-title">Trước khi bước vào đêm 02:14</h2>
+      <div class="warning-list">
+        <div class="warning-item">
+          <strong>Yếu tố kinh dị tâm lý:</strong> Trò chơi chứa không khí u ám, bóng tối, tiếng động bất ngờ và các tình huống gây giật mình nhẹ.
+        </div>
+        <div class="warning-item">
+          <strong>Nhạy cảm ánh sáng:</strong> Có hiệu ứng chớp sáng (tia chớp ngoài cửa sổ, đèn xe cấp cứu, nhiễu màn hình TV). Người nhạy cảm với ánh sáng nhấp nháy nên cân nhắc.
+        </div>
+        <div class="warning-item">
+          <strong>Đề xuất trải nghiệm:</strong> Nên đeo tai nghe ở mức âm lượng vừa phải để cảm nhận âm thanh không gian rõ nhất.
+        </div>
+      </div>
+      <div class="warning-actions">
+        <button id="btn-warning-back" class="secondary-btn" type="button">Quay lại</button>
+        <button id="btn-warning-accept" class="primary-btn" type="button">Tôi đã hiểu — Bắt đầu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THIRD-PARTY LICENSES & CREDITS MODAL -->
+  <div id="licenses-screen" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="licenses-title">
+    <div class="modal-card licenses-card">
+      <div class="modal-kicker">Thông tin pháp lý &amp; Mã nguồn mở</div>
+      <h2 id="licenses-title">Bản quyền &amp; Giấy phép bên thứ ba</h2>
+      <p style="font-size:13.5px;">Phiên bản DEMO thử nghiệm nội bộ này sử dụng các thư viện mã nguồn mở và tài nguyên miễn phí sau:</p>
+      <div class="license-list">
+        <div class="license-item">
+          <strong>Three.js</strong> — <span>MIT License</span>
+          <p>Thư viện đồ họa WebGL 3D (© Three.js Authors).</p>
+        </div>
+        <div class="license-item">
+          <strong>Vite</strong> — <span>MIT License</span>
+          <p>Công cụ build và máy chủ phát triển frontend (© Evan You &amp; Vite Contributors).</p>
+        </div>
+        <div class="license-item">
+          <strong>Google Fonts (Be Vietnam Pro &amp; Lora)</strong> — <span>SIL Open Font License 1.1 (OFL-1.1)</span>
+          <p>Bộ phông chữ hiển thị giao diện và văn bản tiếng Việt.</p>
+        </div>
+        <div class="license-item">
+          <strong>Mixkit Free Sound Effects</strong> — <span>Mixkit Sound Effects Free License</span>
+          <p>Hiệu ứng âm thanh Foley/Ambience miễn phí bản quyền (khi dùng các tệp .wav/.mp3 từ Mixkit trong <code>public/audio/</code>).</p>
+        </div>
+        <div class="license-item">
+          <strong>Vercel Web Analytics</strong> — <span>Vercel Terms of Service (Free Tier)</span>
+          <p>Thống kê lượt truy cập ẩn danh không cookie nhằm giám sát bảo mật link thử nghiệm nội bộ.</p>
+        </div>
+        <div class="license-item">
+          <strong>Web Audio API &amp; Web Speech API</strong> — <span>W3C Web Standards</span>
+          <p>API âm thanh không gian và tổng hợp giọng nói tích hợp sẵn trên trình duyệt.</p>
+        </div>
+      </div>
+      <div style="margin-top:18px; text-align:right;">
+        <button id="btn-close-licenses" class="primary-btn" type="button">Đóng lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIXED BOTTOM DEMO NOTICE FOOTER -->
+  <footer id="demo-footer">
+    <span>Phiên bản cho nhóm phát triển thử nghiệm · Không thương mại hóa · Không chia sẻ công khai lên mạng xã hội</span>
+    <span class="footer-sep">·</span>
+    <button id="btn-open-licenses" class="footer-link-btn" type="button">Bản quyền &amp; Giấy phép</button>
+  </footer>
 
   <!-- BLACK-AND-WHITE INTRO OVERLAY (Option A: Unreliable Narrator) -->
   <div id="intro-screen">
@@ -407,7 +501,7 @@ Thumbs.db
 {
   "name": "0214-ngay-khong-chiu-qua",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.6.1-demo",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -541,6 +635,26 @@ Tự động quét cấu trúc thư mục và chia nhỏ toàn bộ mã nguồn 
 | `O` / `Esc` | Mở / Đóng bảng Cài đặt đồ họa |
 | `1`, `2` | Đưa ra lựa chọn đạo đức khi đứng trước cửa |
 ````
+
+---
+
+<a id="third-party-licenses-md"></a>
+## Tập tin: `THIRD_PARTY_LICENSES.md` (12 dòng)
+
+```markdown
+# Bản quyền & Giấy phép Bên Thứ Ba — 02:14 — Đêm Không Dứt (DEMO)
+
+Dự án này là phiên bản thử nghiệm nội bộ (không thương mại hóa) sử dụng các thư viện mã nguồn mở và tài nguyên miễn phí sau:
+
+| Thành phần | Giấy phép | Ghi chú |
+|---|---|---|
+| **Three.js** (`three`) | MIT License | Thư viện đồ họa WebGL 3D (© Three.js Authors) |
+| **Vite** (`vite`) | MIT License | Công cụ đóng gói & máy chủ phát triển (© Evan You & Contributors) |
+| **Be Vietnam Pro & Lora** (Google Fonts) | SIL Open Font License 1.1 (OFL-1.1) | Phông chữ hiển thị giao diện tiếng Việt |
+| **Mixkit Free Sound Effects** | Mixkit Sound Effects Free License | Hiệu ứng âm thanh Foley & Ambience miễn phí trong `public/audio/` (nếu sử dụng bản tải từ Mixkit) |
+| **Vercel Web Analytics** | Vercel Terms of Service (Free Tier) | Thống kê lượt truy cập ẩn danh không cookie (`/ _vercel/insights/script.js`) |
+| **Web Audio API & Web Speech API** | W3C Web Standards | API trình duyệt web tiêu chuẩn |
+```
 
 ---
 

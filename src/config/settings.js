@@ -22,7 +22,7 @@ export const GFX_PRESETS = {
     wallBump: 0.014,
     floorBump: 0.010,
     tvSkip: 10,
-    exposure: 1.06
+    exposure: 1.14
   },
   medium: {
     label: 'Trung bình',
@@ -35,7 +35,7 @@ export const GFX_PRESETS = {
     wallBump: 0.026,
     floorBump: 0.018,
     tvSkip: 6,
-    exposure: 1.00
+    exposure: 1.08
   },
   high: {
     label: 'Cao',
@@ -48,7 +48,7 @@ export const GFX_PRESETS = {
     wallBump: 0.034,
     floorBump: 0.024,
     tvSkip: 3,
-    exposure: 0.96
+    exposure: 1.04
   }
 };
 

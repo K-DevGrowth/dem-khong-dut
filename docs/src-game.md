@@ -6,15 +6,15 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Các mô-đun trong thư mục `src/game/`  
-> **Số tập tin:** 6 | **Tổng số dòng:** 1,570 | **Dung lượng:** 55.4 KB
+> **Số tập tin:** 6 | **Tổng số dòng:** 1,604 | **Dung lượng:** 56.7 KB
 
 ## Mục lục tập tin
 
 - [`src/game/endings.js`](#src-game-endings-js) (412 dòng · 13.1 KB)
 - [`src/game/horrorDirector.js`](#src-game-horrordirector-js) (496 dòng · 18.3 KB)
-- [`src/game/loopManager.js`](#src-game-loopmanager-js) (508 dòng · 19.7 KB)
+- [`src/game/loopManager.js`](#src-game-loopmanager-js) (537 dòng · 20.9 KB)
 - [`src/game/saveManager.js`](#src-game-savemanager-js) (54 dòng · 2.1 KB)
-- [`src/game/state.js`](#src-game-state-js) (49 dòng · 1.0 KB)
+- [`src/game/state.js`](#src-game-state-js) (54 dòng · 1.1 KB)
 - [`src/game/timerManager.js`](#src-game-timermanager-js) (51 dòng · 1.2 KB)
 
 ---
@@ -944,7 +944,7 @@ export function updateFearAndLighting(dt, tSec, ctx) {
 ---
 
 <a id="src-game-loopmanager-js"></a>
-## Tập tin: `src/game/loopManager.js` (508 dòng)
+## Tập tin: `src/game/loopManager.js` (537 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -987,17 +987,36 @@ export function setupLoopEnvironment(loopNum, ctx) {
   clearInteractUI();
   state.loop = loopNum;
   state.loopClueFound = false;
-  state.wakingDuration = loopNum === 1 ? 4.6 : 3.1;
+  // Loop 3 wakes standing in the steamy bathroom facing the foggy mirror;
+  // Loop 4 wakes disoriented in the living room facing the blaring static TV!
+  const wakeInBed = (loopNum === 1 || loopNum === 2 || loopNum === 5);
+  state.wakingDuration = wakeInBed ? (loopNum === 1 ? 4.6 : 2.9) : 1.1;
   state.wakingTimer = state.wakingDuration;
-  state.wakeStepPlayed = false;
+  state.wakeStepPlayed = !wakeInBed;
 
   eyelidTop.style.transform = 'translateY(0%)';
   eyelidBottom.style.transform = 'translateY(0%)';
   eyeHaze.style.opacity = '0.92';
 
-  state.pos.set(0.35, 1.65, 2.35);
-  state.yaw = 0.25; state.pitch = 0.05;
-  state.targetYaw = 0.25; state.targetPitch = 0.05;
+  if (loopNum === 3) {
+    // Wake up inside the Bathroom facing the foggy 02:14 mirror & running sink
+    state.pos.set(5.75, 1.65, 1.0);
+    state.yaw = -Math.PI / 2;
+    state.pitch = -0.04;
+    state.targetYaw = -Math.PI / 2;
+    state.targetPitch = -0.04;
+  } else if (loopNum === 4) {
+    // Wake up in the Living Room facing the blaring CRT static TV
+    state.pos.set(-1.35, 1.65, -7.85);
+    state.yaw = Math.PI * 0.42;
+    state.pitch = -0.06;
+    state.targetYaw = Math.PI * 0.42;
+    state.targetPitch = -0.06;
+  } else {
+    state.pos.set(0.35, 1.65, 2.35);
+    state.yaw = 0.25; state.pitch = 0.05;
+    state.targetYaw = 0.25; state.targetPitch = 0.05;
+  }
   state.velX = 0; state.velZ = 0; state.bobBlend = 0;
   state.fear = loopNum >= 4 ? 22 : 0;
   state.matchTimer = 0;
@@ -1154,6 +1173,10 @@ export function setupLoopEnvironment(loopNum, ctx) {
 
   state.studyKeyFound = loopNum !== 1;
   state.breakerFixed = loopNum !== 2;
+  state.fridgeChecked = loopNum !== 2;
+  state.bathEscaped = loopNum !== 3;
+  state.phoneCheckedLoop3 = loopNum !== 3;
+  state.tvTurnedOff = loopNum !== 4;
   state.codeUnlocked = loopNum !== TOTAL_LOOPS;
   keypadScreen.classList.add('hidden');
 
@@ -1366,13 +1389,19 @@ export function openChoiceModal(loopNum, ctx) {
   clearInteractUI();
   if (document.pointerLockElement) document.exitPointerLock();
 
+  // Alternate option order on Loops 2 & 4 so players read carefully rather than always clicking button 1
+  const swapped = (loopNum === 2 || loopNum === 4);
+  state.choiceSwapped = swapped;
+  const topOpt = swapped ? cfg.b : cfg.a;
+  const botOpt = swapped ? cfg.a : cfg.b;
+
   choiceKicker.textContent = cfg.kicker;
   choiceTitle.textContent = cfg.title;
   choicePrompt.textContent = cfg.prompt;
-  choiceALabel.textContent = cfg.a.label;
-  choiceASub.textContent = cfg.a.sub;
-  choiceBLabel.textContent = cfg.b.label;
-  choiceBSub.textContent = cfg.b.sub;
+  choiceALabel.textContent = topOpt.label;
+  choiceASub.textContent = topOpt.sub;
+  choiceBLabel.textContent = botOpt.label;
+  choiceBSub.textContent = botOpt.sub;
   choiceScreen.classList.remove('hidden');
 }
 
@@ -1522,7 +1551,7 @@ export function clearSavedRun() {
 ---
 
 <a id="src-game-state-js"></a>
-## Tập tin: `src/game/state.js` (49 dòng)
+## Tập tin: `src/game/state.js` (54 dòng)
 
 ```javascript
 import * as THREE from 'three';
@@ -1561,6 +1590,11 @@ export function createGameState() {
     paperAnim: 0,
     studyKeyFound: false,
     breakerFixed: true,
+    fridgeChecked: false,
+    bathEscaped: true,
+    phoneCheckedLoop3: false,
+    tvTurnedOff: false,
+    choiceSwapped: false,
     codeUnlocked: false,
     anomaliesFound: 0,
     anomaliesRequired: 2,

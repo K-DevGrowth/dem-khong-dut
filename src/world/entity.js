@@ -150,7 +150,7 @@ export function createShadowPresence(scene, materials) {
     roughness: 0.62,
     metalness: 0.04,
     emissive: 0x262e36,
-    emissiveIntensity: 0.52
+    emissiveIntensity: 0.58
   });
 
   const faceTex = makePaleApparitionFaceTex();
@@ -160,7 +160,7 @@ export function createShadowPresence(scene, materials) {
     metalness: 0.04,
     emissive: 0x2a333c,
     emissiveMap: faceTex,
-    emissiveIntensity: 0.42
+    emissiveIntensity: 0.56
   });
 
   const wetHairMat = new THREE.MeshStandardMaterial({

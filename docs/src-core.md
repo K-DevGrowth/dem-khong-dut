@@ -6,18 +6,18 @@
 
 > **Dự án:** `0214-ngay-khong-chiu-qua`  
 > **Mô tả:** Điểm khởi chạy chính, hệ thống âm thanh và stylesheet gốc  
-> **Số tập tin:** 3 | **Tổng số dòng:** 5,184 | **Dung lượng:** 171.0 KB
+> **Số tập tin:** 3 | **Tổng số dòng:** 5,616 | **Dung lượng:** 183.8 KB
 
 ## Mục lục tập tin
 
-- [`src/audio.js`](#src-audio-js) (1,205 dòng · 45.7 KB)
-- [`src/main.js`](#src-main-js) (2,323 dòng · 77.7 KB)
-- [`src/style.css`](#src-style-css) (1,656 dòng · 47.6 KB)
+- [`src/audio.js`](#src-audio-js) (1,211 dòng · 45.8 KB)
+- [`src/main.js`](#src-main-js) (2,524 dòng · 85.8 KB)
+- [`src/style.css`](#src-style-css) (1,881 dòng · 52.1 KB)
 
 ---
 
 <a id="src-audio-js"></a>
-## Tập tin: `src/audio.js` (1,205 dòng)
+## Tập tin: `src/audio.js` (1,211 dòng)
 
 ```javascript
 // =========================================================
@@ -44,7 +44,8 @@ export const SFX_ASSETS = {
   thunder: 'thunder',
   terrorSweep: 'terror-sweep',
   horrorSweep: 'horror-sweep',
-  foxCry: 'fox-cry'
+  foxCry: 'fox-cry',
+  tvStaticOff: 'tv-static-off'
 };
 
 export class HouseAudio {
@@ -636,6 +637,11 @@ export class HouseAudio {
       g.gain.exponentialRampToValueAtTime(0.001, t + off + 0.2);
       osc.connect(g); g.connect(this.masterGain); osc.start(t + off); osc.stop(t + off + 0.22);
     });
+  }
+
+  playTvStaticOff() {
+    this.init();
+    this._playAsset('tvStaticOff', { volume: 0.85 }, () => this.playBreakerSnap());
   }
 
   playBreakerSnap() {
@@ -1230,7 +1236,7 @@ export class HouseAudio {
 ---
 
 <a id="src-main-js"></a>
-## Tập tin: `src/main.js` (2,323 dòng)
+## Tập tin: `src/main.js` (2,524 dòng)
 
 ```javascript
 import * as THREE from "three";
@@ -1427,6 +1433,49 @@ function createSafeWebGLRenderer(initialPreset, initWidth, initHeight) {
 
 function initGame() {
   const isDevBuild = Boolean(import.meta.env && import.meta.env.DEV);
+
+  // =========================================================
+  // 0. DEMO ACCESS GATE (Uses Vercel env VITE_DEMO_PASSWORD, default: testdemo)
+  // =========================================================
+  const DEMO_PASS = String((import.meta.env && import.meta.env.VITE_DEMO_PASSWORD) || "testdemo").trim();
+  const AUTH_SESSION_KEY = "dem_khong_dut_demo_auth_v1";
+  const authGate = document.getElementById("auth-gate");
+  const authForm = document.getElementById("auth-form");
+  const authInput = document.getElementById("auth-input");
+  const authError = document.getElementById("auth-error");
+
+  function unlockDemoGate() {
+    document.body.classList.remove("auth-locked");
+    if (authGate) authGate.classList.add("hidden");
+  }
+
+  try {
+    if (sessionStorage.getItem(AUTH_SESSION_KEY) === DEMO_PASS) {
+      unlockDemoGate();
+    }
+  } catch (_) {}
+
+  if (authForm && authInput) {
+    authForm.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const val = authInput.value.trim();
+      if (val === DEMO_PASS) {
+        try {
+          sessionStorage.setItem(AUTH_SESSION_KEY, DEMO_PASS);
+        } catch (_) {}
+        if (authError) authError.textContent = "";
+        authInput.classList.remove("error");
+        unlockDemoGate();
+      } else {
+        authInput.classList.remove("error");
+        void authInput.offsetWidth;
+        authInput.classList.add("error");
+        if (authError) authError.textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+        authInput.value = "";
+        authInput.focus();
+      }
+    });
+  }
   if (!isDevBuild) {
     document.querySelectorAll('[data-dev-only="true"]').forEach((el) => {
       el.style.display = "none";
@@ -1535,6 +1584,12 @@ function initGame() {
   const keypadScreen = document.getElementById("keypad-screen");
   const keypadDisplay = document.getElementById("keypad-display");
   const keypadMsg = document.getElementById("keypad-msg");
+  const warningScreen = document.getElementById("warning-screen");
+  const btnWarningAccept = document.getElementById("btn-warning-accept");
+  const btnWarningBack = document.getElementById("btn-warning-back");
+  const licensesScreen = document.getElementById("licenses-screen");
+  const btnOpenLicenses = document.getElementById("btn-open-licenses");
+  const btnCloseLicenses = document.getElementById("btn-close-licenses");
 
   // =========================================================
   // 2. THREE.JS SCENE, CAMERA, RENDERER & AUDIO INITIALIZATION
@@ -2096,29 +2151,54 @@ function initGame() {
       ctx.updateHUD();
     } else if (currentTarget.type === "tv") {
       currentTarget.checkedInLoop = state.loop;
-      audio.playBreakerSnap();
-      audio.playHeavyBreath(0.22);
-      const tvLines = {
-        2: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "TV tự bật lúc mất điện... Giữa màn nhiễu trắng lờ mờ hiện bóng một con hẻm mưa lúc 02:14.",
-        },
-        3: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "Bản tin thời tiết từ ngày 14/11 cứ phát lặp lại không ngừng — chiếc TV này đã kẹt ở đêm đó suốt nhiều tuần.",
-        },
-        4: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "Âm thanh nhiễu rè xen lẫn tiếng gõ cửa dồn dập... Không phải TV hư, là ký ức của mình đang phát lại.",
-        },
-        5: {
-          speaker: "Màn hình TV nhiễu hạt",
-          text: "Màn hình chớp tắt theo nhịp đèn xe cấp cứu ngoài cửa sổ. Mọi thứ trong căn nhà này đều dừng lại lúc 02:14.",
-        },
-      };
-      const info = tvLines[state.loop] || tvLines[2];
-      showSubtitle(info.speaker, info.text, 5600, state.loop >= 4);
-      ctx.recordAnomalyFound();
+      if (state.loop === 4 && !state.tvTurnedOff) {
+        state.tvTurnedOff = true;
+        house.lights.tvLight.intensity = 0;
+        materials.tvScreenMat.map = null;
+        materials.tvScreenMat.color.setHex(0x050608);
+        materials.tvScreenMat.needsUpdate = true;
+        audio.triggerDeadSilence(1600);
+        audio.playTvStaticOff();
+        state.shakeTime = 0.35;
+        // Brief uncanny apparition appearance near study doorway when TV snaps off
+        shadow.group.position.set(2.4, 0, -4.45);
+        shadow.group.visible = true;
+        timers.setTimeout(() => {
+          if (state.loop === 4 && !state.ended && shadowEvent.mode === "hidden") {
+            shadow.group.visible = false;
+          }
+        }, 780);
+        objectiveText.textContent = house.objects.phoneObj.answered
+          ? "TV đã tắt — cửa phòng làm việc mở rồi! Vào xem bản chép tin nhắn thoại"
+          : "TV đã tắt — hãy nghe điện thoại bàn đang réo rồi vào phòng làm việc";
+        showSubtitle(
+          "Màn hình TV tắt phụt",
+          "Tiếng nhiễu tắt ngấm... Cả căn phòng đột ngột im bặt. Hình như vừa có bóng người lướt qua cửa phòng làm việc!",
+          5800,
+          true,
+        );
+        ctx.recordAnomalyFound();
+      } else {
+        audio.playBreakerSnap();
+        audio.playHeavyBreath(0.22);
+        const tvLines = {
+          2: {
+            speaker: "Màn hình TV nhiễu hạt",
+            text: "TV tự bật lúc mất điện... Giữa màn nhiễu trắng lờ mờ hiện bóng một con hẻm mưa lúc 02:14.",
+          },
+          3: {
+            speaker: "Màn hình TV nhiễu hạt",
+            text: "Bản tin thời tiết từ ngày 14/11 cứ phát lặp lại không ngừng — chiếc TV này đã kẹt ở đêm đó suốt nhiều tuần.",
+          },
+          5: {
+            speaker: "Màn hình TV nhiễu hạt",
+            text: "Màn hình chớp tắt theo nhịp đèn xe cấp cứu ngoài cửa sổ. Mọi thứ trong căn nhà này đều dừng lại lúc 02:14.",
+          },
+        };
+        const info = tvLines[state.loop] || tvLines[2];
+        showSubtitle(info.speaker, info.text, 5600, state.loop >= 4);
+        ctx.recordAnomalyFound();
+      }
     } else if (currentTarget.type === "broken_mug") {
       currentTarget.checkedInLoop = state.loop;
       audio.playFloorCreak();
@@ -2149,10 +2229,14 @@ function initGame() {
           5600,
         );
       } else if (state.loop === 3) {
+        state.phoneCheckedLoop3 = true;
+        if (state.anomaliesFound + 1 >= state.anomaliesRequired) {
+          objectiveText.textContent = "Đã xem nhật ký cuộc gọi → vào phòng làm việc kiểm tra tờ lịch";
+        }
         showSubtitle(
           "Màn hình sáng đỏ · 02:08",
-          "4 cuộc gọi nhỡ từ Alice lúc 02:08 ngày 14/11 — khi máy đang bật Im lặng! Không phải kẻ lạ đâu...",
-          5800,
+          "4 cuộc gọi nhỡ từ Alice lúc 02:08 ngày 14/11 — khi máy đang bật Im lặng! Khoan đã... hôm nay thật sự là ngày mấy?",
+          6000,
           true,
         );
       } else {
@@ -2214,6 +2298,11 @@ function initGame() {
       completeBreakerFix();
     } else if (currentTarget.type === "bath_mirror") {
       currentTarget.checkedInLoop = state.loop;
+      if (state.loop === 3 && !state.bathEscaped) {
+        state.bathEscaped = true;
+        audio.playDoorCreak(false);
+        objectiveText.textContent = "Cửa phòng tắm mở chốt rồi → kiểm tra điện thoại sáng đỏ ngoài phòng khách";
+      }
       ctx.recordAnomalyFound();
       if (state.loop === 1) {
         audio.playHeavyBreath(0.18);
@@ -2253,6 +2342,10 @@ function initGame() {
       currentTarget.dripping = false;
       house.objects.bathWaterMesh.visible = false;
       audio.playFaucetToggle(true);
+      if (state.loop === 3 && !state.bathEscaped) {
+        state.bathEscaped = true;
+        objectiveText.textContent = "Cửa phòng tắm hết kẹt rồi → soi gương hoặc ra kiểm tra điện thoại sáng đỏ";
+      }
       const info = wasRunning ? LOOP_STORY.bathFaucet2 : LOOP_STORY.bathFaucet1;
       showSubtitle(info.speaker, info.text, 5400, wasRunning);
     } else if (currentTarget.type === "kitchen_faucet") {
@@ -2267,6 +2360,7 @@ function initGame() {
       showSubtitle(info.speaker, info.text, 5400, wasRunning);
     } else if (currentTarget.type === "fridge") {
       currentTarget.checkedInLoop = state.loop;
+      state.fridgeChecked = true;
       ctx.recordAnomalyFound();
       audio.playDoorCreak(false);
       if (state.loop === 1) {
@@ -2293,6 +2387,7 @@ function initGame() {
       }
     } else if (currentTarget.type === "kitchen_note") {
       currentTarget.readInLoop = state.loop;
+      ctx.recordAnomalyFound();
       audio.playMemoryChime(false);
       const key =
         state.loop === 1
@@ -2330,6 +2425,7 @@ function initGame() {
       }
     } else if (currentTarget.type === "wardrobe") {
       currentTarget.checkedInLoop = state.loop;
+      ctx.recordAnomalyFound();
       if (state.loop === 1) {
         audio.playWardrobeCreak(false);
         house.objects.wardrobeObj.targetAngle = -0.45;
@@ -2436,6 +2532,33 @@ function initGame() {
         );
         return;
       }
+      if (state.loop === 2 && !state.fridgeChecked) {
+        audio.playDoorSlam();
+        showSubtitle(
+          "Chưa kiểm tra tủ lạnh",
+          "Tủ lạnh trong Nhà bếp vẫn đang hở sáng bất thường... Hãy kiểm tra bên trong trước khi xem hóa đơn.",
+          5000,
+        );
+        return;
+      }
+      if (state.loop === 3 && !state.phoneCheckedLoop3) {
+        audio.playDoorSlam();
+        showSubtitle(
+          "Điện thoại ngoài phòng khách",
+          "Chiếc điện thoại trên bàn phòng khách đang sáng đỏ bất thường... Hãy kiểm tra nó trước.",
+          5000,
+        );
+        return;
+      }
+      if (state.loop === 4 && !state.tvTurnedOff) {
+        audio.playDoorSlam();
+        showSubtitle(
+          "Tiếng nhiễu quá ồn",
+          "Màn hình TV nhiễu hạt ngoài phòng khách đang kêu chói tai khiến đầu óc quay cuồng... Hãy ra tắt TV trước.",
+          5000,
+        );
+        return;
+      }
       if (state.loop === TOTAL_LOOPS && !state.codeUnlocked) {
         keypadController.openKeypad();
         return;
@@ -2495,6 +2618,34 @@ function initGame() {
         );
         return;
       }
+      if (
+        currentTarget.id === "door_bathroom" &&
+        state.loop === 3 &&
+        !state.bathEscaped
+      ) {
+        audio.playDoorSlam();
+        currentTarget.rattleTime = 0.28;
+        showSubtitle(
+          "Cửa phòng tắm bị kẹt!",
+          "Tay nắm kẹt cứng trong hơi nước... Hãy khóa vòi nước hoặc nhìn lên mặt gương phía sau trước đã.",
+          4800,
+        );
+        return;
+      }
+      if (
+        currentTarget.id === "door_study" &&
+        state.loop === 4 &&
+        !state.tvTurnedOff
+      ) {
+        audio.playDoorSlam();
+        currentTarget.rattleTime = 0.28;
+        showSubtitle(
+          "Cửa phòng làm việc kẹt chặt",
+          "Tiếng nhiễu TV ngoài phòng khách đang dội thẳng vào tai... Hãy tắt chiếc TV nhiễu hạt trước.",
+          4800,
+        );
+        return;
+      }
       const willClose = currentTarget.isOpen;
       currentTarget.isOpen = !currentTarget.isOpen;
       currentTarget.targetOffset = currentTarget.isOpen ? -Math.PI * 0.48 : 0;
@@ -2508,6 +2659,15 @@ function initGame() {
   // 6. INPUT EVENT LISTENERS (KEYBOARD, MOUSE, TOUCH)
   // =========================================================
   window.addEventListener("keydown", (e) => {
+    if (document.body.classList.contains("auth-locked")) return;
+    if (licensesScreen && !licensesScreen.classList.contains("hidden")) {
+      if (e.code === "Escape") licensesScreen.classList.add("hidden");
+      return;
+    }
+    if (warningScreen && !warningScreen.classList.contains("hidden")) {
+      if (e.code === "Escape") warningScreen.classList.add("hidden");
+      return;
+    }
     if (state.inIntro) {
       beginLoop1AfterIntro(ctx);
       return;
@@ -2517,12 +2677,12 @@ function initGame() {
     if (!choiceScreen.classList.contains("hidden")) {
       if (e.key === "1") {
         audio.init();
-        resolveMoralChoice("confront", ctx);
+        resolveMoralChoice(state.choiceSwapped ? "avoid" : "confront", ctx);
         return;
       }
       if (e.key === "2") {
         audio.init();
-        resolveMoralChoice("avoid", ctx);
+        resolveMoralChoice(state.choiceSwapped ? "confront" : "avoid", ctx);
         return;
       }
       return;
@@ -2782,7 +2942,9 @@ function initGame() {
       !keypadScreen.classList.contains("hidden") ||
       !choiceScreen.classList.contains("hidden") ||
       !endingScreen.classList.contains("hidden") ||
-      (paperOverlay && !paperOverlay.classList.contains("hidden"))
+      (paperOverlay && !paperOverlay.classList.contains("hidden")) ||
+      (warningScreen && !warningScreen.classList.contains("hidden")) ||
+      (licensesScreen && !licensesScreen.classList.contains("hidden"))
     );
   }
 
@@ -2928,11 +3090,47 @@ function initGame() {
 
   refreshContinueButton();
 
-  // UI Button Bindings
+  // UI Button Bindings (Start opens Horror & Photosensitivity Warning first)
   document.getElementById("btn-start").addEventListener("click", () => {
     audio.init();
-    startNewGame(true, ctx);
+    if (warningScreen) {
+      warningScreen.classList.remove("hidden");
+    } else {
+      startNewGame(true, ctx);
+    }
   });
+  if (btnWarningAccept) {
+    btnWarningAccept.addEventListener("click", () => {
+      audio.init();
+      if (warningScreen) warningScreen.classList.add("hidden");
+      startNewGame(true, ctx);
+    });
+  }
+  if (btnWarningBack) {
+    btnWarningBack.addEventListener("click", () => {
+      if (warningScreen) warningScreen.classList.add("hidden");
+    });
+  }
+  if (btnOpenLicenses && licensesScreen) {
+    btnOpenLicenses.addEventListener("click", () => {
+      if (state.running && !state.ended) {
+        state.paused = true;
+        clearKeys();
+        if (document.pointerLockElement) {
+          try { document.exitPointerLock(); } catch (_) {}
+        }
+      }
+      licensesScreen.classList.remove("hidden");
+    });
+  }
+  if (btnCloseLicenses && licensesScreen) {
+    btnCloseLicenses.addEventListener("click", () => {
+      licensesScreen.classList.add("hidden");
+      if (state.running && !state.ended && !isAnyModalOpen() && (!pauseOverlay || pauseOverlay.classList.contains("hidden"))) {
+        state.paused = false;
+      }
+    });
+  }
   const btnTestEnding = document.getElementById("btn-test-ending");
   if (btnTestEnding && isDevBuild) {
     btnTestEnding.addEventListener("click", () => startQuickEndingTest(ctx));
@@ -3000,16 +3198,16 @@ function initGame() {
     });
   }
 
-  // Choice Dialog Buttons
+  // Choice Dialog Buttons (respects per-loop choice order)
   if (btnChoiceA)
     btnChoiceA.addEventListener("click", () => {
       audio.init();
-      resolveMoralChoice("confront", ctx);
+      resolveMoralChoice(state.choiceSwapped ? "avoid" : "confront", ctx);
     });
   if (btnChoiceB)
     btnChoiceB.addEventListener("click", () => {
       audio.init();
-      resolveMoralChoice("avoid", ctx);
+      resolveMoralChoice(state.choiceSwapped ? "confront" : "avoid", ctx);
     });
 
   // Ending Switcher Buttons
@@ -3213,8 +3411,8 @@ function initGame() {
       );
     }
 
-    // TV static noise (only upload texture when near living room)
-    if (state.loop >= 2) {
+    // TV static noise (only upload texture when near living room and TV is still on)
+    if (state.loop >= 2 && !(state.loop === 4 && state.tvTurnedOff)) {
       house.lights.tvLight.intensity =
         1.05 + Math.sin(tSec * 29) * 0.25 + Math.cos(tSec * 43) * 0.15;
       tvFrameSkip = (tvFrameSkip + 1) % preset.tvSkip;
@@ -3333,7 +3531,16 @@ function initGame() {
         eyeHaze.style.opacity = ((1 - eyeOpen) * 0.72).toFixed(2);
 
         let cx, cy, cz, ry, rx, rz;
-        if (p < 0.42) {
+        if (state.loop === 3 || state.loop === 4) {
+          // Disoriented standing wake-up (Bathroom in Loop 3, Living Room TV in Loop 4)
+          const tOpen = smooth(p);
+          cx = state.pos.x;
+          cy = state.pos.y - (1 - tOpen) * 0.08;
+          cz = state.pos.z;
+          ry = state.yaw;
+          rx = state.pitch - (1 - tOpen) * 0.14;
+          rz = Math.sin((1 - tOpen) * Math.PI) * 0.06;
+        } else if (p < 0.42) {
           const t1 = smooth(p / 0.42);
           cx = -1.62;
           cy = 0.8 + t1 * 0.04;
@@ -3561,7 +3768,7 @@ if (
 ---
 
 <a id="src-style-css"></a>
-## Tập tin: `src/style.css` (1,656 dòng)
+## Tập tin: `src/style.css` (1,881 dòng)
 
 ```css
 :root {
@@ -5219,6 +5426,231 @@ canvas {
 .paper-close-btn:hover {
   background: rgba(34, 26, 18, 0.16);
   border-color: rgba(46, 36, 26, 0.65);
+}
+
+/* === v1.6.0: DEMO ACCESS GATE, HORROR WARNING, LICENSES & FOOTER === */
+body.auth-locked #start-screen,
+body.auth-locked #canvas-container {
+  visibility: hidden;
+}
+
+#auth-gate {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px 64px;
+  transition: opacity 0.45s ease;
+}
+#auth-gate.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-card {
+  width: min(430px, 100%);
+  padding: 34px 28px 30px;
+  background: rgba(12, 13, 18, 0.96);
+  border: 1px solid rgba(232, 155, 76, 0.28);
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.92);
+}
+.demo-pill-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(212, 77, 66, 0.16);
+  border: 1px solid rgba(240, 123, 114, 0.45);
+  color: #ff9a91;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin-bottom: 14px;
+}
+.auth-title {
+  margin: 0 0 8px;
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(20px, 3.6vw, 25px);
+  font-weight: 600;
+  color: #f4f1ea;
+}
+.auth-sub {
+  margin: 0 0 20px;
+  font-size: 13.5px;
+  color: var(--mute);
+  line-height: 1.55;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #06070a;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  color: #f5f2eb;
+  font-family: monospace;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.auth-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px rgba(232, 155, 76, 0.2);
+}
+.auth-input.error {
+  border-color: var(--red);
+  animation: keypadShake 0.32s ease;
+}
+.auth-btn {
+  width: 100%;
+  padding: 12px 24px;
+}
+.auth-error {
+  min-height: 20px;
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: #ff7a70;
+}
+
+.demo-tag {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(232, 155, 76, 0.18);
+  border: 1px solid rgba(232, 155, 76, 0.55);
+  color: var(--amber-bright);
+  font-family: monospace;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.demo-tag-inline {
+  color: var(--amber-bright);
+  font-weight: 700;
+}
+
+#warning-screen { z-index: 44; }
+.warning-card {
+  width: min(520px, 100%);
+  border-color: rgba(212, 77, 66, 0.45);
+}
+.warning-kicker {
+  color: #ff8e86;
+}
+.warning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 22px;
+}
+.warning-item {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid rgba(232, 155, 76, 0.65);
+  border-radius: 6px;
+  font-size: 13.5px;
+  line-height: 1.58;
+  color: #dcd6ca;
+}
+.warning-item strong {
+  color: #f7e4c6;
+}
+.warning-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#licenses-screen { z-index: 130; }
+.licenses-card {
+  width: min(560px, 100%);
+}
+.license-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.license-item {
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+.license-item strong {
+  color: var(--amber-bright);
+  font-size: 13.5px;
+}
+.license-item span {
+  font-family: monospace;
+  font-size: 11.5px;
+  color: #8fd2ce;
+}
+.license-item p {
+  margin: 4px 0 0 !important;
+  font-size: 12.5px !important;
+  line-height: 1.48 !important;
+  color: #b7b1a5 !important;
+}
+
+#demo-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 125;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 7px 14px;
+  background: rgba(4, 5, 8, 0.84);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11.5px;
+  color: rgba(205, 199, 188, 0.78);
+  text-align: center;
+  line-height: 1.4;
+}
+body:not(.pre-start):not(.auth-locked) #demo-footer {
+  background: rgba(4, 5, 8, 0.42);
+  border-top-color: rgba(255, 255, 255, 0.04);
+  font-size: 10.5px;
+  color: rgba(205, 199, 188, 0.52);
+  padding: 4px 12px;
+}
+.footer-sep {
+  opacity: 0.4;
+}
+.footer-link-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--amber-bright);
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footer-link-btn:hover {
+  color: #fff2d9;
 }
 ```
 
