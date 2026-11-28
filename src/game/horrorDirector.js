@@ -268,7 +268,7 @@ export function updateShadowEvents(dt, tSec, isMoving, ctx) {
         state.velX = 0;
         state.velZ = 0;
         audio.playMemoryChime(true);
-        showSubtitle('Tin nhắn thoại · Alice (02:09)', VOICEMAIL_LINE, 0, 'warm', false, true);
+        showSubtitle('Băng ghi âm · 113 (02:08)', VOICEMAIL_LINE, 0, 'cold', false, true);
       }
 
       return 0;

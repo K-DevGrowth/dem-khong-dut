@@ -1064,30 +1064,30 @@ function initGame() {
       if (state.loop === 1) {
         showSubtitle(
           "Điện thoại trên bàn",
-          "Màn hình tối om, đồng hồ đứng ở 02:14 và báo Không có dịch vụ. Lạ thật, sao Alice không nhắn gì cả?",
-          5600,
+          "02:14 · Không có dịch vụ. Màn hình khóa cài ảnh hai người — không có mặt mình.",
+          5400,
         );
       } else if (state.loop === 2) {
         showSubtitle(
           "Điện thoại trên bàn",
-          "Vẫn là 02:14 không thông báo... nhưng góc máy có biểu tượng chuông gạch chéo. Mình bật Im lặng từ lúc nào?",
-          5600,
+          "Vẫn đứng ở 02:14. Chiếc máy này dùng mật khẩu mình không hề biết.",
+          5400,
         );
       } else if (state.loop === 3) {
         state.phoneCheckedLoop3 = true;
         if (state.anomaliesFound + 1 >= state.anomaliesRequired) {
-          objectiveText.textContent = "Đã xem nhật ký cuộc gọi → vào phòng làm việc kiểm tra tờ lịch";
+          objectiveText.textContent = "Đã xem lịch sử cuộc gọi → vào phòng làm việc kiểm tra tờ lịch";
         }
         showSubtitle(
-          "Màn hình sáng đỏ · 02:08",
-          "4 cuộc gọi nhỡ từ Alice lúc 02:08 ngày 14/11 — khi máy đang bật Im lặng! Khoan đã... hôm nay thật sự là ngày mấy?",
-          6000,
+          "Lịch sử cuộc gọi · 02:08",
+          "Cuộc gọi đi gần nhất: 113 (02:08 · 41 giây). Tin nhắn nháp gửi David: “Có ai đó đang ở trong...”",
+          6200,
           true,
         );
       } else {
         showSubtitle(
-          "Tin nhắn thoại · 02:09",
-          "Màn hình hiện 1 tin nhắn thoại dài 34 giây từ Alice gửi lúc 02:09, ngay sau khi cô ấy gõ cửa mà không ai mở.",
+          "Tin nhắn chưa gửi · 02:09",
+          "Gửi David: “Em khóa cửa phòng ngủ rồi nhưng nghe tiếng thở ngay ngoài hành lang...”",
           6000,
         );
       }
@@ -1364,11 +1364,11 @@ function initGame() {
         true,
       );
       state.journalNotes.push({
-        title: `Vòng ${state.loop} — Cuộc gọi từ điện thoại bàn`,
+        title: `Vòng ${state.loop} — Băng ghi âm điện thoại bàn`,
         text:
           state.loop === 2
-            ? "Điện thoại bàn tự đổ chuông dù dây đã rút. Đầu dây bên kia là giọng Alice giữa tiếng mưa lớn ở đầu hẻm lúc 02:14..."
-            : "Vòng 4: Điện thoại lại réo vang giữa đêm. Giọng Alice đứt quãng giữa tiếng nhiễu rè, trách mình vì sao khóa cửa không nghe máy.",
+            ? "Điện thoại bàn tự reo dù dây đã rút. Đầu dây bên kia vang lên giọng phụ nữ hoảng loạn gọi 113 lúc 02:08."
+            : "Vòng 4: Băng ghi âm tổng đài 113 phát lại rõ mồn một — “Hắn không đứng ngoài cửa nữa, hắn đang ở trong nhà tôi...”",
       });
       renderJournal(state, { journalList, journalTimeline, journalChoices });
       ctx.recordAnomalyFound();

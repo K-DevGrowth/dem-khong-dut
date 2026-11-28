@@ -914,18 +914,18 @@ export function createHouse(scene, materials, colliders, interactables, getState
       ctx.strokeStyle = '#ff5a50'; ctx.lineWidth = 3;
       ctx.strokeRect(18, 168, 220, 104);
       ctx.fillStyle = '#ff7b72'; ctx.font = 'bold 23px sans-serif';
-      ctx.fillText('4 CUỘC GỌI NHỠ', 128, 204);
-      ctx.fillStyle = '#f5e8e6'; ctx.font = '19px sans-serif';
-      ctx.fillText('Alice · 02:08 (Im lặng)', 128, 240);
+      ctx.fillText('CUỘC GỌI ĐI · 113', 128, 204);
+      ctx.fillStyle = '#f5e8e6'; ctx.font = '18px sans-serif';
+      ctx.fillText('02:08 · Thời lượng 0:41', 128, 240);
     } else if (mode === 'voicemail') {
-      ctx.fillStyle = 'rgba(232, 155, 76, 0.24)';
+      ctx.fillStyle = 'rgba(212, 77, 66, 0.22)';
       ctx.fillRect(18, 168, 220, 108);
-      ctx.strokeStyle = '#f7c37c'; ctx.lineWidth = 3;
+      ctx.strokeStyle = '#d46960'; ctx.lineWidth = 3;
       ctx.strokeRect(18, 168, 220, 108);
-      ctx.fillStyle = '#f7c37c'; ctx.font = 'bold 22px sans-serif';
-      ctx.fillText('TIN NHẮN THOẠI', 128, 204);
-      ctx.fillStyle = '#f5efe6'; ctx.font = '19px sans-serif';
-      ctx.fillText('Alice · 02:09 (0:34)', 128, 242);
+      ctx.fillStyle = '#e69b94'; ctx.font = 'bold 21px sans-serif';
+      ctx.fillText('TIN NHẮN CHƯA GỬI', 128, 204);
+      ctx.fillStyle = '#f5efe6'; ctx.font = '17px sans-serif';
+      ctx.fillText('Gửi David · 02:09', 128, 242);
     } else {
       ctx.fillStyle = 'rgba(255,255,255,0.08)';
       ctx.fillRect(22, 180, 212, 64);

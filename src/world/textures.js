@@ -124,9 +124,9 @@ export function makeBathMirrorTex(mode) {
     ctx.fillStyle = 'rgba(18, 26, 32, 0.86)';
     ctx.font = 'bold 16px "Be Vietnam Pro", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('NGƯỜI NGOÀI CỬA LÀ ALICE', 128, 212);
-    ctx.font = 'bold 24px "Be Vietnam Pro", sans-serif';
-    ctx.fillText('ĐỪNG TRỐN NỮA', 128, 244);
+    ctx.fillText('ĐÂY KHÔNG PHẢI NHÀ ANH', 128, 212);
+    ctx.font = 'bold 26px "Be Vietnam Pro", sans-serif';
+    ctx.fillText('ANH LÀ AI?', 128, 246);
     ctx.strokeStyle = 'rgba(235, 246, 255, 0.86)';
     ctx.lineWidth = 2;
     [[128, 120, 18, 36], [128, 120, 244, 72], [128, 120, 48, 305], [128, 120, 215, 290], [128, 120, 128, 8]].forEach(([x1, y1, x2, y2]) => {

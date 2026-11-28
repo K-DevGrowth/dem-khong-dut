@@ -27,50 +27,50 @@ export function unlockEnding(type) {
 }
 
 export const ALLEY_VOICES = [
-  { z: -16.5, speaker: 'Ký ức', text: '“Đoạn hẻm này tối quá… đi một mình em hơi sợ.” — “Vậy lần sau cứ gọi anh. Anh ra đón em.”' },
-  { z: -26.5, speaker: 'Ý nghĩ', text: 'Cô ấy đã gọi, đúng như mình từng nói. Vậy mà mình không bắt máy. Rồi tự giam mình trong đêm đó suốt bao lâu nay.' },
-  { z: -36.5, speaker: 'Ý nghĩ', text: 'Nhưng dù mình có kẹt lại trong đêm này mãi, cô ấy cũng không quay về được.' }
+  { z: -16.5, speaker: '02:08', text: 'Cửa sau đêm đó... không khóa.' },
+  { z: -26.5, speaker: 'Số 14', text: '“D. Tran”. Không phải tên mình.' },
+  { z: -36.5, speaker: '02:14', text: 'Ba nhịp gõ. Đèn xanh–đỏ ngoài kính.' }
 ];
 
-export const VOICEMAIL_LINE = '“...anh bảo cứ gọi mà... sao anh không nghe máy... (cười khẽ) Em đùa thôi. Chắc anh ngủ say rồi hả. Không sao đâu, lần này em tự đi được. Chuyện lúc tối, mai mình nói tiếp nha. Anh ngủ ngon.”';
-export const FINALE_LINE_5 = 'Mình đã tệ với cô ấy, điều đó không đổi. Nhưng cô ấy vẫn gọi. Lần này, mình nghe hết rồi.';
-export const FINALE_LINE_6 = 'Anh sẽ không quên em đâu. Kể cả những lỗi của anh. Chỉ là… từ hôm nay, anh sẽ sống tiếp.';
+export const VOICEMAIL_LINE = '[113 · 02:08:15] “...số 14... cửa sau mở rồi... hắn không ở ngoài nữa... hắn trong—” [NGẮT TÍN HIỆU · 02:08:42]';
+export const FINALE_LINE_5 = 'Chốt cửa trượt xuống.';
+export const FINALE_LINE_6 = '02:14.';
 
 export const ENDINGS_DATA = {
   true: {
     cls: '',
     badge: 'Kết thúc Thật · 1/3',
-    title: 'Bình Minh 15/11',
-    kicker: '15 tháng 11 · 05:48',
-    body: '“Không có kẻ lạ nào ngoài cửa cả — chỉ có em đứng dưới mưa và nỗi sợ của chính anh. Hôm nay, anh mở chốt khóa và bước ra khỏi đêm 14/11.”',
+    title: 'Số 14',
+    kicker: '15/11 · 05:48',
+    body: '“Cửa chính mở. Mưa tạt vào mặt. Ngoài bậc thềm chỉ có ánh đèn xanh–đỏ xoay đều trong sương.”',
     phoneTime: '05:48',
     phoneDate: '15/11',
     phoneIcon: '✓',
-    phoneTitle: 'Tin nhắn thoại của Alice · 02:09 · Đã nghe & lưu',
+    phoneTitle: 'Hồ sơ #0214 · Số 14',
     phoneBar: '100%'
   },
   normal: {
     cls: 'ending-normal',
     badge: 'Kết thúc Thường · 2/3',
-    title: 'Sáng Sớm Lạnh Lẽo',
-    kicker: '15 tháng 11 · 05:12',
-    body: '“Tôi bước ra khỏi căn nhà khi trời vừa tảng sáng. Tôi biết người gõ cửa đêm đó là Alice, nhưng trong lòng vẫn còn những mảnh ký ức chưa đủ can đảm đối diện.”',
+    title: 'Chìa Khóa Lạ',
+    kicker: '15/11 · 05:12',
+    body: '“Trời hửng sáng. Tôi bước ra khỏi hẻm. Trong túi áo vẫn còn một chùm chìa khóa — không có chìa nào vừa ổ cửa số 14.”',
     phoneTime: '05:12',
     phoneDate: '15/11',
     phoneIcon: '●',
-    phoneTitle: '1 tin nhắn thoại nghe dở · Alice (02:09)',
-    phoneBar: '36%'
+    phoneTitle: 'Băng 113 (02:08) · 00:31',
+    phoneBar: '42%'
   },
   bad: {
     cls: 'ending-bad',
     badge: 'Kết thúc Xấu · 3/3',
-    title: '02:14',
-    kicker: '14 tháng 11 · 02:14',
-    body: '“Tôi lại mở mắt trên giường giữa tiếng mưa. Tôi vẫn tự nhủ ngoài cửa là kẻ lạ — và bàn tay tôi lại gạt chặt chốt khóa thêm một lần nữa.”',
+    title: 'Gạt Chốt',
+    kicker: '14/11 · 02:14',
+    body: '“Mưa vẫn gõ ngoài kính. Đồng hồ đỏ 02:14. Sau cửa chính vang lên ba nhịp gõ trầm — tôi đứng dậy, gạt chặt chốt trên.”',
     phoneTime: '02:14',
     phoneDate: '14/11',
     phoneIcon: '✕',
-    phoneTitle: '4 cuộc gọi nhỡ · Alice · Chế độ Im lặng',
+    phoneTitle: 'Cuộc gọi đi: 113 · 02:08',
     phoneBar: '0%'
   }
 };
