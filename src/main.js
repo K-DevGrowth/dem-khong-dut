@@ -1690,6 +1690,21 @@ function initGame() {
   let isDragging = false;
   let lastX = 0;
   let lastY = 0;
+  let pointerLockIgnoreUntil = 0;
+
+  function requestSafePointerLock() {
+    if (!container.requestPointerLock) return;
+    try {
+      const p = container.requestPointerLock({ unadjustedMovement: true });
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          try { container.requestPointerLock(); } catch (_) {}
+        });
+      }
+    } catch (_) {
+      try { container.requestPointerLock(); } catch (_) {}
+    }
+  }
 
   subtitleBox.addEventListener("click", () => {
     if (shadowEvent.voicemailHold) advanceVoicemailSequence(ctx);
@@ -1708,21 +1723,20 @@ function initGame() {
 
     if (e.button === 2) return;
 
-    isDragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-
-    // First click while unlocked acquires Pointer Lock only (avoids accidental HPL grab/throw)
+    // First click while unlocked acquires Pointer Lock cleanly without starting drag fallback
     if (
       e.button === 0 &&
       container.requestPointerLock &&
       document.pointerLockElement !== container
     ) {
-      try {
-        container.requestPointerLock();
-      } catch (_) {}
+      isDragging = false;
+      requestSafePointerLock();
       return;
     }
+
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
 
     // All doors, drawers & breaker use crisp [E] interaction
   });
@@ -1736,8 +1750,12 @@ function initGame() {
   window.addEventListener("mousemove", (e) => {
     if (state.holdingPaper && paperTiltWrap) {
       if (document.pointerLockElement === container) {
-        state.paperTiltY = Math.max(-22, Math.min(22, state.paperTiltY + e.movementX * 0.08));
-        state.paperTiltX = Math.max(-16, Math.min(16, state.paperTiltX - e.movementY * 0.08));
+        if (performance.now() < pointerLockIgnoreUntil) return;
+        const pmx = e.movementX || 0;
+        const pmy = e.movementY || 0;
+        if (Math.abs(pmx) > 160 || Math.abs(pmy) > 160) return;
+        state.paperTiltY = Math.max(-22, Math.min(22, state.paperTiltY + pmx * 0.08));
+        state.paperTiltX = Math.max(-16, Math.min(16, state.paperTiltX - pmy * 0.08));
       } else {
         const nx = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1;
         const ny = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
@@ -1754,13 +1772,19 @@ function initGame() {
     let dy = 0;
 
     if (document.pointerLockElement === container) {
-      dx = e.movementX;
-      dy = e.movementY;
+      if (performance.now() < pointerLockIgnoreUntil) return;
+      dx = e.movementX || 0;
+      dy = e.movementY || 0;
+      // Drop corrupt Chromium/Windows Pointer Lock cursor-recenter spike events (>160px in 1 frame)
+      if (Math.abs(dx) > 160 || Math.abs(dy) > 160) return;
+      dx = Math.max(-90, Math.min(90, dx));
+      dy = Math.max(-90, Math.min(90, dy));
     } else if (isDragging) {
       dx = e.clientX - lastX;
       dy = e.clientY - lastY;
       lastX = e.clientX;
       lastY = e.clientY;
+      if (Math.abs(dx) > 160 || Math.abs(dy) > 160) return;
     } else {
       return;
     }
@@ -1938,6 +1962,9 @@ function initGame() {
   let wasPointerLocked = false;
   document.addEventListener("pointerlockchange", () => {
     const locked = document.pointerLockElement === container;
+    if (locked && !wasPointerLocked) {
+      pointerLockIgnoreUntil = performance.now() + 80;
+    }
     if (
       wasPointerLocked &&
       !locked &&
