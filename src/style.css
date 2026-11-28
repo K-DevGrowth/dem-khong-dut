@@ -2439,3 +2439,227 @@ body.pre-start #foley-panel {
   background: rgba(20, 15, 10, 0.24);
   border-color: rgba(26, 20, 14, 0.65);
 }
+
+/* === v1.8.0: 3D PAPER TILT & FLIP INSPECTION + COLORED CIPHER CLUE === */
+.paper-stage {
+  perspective: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(560px, 92vw);
+}
+
+.paper-tilt-wrap {
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.08s ease-out;
+  will-change: transform;
+}
+
+.paper-card-3d {
+  position: relative;
+  width: 100%;
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.paper-card-3d.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.paper-face {
+  grid-area: 1 / 1;
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.paper-face-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.paper-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paper-back-clue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 18px 0 14px;
+  padding: 16px 20px;
+  background: rgba(16, 12, 8, 0.14);
+  border: 1px dashed rgba(26, 20, 14, 0.38);
+}
+
+.paper-back-clue.hidden {
+  display: none;
+}
+
+.paper-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(20, 16, 12, 0.55);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.paper-back-digit {
+  font-family: monospace;
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.paper-back-body {
+  font-size: 16px;
+  text-align: center;
+  margin: 12px 0;
+  opacity: 0.9;
+}
+
+.paper-controls-tip {
+  font-family: monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: rgba(214, 208, 198, 0.65);
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+}
+
+/* === v1.8.1: TITLE SCREEN PHOTO BACKGROUND + LEFT BLACK SCRIM === */
+#start-screen {
+  background: #000000;
+  overflow: hidden;
+}
+
+.title-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 64% center;
+  z-index: 0;
+  pointer-events: none;
+  filter: contrast(1.04) brightness(0.92);
+}
+
+.title-bg-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #000000 0%,
+    rgba(2, 2, 3, 0.96) 24%,
+    rgba(2, 2, 3, 0.78) 42%,
+    rgba(2, 2, 3, 0.22) 66%,
+    rgba(2, 2, 3, 0.35) 100%
+  );
+}
+
+.title-fullscreen {
+  position: relative;
+  z-index: 2;
+}
+
+#start-screen .title-sub {
+  margin: 8px 0 32px;
+}
+
+#start-screen .title-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  line-height: 1.5;
+  color: #7c776f;
+}
+
+/* === v1.8.2: UNDUPLICATED TITLE HIERARCHY (LEFT TEXT + RIGHT 02:14 CLOCK) === */
+#start-screen .title-main.title-main-vi {
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #e6e1d7;
+  margin: 2px 0 12px;
+}
+
+.title-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.title-sub-row .demo-tag {
+  margin-left: 0;
+}
+
+/* === v1.9.0: 3-TAB HORROR SETTINGS MENU === */
+.settings-modal-card {
+  width: min(580px, 100%);
+}
+
+.settings-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0 0 16px;
+  border-bottom: 1px solid rgba(214, 208, 198, 0.14);
+  padding-bottom: 10px;
+}
+
+.settings-tab {
+  padding: 9px 10px;
+  background: transparent;
+  border: 1px solid rgba(214, 208, 198, 0.12);
+  border-radius: 2px;
+  color: #88837a;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.settings-tab:hover {
+  color: #e6e1d7;
+  border-color: rgba(168, 51, 43, 0.55);
+}
+
+.settings-tab.active {
+  color: #f4efe6;
+  background: rgba(168, 51, 43, 0.24);
+  border-color: #b83b33;
+}
+
+.settings-tab-panel.hidden {
+  display: none;
+}
+
+body.no-film-grain #film-grain {
+  display: none;
+}
+
+body.subtitles-off #subtitle-box {
+  display: none;
+}

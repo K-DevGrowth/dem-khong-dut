@@ -520,3 +520,86 @@ export function makeContactShadowTex() {
   ctx.fillRect(0, 0, 128, 128);
   return new THREE.CanvasTexture(c);
 }
+
+export function makeLoop5WallOrderTex(colorOrder) {
+  const c = document.createElement('canvas');
+  c.width = 768; c.height = 384;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 768, 384);
+
+  ctx.fillStyle = 'rgba(218, 210, 198, 0.88)';
+  ctx.font = 'bold 30px "Be Vietnam Pro", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('THỨ TỰ MỞ KHÓA HỘP HỒ SƠ', 384, 72);
+
+  const startX = 120;
+  const gap = 176;
+  colorOrder.forEach((item, idx) => {
+    const cx = startX + idx * gap;
+    const cy = 186;
+    ctx.fillStyle = item.hex;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(240, 234, 224, 0.65)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(235, 228, 218, 0.92)';
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText(String(idx + 1), cx, cy + 8);
+
+    ctx.font = 'bold 21px "Be Vietnam Pro", sans-serif';
+    ctx.fillText(item.name.toUpperCase(), cx, cy + 72);
+
+    if (idx < colorOrder.length - 1) {
+      ctx.fillStyle = 'rgba(218, 210, 198, 0.72)';
+      ctx.font = 'bold 34px monospace';
+      ctx.fillText('→', cx + gap * 0.5, cy + 12);
+    }
+  });
+
+  ctx.fillStyle = 'rgba(182, 34, 26, 0.85)';
+  ctx.font = 'italic 22px "Lora", serif';
+  ctx.fillText('Tìm 4 số màu: mặt sau giấy bếp · tủ lạnh · tủ áo · gương tắm', 384, 336);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+export function makeLoop5BathMirrorTex(clue) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 320;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 256, 320);
+  g.addColorStop(0, '#33424c'); g.addColorStop(0.5, '#1e2830'); g.addColorStop(1, '#12181e');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 320);
+
+  ctx.strokeStyle = 'rgba(235, 246, 255, 0.72)';
+  ctx.lineWidth = 2;
+  [[128, 110, 18, 36], [128, 110, 244, 72], [128, 110, 48, 305], [128, 110, 215, 290]].forEach(([x1, y1, x2, y2]) => {
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo((x1 + x2) / 2 + 10, (y1 + y2) / 2 - 6); ctx.lineTo(x2, y2); ctx.stroke();
+  });
+
+  ctx.fillStyle = clue.hex;
+  ctx.beginPath();
+  ctx.arc(128, 140, 42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.fillStyle = '#f5f2eb';
+  ctx.font = 'bold 54px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(String(clue.digit), 128, 159);
+
+  ctx.fillStyle = 'rgba(230, 238, 242, 0.9)';
+  ctx.font = 'bold 20px "Be Vietnam Pro", sans-serif';
+  ctx.fillText(`MÀU ${clue.name.toUpperCase()}`, 128, 232);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}

@@ -27,7 +27,7 @@ import { createShadowPresence } from "./world/entity.js";
 // Game logic & director modules
 import { createGameState } from "./game/state.js";
 import { createTimerManager } from "./game/timerManager.js";
-import { loadSavedRun } from "./game/saveManager.js";
+import { loadSavedRun, clearSavedRun } from "./game/saveManager.js";
 import {
   computeStereoPan,
   createShadowEventState,
@@ -289,7 +289,18 @@ function initGame() {
   const paperBody = document.getElementById("paper-body");
   const paperNoteWrap = document.getElementById("paper-note-wrap");
   const paperNote = document.getElementById("paper-note");
+  const paperTiltWrap = document.getElementById("paper-tilt-wrap");
+  const paperCard3d = document.getElementById("paper-card-3d");
+  const paperSheetBack = document.getElementById("paper-sheet-back");
+  const paperBackHeader = document.getElementById("paper-back-header");
+  const paperBackClue = document.getElementById("paper-back-clue");
+  const paperBackSwatch = document.getElementById("paper-back-swatch");
+  const paperBackDigit = document.getElementById("paper-back-digit");
+  const paperBackBody = document.getElementById("paper-back-body");
+  const btnFlipPaper = document.getElementById("btn-flip-paper");
+  const btnFlipPaperBack = document.getElementById("btn-flip-paper-back");
   const btnClosePaper = document.getElementById("btn-close-paper");
+  const btnClosePaperBack = document.getElementById("btn-close-paper-back");
   const subtitleBox = document.getElementById("subtitle-box");
   const subtitleSpeaker = document.getElementById("subtitle-speaker");
   const subtitleText = document.getElementById("subtitle-text");
@@ -337,7 +348,21 @@ function initGame() {
   const settingsScreen = document.getElementById("settings-screen");
   const gfxDescEl = document.getElementById("gfx-desc");
   const toggleShowFps = document.getElementById("toggle-show-fps");
+  const toggleFilmGrain = document.getElementById("toggle-film-grain");
+  const toggleSubtitles = document.getElementById("toggle-subtitles");
+  const toggleInvertY = document.getElementById("toggle-invert-y");
+  const toggleHeadBob = document.getElementById("toggle-head-bob");
   const toggleCamSmooth = document.getElementById("toggle-cam-smooth");
+  const sliderGamma = document.getElementById("slider-gamma");
+  const gammaDisplay = document.getElementById("gamma-display");
+  const sliderFov = document.getElementById("slider-fov");
+  const fovDisplay = document.getElementById("fov-display");
+  const sliderMasterVol = document.getElementById("slider-master-vol");
+  const masterVolDisplay = document.getElementById("master-vol-display");
+  const sliderAmbienceVol = document.getElementById("slider-ambience-vol");
+  const ambienceVolDisplay = document.getElementById("ambience-vol-display");
+  const sliderSfxVol = document.getElementById("slider-sfx-vol");
+  const sfxVolDisplay = document.getElementById("sfx-vol-display");
   const sliderSens = document.getElementById("slider-sens");
   const sensDisplay = document.getElementById("sens-display");
   const keypadScreen = document.getElementById("keypad-screen");
@@ -615,7 +640,7 @@ function initGame() {
     },
   );
 
-  // Wire Settings Controller
+  // Wire Settings Controller (v1.9.0 3-tab horror settings)
   settingsController = createSettingsController(
     {
       container,
@@ -623,8 +648,22 @@ function initGame() {
       journalScreen,
       fpsBadge,
       gfxDescEl,
+      toggleFilmGrain,
       toggleShowFps,
+      toggleSubtitles,
+      toggleInvertY,
+      toggleHeadBob,
       toggleCamSmooth,
+      sliderGamma,
+      gammaDisplay,
+      sliderFov,
+      fovDisplay,
+      sliderMasterVol,
+      masterVolDisplay,
+      sliderAmbienceVol,
+      ambienceVolDisplay,
+      sliderSfxVol,
+      sfxVolDisplay,
       sliderSens,
       sensDisplay,
     },
@@ -632,6 +671,8 @@ function initGame() {
     GFX_PRESETS,
     renderer,
     scene,
+    camera,
+    audio,
     {
       matchLight: matchSystem.matchLight,
       bedroomLampLight: house.lights.bedroomLampLight,
@@ -642,6 +683,10 @@ function initGame() {
     state,
     {
       clearKeys,
+      onClearSave: () => {
+        clearSavedRun();
+        refreshContinueButton();
+      },
       onReset: () => {
         Object.assign(settings, DEFAULT_SETTINGS);
         saveSettings(settings);
@@ -654,14 +699,24 @@ function initGame() {
   // =========================================================
   // 4. HELD PAPER & CLUE INSPECTION (CRISP 2D DOM READER)
   // =========================================================
+  function flipHeldPaper() {
+    if (!state.holdingPaper || !paperCard3d) return;
+    state.paperFlipped = !state.paperFlipped;
+    paperCard3d.classList.toggle("is-flipped", state.paperFlipped);
+    audio.playFloorCreak();
+  }
+
   function openHeldPaperUI(kind, loopNum) {
-    const content = getHeldPaperContent(kind, loopNum);
+    const content = getHeldPaperContent(kind, loopNum, state);
     if (materials.heldPaperMat.map) materials.heldPaperMat.map.dispose();
     materials.heldPaperMat.map = makeHeldPaperTexture(kind, loopNum);
     materials.heldPaperMat.needsUpdate = true;
 
     state.holdingPaper = true;
     state.holdingPaperSource = kind;
+    state.paperFlipped = false;
+    state.paperTiltX = 0;
+    state.paperTiltY = 0;
     state.paperAnim = 0;
     heldPaperSystem.heldPaperGroup.visible = false;
     matchSystem.matchGroup.visible = false;
@@ -670,8 +725,15 @@ function initGame() {
     clearInteractUI(hudCache, { crosshair, interactPrompt });
     clearKeys();
 
+    if (paperCard3d) paperCard3d.classList.remove("is-flipped");
+    if (paperTiltWrap) paperTiltWrap.style.transform = "rotateX(0deg) rotateY(0deg)";
+
     if (paperOverlay && paperSheet && content) {
-      paperSheet.className = `paper-sheet theme-${content.theme || "calendar"}`;
+      const themeCls = `theme-${content.theme || "calendar"}`;
+      paperSheet.className = `paper-sheet paper-face paper-face-front ${themeCls}`;
+      if (paperSheetBack) {
+        paperSheetBack.className = `paper-sheet paper-face paper-face-back ${themeCls}`;
+      }
       if (paperHeader) paperHeader.textContent = content.header || "";
       if (paperSubHeader) {
         if (content.subHeader) {
@@ -692,6 +754,30 @@ function initGame() {
           paperNoteWrap.classList.add("hidden");
         }
       }
+
+      if (paperBackHeader) paperBackHeader.textContent = content.backHeader || "MẶT SAU TỜ GIẤY";
+      if (paperBackBody) {
+        paperBackBody.textContent = content.backBody || "Mặt sau tờ giấy chỉ có vài vết ố ẩm cũ kỹ.";
+      }
+      if (paperBackClue && paperBackSwatch && paperBackDigit) {
+        if (content.backClue) {
+          paperBackSwatch.style.background = content.backClue.hex;
+          paperBackDigit.textContent = String(content.backClue.digit);
+          paperBackDigit.style.color = content.backClue.hex;
+          paperBackClue.classList.remove("hidden");
+          const clueTitle = `Vòng 5 · Mã màu ${content.backClue.name}`;
+          if (!state.journalNotes.some((n) => n.title === clueTitle)) {
+            state.journalNotes.push({
+              title: clueTitle,
+              text: `Tìm thấy ở mặt sau giấy (${kind === "fridge_note" ? "Tủ lạnh" : "Quầy bếp"}): Màu ${content.backClue.name} = số ${content.backClue.digit}.`,
+            });
+            renderJournal(state, { journalList, journalTimeline, journalChoices });
+          }
+        } else {
+          paperBackClue.classList.add("hidden");
+        }
+      }
+
       paperOverlay.classList.remove("hidden");
     }
 
@@ -1029,9 +1115,24 @@ function initGame() {
     } else if (currentTarget.type === "scrawl_anomaly") {
       currentTarget.checkedInLoop = state.loop;
       audio.playWoodScratch(3);
-      const info =
-        LOOP_STORY.anomalyScrawl[state.loop] || LOOP_STORY.anomalyScrawl[2];
-      showSubtitle(info.speaker, info.text, 5400, true);
+      if (state.loop === 5 && state.puzzleColorOrder.length === 4) {
+        const seqStr = state.puzzleColorOrder.map((c) => c.name).join(" → ");
+        showSubtitle(
+          "Thứ tự 4 màu trên tường",
+          `Thứ tự nhập mật mã hộp hồ sơ: ${seqStr}. Hãy tìm 4 chữ số màu ở mặt sau giấy bếp, tủ lạnh, tủ quần áo và gương phòng tắm!`,
+          7000,
+          false,
+        );
+        const t = "Vòng 5 · Thứ tự màu mật mã";
+        if (!state.journalNotes.some((n) => n.title === t)) {
+          state.journalNotes.push({ title: t, text: `Thứ tự màu trên tường phòng khách: ${seqStr}.` });
+          renderJournal(state, { journalList, journalTimeline, journalChoices });
+        }
+      } else {
+        const info =
+          LOOP_STORY.anomalyScrawl[state.loop] || LOOP_STORY.anomalyScrawl[2];
+        showSubtitle(info.speaker, info.text, 5400, true);
+      }
       ctx.recordAnomalyFound();
     } else if (
       currentTarget.type === "study_key" &&
@@ -1086,6 +1187,19 @@ function initGame() {
           materials.bathMirrorMat.map = materials.bathMirrorFogTex;
           materials.bathMirrorMat.needsUpdate = true;
         }, 650);
+      } else if (state.loop === 5 && state.puzzleClues && state.puzzleClues.bath) {
+        const bc = state.puzzleClues.bath;
+        audio.playHeavyBreath(0.24);
+        showSubtitle(
+          "Gương phòng tắm · Mảnh mã màu",
+          `Trên mặt gương nứt hiện vòng tròn màu ${bc.name} với chữ số ${bc.digit}.`,
+          6000,
+        );
+        const t = `Vòng 5 · Mã màu ${bc.name}`;
+        if (!state.journalNotes.some((n) => n.title === t)) {
+          state.journalNotes.push({ title: t, text: `Tìm thấy trên gương phòng tắm: Màu ${bc.name} = số ${bc.digit}.` });
+          renderJournal(state, { journalList, journalTimeline, journalChoices });
+        }
       } else {
         audio.playHeavyBreath(0.24);
         showSubtitle(
@@ -1209,6 +1323,21 @@ function initGame() {
           5800,
           true,
         );
+      } else if (state.loop === 5 && state.puzzleClues && state.puzzleClues.wardrobe) {
+        const wc = state.puzzleClues.wardrobe;
+        audio.playWoodScratch(4);
+        house.objects.wardrobeObj.targetAngle = -1.45;
+        house.objects.wardrobeObj.targetAngle2 = 1.35;
+        showSubtitle(
+          "Vách sau tủ quần áo · Mảnh mã màu",
+          `Bên trong vách gỗ khắc vòng tròn màu ${wc.name} với chữ số ${wc.digit}.`,
+          6000,
+        );
+        const t = `Vòng 5 · Mã màu ${wc.name}`;
+        if (!state.journalNotes.some((n) => n.title === t)) {
+          state.journalNotes.push({ title: t, text: `Tìm thấy trong tủ quần áo: Màu ${wc.name} = số ${wc.digit}.` });
+          renderJournal(state, { journalList, journalTimeline, journalChoices });
+        }
       } else {
         audio.playWoodScratch(4);
         audio.playHeavyBreath(0.32);
@@ -1532,6 +1661,11 @@ function initGame() {
       advanceVoicemailSequence(ctx);
       return;
     }
+    if (state.holdingPaper && (e.code === "KeyR" || e.code === "Space")) {
+      e.preventDefault();
+      flipHeldPaper();
+      return;
+    }
     if (e.code === "KeyE") triggerInteract();
     if (e.code === "KeyJ")
       toggleJournal(
@@ -1599,6 +1733,19 @@ function initGame() {
   });
 
   window.addEventListener("mousemove", (e) => {
+    if (state.holdingPaper && paperTiltWrap) {
+      if (document.pointerLockElement === container) {
+        state.paperTiltY = Math.max(-22, Math.min(22, state.paperTiltY + e.movementX * 0.08));
+        state.paperTiltX = Math.max(-16, Math.min(16, state.paperTiltX - e.movementY * 0.08));
+      } else {
+        const nx = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1;
+        const ny = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
+        state.paperTiltY = nx * 16;
+        state.paperTiltX = -ny * 12;
+      }
+      paperTiltWrap.style.transform = `rotateX(${state.paperTiltX.toFixed(1)}deg) rotateY(${state.paperTiltY.toFixed(1)}deg)`;
+      return;
+    }
     if (!state.running || state.paused || state.ended || state.wakingTimer > 0)
       return;
     const sens = settings.sensitivity;
@@ -1618,10 +1765,11 @@ function initGame() {
     }
 
     const mult = document.pointerLockElement === container ? 0.0022 : 0.0045;
+    const ySign = settings.invertY ? -1 : 1;
     state.targetYaw -= dx * mult * sens;
     state.targetPitch = Math.max(
       -1.15,
-      Math.min(1.15, state.targetPitch - dy * mult * sens),
+      Math.min(1.15, state.targetPitch - dy * mult * sens * ySign),
     );
     if (!settings.camSmooth) {
       state.yaw = state.targetYaw;
@@ -2042,8 +2190,17 @@ function initGame() {
   document
     .getElementById("btn-interact")
     .addEventListener("click", triggerInteract);
+  if (btnFlipPaper) {
+    btnFlipPaper.addEventListener("click", () => flipHeldPaper());
+  }
+  if (btnFlipPaperBack) {
+    btnFlipPaperBack.addEventListener("click", () => flipHeldPaper());
+  }
   if (btnClosePaper) {
     btnClosePaper.addEventListener("click", () => lowerHeldPaperUI());
+  }
+  if (btnClosePaperBack) {
+    btnClosePaperBack.addEventListener("click", () => lowerHeldPaperUI());
   }
   if (paperOverlay) {
     paperOverlay.addEventListener("click", (ev) => {
@@ -2551,23 +2708,25 @@ function initGame() {
       }
       state.wasMoving = isMoving;
 
-      // 9. Camera positioning, head bob & trauma shake
+      // 9. Camera positioning, head bob & trauma shake (respects anti-motion-sickness headBob setting)
+      const motionMult = settings.headBob ? 1.0 : 0.0;
       let shakeX = 0;
       let shakeY = 0;
       if (state.shakeTime > 0) {
         state.shakeTime = Math.max(0, state.shakeTime - dt);
-        const shakeAmp = state.panicTimer > 0 ? 0.12 : 0.08;
+        const shakeAmp = (state.panicTimer > 0 ? 0.12 : 0.08) * (settings.headBob ? 1.0 : 0.2);
         shakeX = (Math.random() - 0.5) * shakeAmp;
         shakeY = (Math.random() - 0.5) * shakeAmp;
       }
 
-      const bob = Math.sin(state.bobPhase) * 0.032 * state.bobBlend;
-      const panicRoll = state.panicTimer > 0 ? Math.sin(tSec * 9.5) * 0.055 : 0;
+      const bob = Math.sin(state.bobPhase) * 0.032 * state.bobBlend * motionMult;
+      const panicRoll = state.panicTimer > 0 ? Math.sin(tSec * 9.5) * 0.055 * motionMult : 0;
       const sway =
-        Math.max(state.fear / 100, shadowTension) *
+        (Math.max(state.fear / 100, shadowTension) *
           Math.sin(tSec * 2.6) *
           0.032 +
-        panicRoll;
+          panicRoll) *
+        motionMult;
       camera.position.set(
         state.pos.x + shakeX,
         state.pos.y + bob + shakeY,

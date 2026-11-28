@@ -152,7 +152,7 @@ export const LOOP_STORY = {
   },
   5: {
     clockSub: 'Vòng 5/5 · 02:14 · Đối diện chốt khóa',
-    objective: 'Kiểm tra 3 dấu vết cuối → giải khóa mã 4 số trên bàn làm việc',
+    objective: 'Xem thứ tự 4 màu trên tường & tìm 4 số màu (lật giấy bếp, tủ lạnh, tủ áo, gương tắm) → mở hộp hồ sơ',
     wakeSpeaker: 'Steve · 02:14',
     wakeText: 'Ngoài cửa sổ ánh đèn xanh–đỏ của xe cấp cứu đang chớp liên hồi... Bó hoa cúc trắng đã nằm dưới khung ảnh vỡ. Đã đến lúc mở hộp hồ sơ trên bàn làm việc và đối diện đêm 14/11.',
     clueTitle: 'Giấy báo tử của Alice (02:14)',

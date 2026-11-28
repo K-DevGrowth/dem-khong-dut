@@ -31,7 +31,12 @@ export class HouseAudio {
     this.ctx = null;
     this.muted = false;
     this.started = false;
+    this.masterVol = 0.88;
+    this.ambienceVol = 0.85;
+    this.sfxVol = 0.90;
     this.masterGain = null;
+    this.sfxBus = null;
+    this.ambienceBus = null;
     this.reverbSend = null;
     this.droneGain = null;
     this.staticGain = null;
@@ -72,8 +77,16 @@ export class HouseAudio {
     this.started = true;
 
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = this.muted ? 0 : 0.88;
+    this.masterGain.gain.value = this.muted ? 0 : this.masterVol;
     this.masterGain.connect(this.ctx.destination);
+
+    this.sfxBus = this.ctx.createGain();
+    this.sfxBus.gain.value = this.sfxVol;
+    this.sfxBus.connect(this.masterGain);
+
+    this.ambienceBus = this.ctx.createGain();
+    this.ambienceBus.gain.value = this.ambienceVol;
+    this.ambienceBus.connect(this.masterGain);
 
     // Pre-generate shared noise buffers
     const sr = this.ctx.sampleRate;
@@ -133,18 +146,18 @@ export class HouseAudio {
     this.staticGain.connect(this.masterGain);
     src.start();
 
-    // Ambience gain buses (routed cleanly through masterGain)
+    // Ambience gain buses (routed cleanly through ambienceBus -> masterGain)
     this.bgAmbienceGain = this.ctx.createGain();
     this.bgAmbienceGain.gain.value = 0.12;
-    this.bgAmbienceGain.connect(this.masterGain);
+    this.bgAmbienceGain.connect(this.ambienceBus);
 
     this.bgWindGain = this.ctx.createGain();
     this.bgWindGain.gain.value = 0.05;
-    this.bgWindGain.connect(this.masterGain);
+    this.bgWindGain.connect(this.ambienceBus);
 
     this.bgRainGain = this.ctx.createGain();
     this.bgRainGain.gain.value = 0.11;
-    this.bgRainGain.connect(this.masterGain);
+    this.bgRainGain.connect(this.ambienceBus);
 
     // Start procedural beds immediately; seamlessly replaced when MP3 buffers decode
     this._startProceduralWindBed();
@@ -312,12 +325,30 @@ export class HouseAudio {
   }
 
   _connectOut(node, wetAmount = 0.35) {
-    node.connect(this.masterGain);
+    const dest = this.sfxBus || this.masterGain;
+    node.connect(dest);
     if (this.reverbSend && wetAmount > 0) {
       const wg = this.ctx.createGain();
-      wg.gain.value = wetAmount;
+      wg.gain.value = wetAmount * this.sfxVol;
       node.connect(wg);
       wg.connect(this.reverbSend);
+    }
+  }
+
+  setVolumes(masterVol, ambienceVol, sfxVol) {
+    this.masterVol = Math.max(0, Math.min(1, Number(masterVol) ?? 0.88));
+    this.ambienceVol = Math.max(0, Math.min(1, Number(ambienceVol) ?? 0.85));
+    this.sfxVol = Math.max(0, Math.min(1, Number(sfxVol) ?? 0.90));
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    if (this.masterGain) {
+      this.masterGain.gain.setTargetAtTime(this.muted ? 0 : this.masterVol, t, 0.04);
+    }
+    if (this.ambienceBus) {
+      this.ambienceBus.gain.setTargetAtTime(this.ambienceVol, t, 0.04);
+    }
+    if (this.sfxBus) {
+      this.sfxBus.gain.setTargetAtTime(this.sfxVol, t, 0.04);
     }
   }
 
@@ -333,7 +364,7 @@ export class HouseAudio {
   setMuted(m) {
     this.muted = m;
     if (this.masterGain && this.ctx) {
-      this.masterGain.gain.setTargetAtTime(m ? 0 : 0.88, this.ctx.currentTime, 0.05);
+      this.masterGain.gain.setTargetAtTime(m ? 0 : this.masterVol, this.ctx.currentTime, 0.05);
     }
   }
 

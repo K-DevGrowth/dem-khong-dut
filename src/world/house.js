@@ -243,26 +243,30 @@ export function createHouse(scene, materials, colliders, interactables, getState
   const clockCtx = clockCanvas.getContext('2d');
   const clockTex = new THREE.CanvasTexture(clockCanvas);
   clockTex.colorSpace = THREE.SRGBColorSpace;
-  function drawClockFace(text, color = '#ff4a3d') {
-    clockCtx.fillStyle = '#070709'; clockCtx.fillRect(0, 0, 256, 128);
-    clockCtx.shadowColor = color; clockCtx.shadowBlur = 14;
-    clockCtx.fillStyle = color; clockCtx.font = 'bold 76px monospace';
+  function drawClockFace(text, color = '#ff2a1e') {
+    clockCtx.fillStyle = '#050507'; clockCtx.fillRect(0, 0, 256, 128);
+    clockCtx.strokeStyle = '#1b1d22'; clockCtx.lineWidth = 8;
+    clockCtx.strokeRect(4, 4, 248, 120);
+    clockCtx.shadowColor = color; clockCtx.shadowBlur = 22;
+    clockCtx.fillStyle = color; clockCtx.font = 'bold 78px monospace';
     clockCtx.textAlign = 'center'; clockCtx.textBaseline = 'middle';
     clockCtx.fillText(text, 128, 66);
     clockTex.needsUpdate = true;
   }
   drawClockFace('02:14');
 
+  const clockFaceMat = new THREE.MeshBasicMaterial({ map: clockTex, toneMapped: false });
+  // Face index 5 is -Z (facing straight toward the player & bed instead of the back wall!)
   const clockMesh = new THREE.Mesh(
-    getBoxGeo(0.28, 0.14, 0.12),
-    [materials.metalMat, materials.metalMat, materials.metalMat, materials.metalMat, new THREE.MeshBasicMaterial({ map: clockTex }), materials.metalMat]
+    getBoxGeo(0.34, 0.16, 0.15),
+    [materials.metalMat, materials.metalMat, materials.metalMat, materials.metalMat, materials.metalMat, clockFaceMat]
   );
-  clockMesh.position.set(-0.2, 0.71, 3.85);
-  clockMesh.rotation.y = -0.35;
+  clockMesh.position.set(-0.2, 0.72, 3.82);
+  clockMesh.rotation.y = 0.24;
   scene.add(clockMesh);
 
-  // Emissive glow proxy instead of PointLight
-  const clockGlow = createGlowProxy(scene, 0xff3322, [-0.2, 0.74, 3.72], 0.42, 0.5, 0.42);
+  // Subtle red LED reflection on nightstand surface + glowing halo
+  const clockGlow = createGlowProxy(scene, 0xff261b, [-0.22, 0.74, 3.68], 0.52, 0.78, 0.52);
 
   const clockAnomalyObj = {
     type: 'clock_anomaly',
@@ -330,16 +334,36 @@ export function createHouse(scene, materials, colliders, interactables, getState
 
   // Scratched date clue inside back wall of wardrobe (revealed in Loops 3-5)
   const wScrawlCanvas = document.createElement('canvas');
-  wScrawlCanvas.width = 256; wScrawlCanvas.height = 128;
+  wScrawlCanvas.width = 256; wScrawlCanvas.height = 160;
   const wScrawlCtx = wScrawlCanvas.getContext('2d');
-  wScrawlCtx.clearRect(0, 0, 256, 128);
-  wScrawlCtx.fillStyle = 'rgba(225, 212, 194, 0.82)';
-  wScrawlCtx.font = 'bold 24px monospace';
-  wScrawlCtx.textAlign = 'center';
-  wScrawlCtx.fillText('ALICE · 14/11', 128, 52);
-  wScrawlCtx.fillText('02:14', 128, 92);
   const wScrawlTex = new THREE.CanvasTexture(wScrawlCanvas);
   wScrawlTex.colorSpace = THREE.SRGBColorSpace;
+  function drawWardrobeClue(clue = null) {
+    wScrawlCtx.clearRect(0, 0, 256, 160);
+    wScrawlCtx.textAlign = 'center';
+    if (clue) {
+      wScrawlCtx.fillStyle = clue.hex;
+      wScrawlCtx.beginPath();
+      wScrawlCtx.arc(128, 66, 40, 0, Math.PI * 2);
+      wScrawlCtx.fill();
+      wScrawlCtx.strokeStyle = 'rgba(240,235,225,0.75)';
+      wScrawlCtx.lineWidth = 3;
+      wScrawlCtx.stroke();
+      wScrawlCtx.fillStyle = '#f5f2eb';
+      wScrawlCtx.font = 'bold 46px monospace';
+      wScrawlCtx.fillText(String(clue.digit), 128, 82);
+      wScrawlCtx.fillStyle = 'rgba(232, 224, 210, 0.9)';
+      wScrawlCtx.font = 'bold 20px "Be Vietnam Pro", sans-serif';
+      wScrawlCtx.fillText(`MÀU ${clue.name.toUpperCase()}`, 128, 138);
+    } else {
+      wScrawlCtx.fillStyle = 'rgba(225, 212, 194, 0.82)';
+      wScrawlCtx.font = 'bold 24px monospace';
+      wScrawlCtx.fillText('ALICE · 14/11', 128, 64);
+      wScrawlCtx.fillText('02:14', 128, 108);
+    }
+    wScrawlTex.needsUpdate = true;
+  }
+  drawWardrobeClue(null);
   const wardrobeScrawlMesh = new THREE.Mesh(
     new THREE.PlaneGeometry(0.92, 0.46),
     new THREE.MeshBasicMaterial({ map: wScrawlTex, transparent: true })
@@ -1163,6 +1187,7 @@ export function createHouse(scene, materials, colliders, interactables, getState
       wardrobeEyes,
       aliceCoatGroup,
       wardrobeScrawlMesh,
+      drawWardrobeClue,
       wardrobeObj,
       secondPillowMesh,
       mirrorMesh,

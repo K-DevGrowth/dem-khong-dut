@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { TOTAL_LOOPS, LOOP_ANOMALY_REQ, LOOP_STORY, MORAL_CHOICES } from '../config/storyData.js';
+import { makeLoop5WallOrderTex, makeLoop5BathMirrorTex } from '../world/textures.js';
 import { saveRunProgress } from './saveManager.js';
 
 export function setupLoopEnvironment(loopNum, ctx) {
@@ -262,6 +263,7 @@ export function setupLoopEnvironment(loopNum, ctx) {
 
   if (objects.aliceCoatGroup) objects.aliceCoatGroup.visible = (loopNum === 1);
   if (objects.wardrobeScrawlMesh) objects.wardrobeScrawlMesh.visible = (loopNum >= 3);
+  if (loopNum !== 5 && objects.drawWardrobeClue) objects.drawWardrobeClue(null);
 
   if (loopNum === 1) {
     lights.bedroomLampLight.intensity = 1.15;
@@ -325,13 +327,52 @@ export function setupLoopEnvironment(loopNum, ctx) {
     objects.phoneObj.ringing = true; objects.phoneLed.intensity = 1.3;
     lights.dawnLight.intensity = 0;
   } else if (loopNum === 5) {
+    const palette = [
+      { id: 'red', name: 'Đỏ', hex: '#b8322a' },
+      { id: 'blue', name: 'Xanh dương', hex: '#2f6a96' },
+      { id: 'yellow', name: 'Vàng', hex: '#a88424' },
+      { id: 'green', name: 'Xanh lá', hex: '#3e7350' },
+    ];
+    for (let i = palette.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [palette[i], palette[j]] = [palette[j], palette[i]];
+    }
+    const digitPool = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    for (let i = digitPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [digitPool[i], digitPool[j]] = [digitPool[j], digitPool[i]];
+    }
+    const ordered = palette.map((c, idx) => ({ ...c, digit: digitPool[idx] }));
+    state.puzzleColorOrder = ordered;
+    state.puzzleCode = ordered.map((c) => String(c.digit)).join('');
+
+    const locPool = ordered.slice();
+    for (let i = locPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [locPool[i], locPool[j]] = [locPool[j], locPool[i]];
+    }
+    state.puzzleClues = {
+      kitchen: locPool[0],
+      fridge: locPool[1],
+      wardrobe: locPool[2],
+      bath: locPool[3],
+    };
+
     lights.bedroomLampLight.intensity = 0;
     objects.wardrobeDoorPivot.rotation.y = -1.45; objects.wardrobeObj.targetAngle = -1.45;
     objects.wardrobeDoorPivot2.rotation.y = 1.35; objects.wardrobeObj.targetAngle2 = 1.35; objects.wardrobeEyes.visible = false;
+    if (objects.drawWardrobeClue) objects.drawWardrobeClue(state.puzzleClues.wardrobe);
+
+    materials.bathMirrorMat.map = makeLoop5BathMirrorTex(state.puzzleClues.bath);
+    materials.bathMirrorMat.needsUpdate = true;
+
     materials.portraitMat.map = materials.portraitScratchedTex; materials.portraitMat.needsUpdate = true;
     objects.portraitGroup.position.set(-3.45, 0.08, -3.4); objects.portraitGroup.rotation.set(0, 0.35, -Math.PI / 2);
     objects.portraitAnomalyObj.worldPos.set(-3.45, 0.35, -3.4);
-    materials.wallScrawlMat.map = materials.scrawlTex5; materials.wallScrawlMat.needsUpdate = true; objects.wallScrawl.visible = true;
+
+    materials.wallScrawlMat.map = makeLoop5WallOrderTex(state.puzzleColorOrder);
+    materials.wallScrawlMat.needsUpdate = true;
+    objects.wallScrawl.visible = true;
     lights.tvLight.intensity = 1.1;
     materials.tvScreenMat.map = ctx.tvStaticTex; materials.tvScreenMat.color.setHex(0xffffff); materials.tvScreenMat.needsUpdate = true;
     objects.chairGroup.position.set(0.25, 0.24, -4.6); objects.chairGroup.rotation.set(0.15, 0.4, Math.PI / 2);

@@ -485,10 +485,11 @@ export function updateFearAndLighting(dt, tSec, ctx) {
     }
   }
 
-  // Tunnel Vision FOV
+  // Tunnel Vision FOV (relative to user's chosen base FOV in Settings)
+  const baseFov = (ctx.settings && ctx.settings.fov) ? ctx.settings.fov : 66;
   const targetFov = state.panicTimer > 0
-    ? 56 + Math.sin(tSec * 16) * 1.4
-    : (state.fear > 75 ? 66 - ((state.fear - 75) / 25) * 4.5 : 66);
+    ? Math.max(48, baseFov - 10) + Math.sin(tSec * 16) * 1.4
+    : (state.fear > 75 ? baseFov - ((state.fear - 75) / 25) * 4.5 : baseFov);
   if (Math.abs(camera.fov - targetFov) > 0.05) {
     camera.fov += (targetFov - camera.fov) * (1 - Math.exp(-7 * dt));
     camera.updateProjectionMatrix();

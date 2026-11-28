@@ -1,13 +1,27 @@
 import * as THREE from 'three';
 
-export const SETTINGS_KEY = 'vong_lap_settings_v4';
+export const SETTINGS_KEY = 'vong_lap_settings_v5';
 
 export const DEFAULT_SETTINGS = {
+  // Đồ họa & Hiển thị
   graphics: 'medium', // 'low' | 'medium' | 'high'
   fpsLimit: 60,       // 30 | 60 | 120 | 0 (unlimited)
+  gamma: 1.0,         // 0.70 - 1.45 (exposure multiplier)
+  fov: 66,            // 55 - 85 degrees
+  filmGrain: true,
   showFps: false,
+
+  // Âm thanh & Phụ đề
+  masterVol: 0.88,    // 0.0 - 1.0
+  ambienceVol: 0.85,  // 0.0 - 1.0
+  sfxVol: 0.90,       // 0.0 - 1.0
+  subtitles: true,
+
+  // Điều khiển & Chống say 3D
+  sensitivity: 1.0,   // 0.5 - 2.0
+  invertY: false,
   camSmooth: true,
-  sensitivity: 1.0
+  headBob: true
 };
 
 export const GFX_PRESETS = {
@@ -52,17 +66,31 @@ export const GFX_PRESETS = {
   }
 };
 
+function clamp(v, lo, hi, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : fallback;
+}
+
 export function loadSettings() {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
-    const parsed = JSON.parse(raw);
+    const p = JSON.parse(raw);
     return {
-      graphics: GFX_PRESETS[parsed.graphics] ? parsed.graphics : DEFAULT_SETTINGS.graphics,
-      fpsLimit: [0, 30, 60, 120].includes(Number(parsed.fpsLimit)) ? Number(parsed.fpsLimit) : DEFAULT_SETTINGS.fpsLimit,
-      showFps: Boolean(parsed.showFps),
-      camSmooth: parsed.camSmooth !== undefined ? Boolean(parsed.camSmooth) : DEFAULT_SETTINGS.camSmooth,
-      sensitivity: Math.max(0.5, Math.min(2.0, Number(parsed.sensitivity) || 1.0))
+      graphics: GFX_PRESETS[p.graphics] ? p.graphics : DEFAULT_SETTINGS.graphics,
+      fpsLimit: [0, 30, 60, 120].includes(Number(p.fpsLimit)) ? Number(p.fpsLimit) : DEFAULT_SETTINGS.fpsLimit,
+      gamma: clamp(p.gamma, 0.7, 1.45, DEFAULT_SETTINGS.gamma),
+      fov: Math.round(clamp(p.fov, 55, 85, DEFAULT_SETTINGS.fov)),
+      filmGrain: p.filmGrain !== undefined ? Boolean(p.filmGrain) : DEFAULT_SETTINGS.filmGrain,
+      showFps: Boolean(p.showFps),
+      masterVol: clamp(p.masterVol, 0, 1, DEFAULT_SETTINGS.masterVol),
+      ambienceVol: clamp(p.ambienceVol, 0, 1, DEFAULT_SETTINGS.ambienceVol),
+      sfxVol: clamp(p.sfxVol, 0, 1, DEFAULT_SETTINGS.sfxVol),
+      subtitles: p.subtitles !== undefined ? Boolean(p.subtitles) : DEFAULT_SETTINGS.subtitles,
+      sensitivity: clamp(p.sensitivity, 0.5, 2.0, DEFAULT_SETTINGS.sensitivity),
+      invertY: Boolean(p.invertY),
+      camSmooth: p.camSmooth !== undefined ? Boolean(p.camSmooth) : DEFAULT_SETTINGS.camSmooth,
+      headBob: p.headBob !== undefined ? Boolean(p.headBob) : DEFAULT_SETTINGS.headBob
     };
   } catch (_) {
     return { ...DEFAULT_SETTINGS };

@@ -33,7 +33,8 @@ export function createKeypadController(els, state, audio, callbacks) {
   }
 
   function submitKeypad() {
-    if (keypadCode === "0214" || keypadCode === "1411") {
+    const expected = state.puzzleCode || "0214";
+    if (keypadCode === expected) {
       state.codeUnlocked = true;
       closeKeypad();
       state.loopClueFound = true;
@@ -44,7 +45,7 @@ export function createKeypadController(els, state, audio, callbacks) {
       void els.keypadDisplay.offsetWidth;
       els.keypadDisplay.classList.add("error");
       els.keypadMsg.textContent =
-        "Sai mật mã! Gợi ý: nhìn đồng hồ đầu giường hoặc gương phòng tắm.";
+        "Sai mật mã! Xem thứ tự 4 màu trên tường phòng khách & 4 số màu (mặt sau giấy bếp, tủ lạnh, tủ áo, gương tắm).";
       els.keypadMsg.classList.add("err");
       keypadCode = "";
       setTimeout(renderKeypad, 420);
